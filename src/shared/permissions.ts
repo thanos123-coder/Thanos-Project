@@ -136,7 +136,7 @@ export const ROLE_MODEL_CONTEXT_CATEGORIES: Readonly<Record<string, readonly Dat
   '02': ['education_context', 'application_scope', 'practical_constraints', 'interaction_preferences', 'goals_preferences', 'plans_tasks', 'experiences'],
   '03': ['education_context'],
   '04': [],
-  '05': ['goals_preferences', 'exploration_reflections', 'education_context', 'practical_constraints', 'experiences', 'interaction_preferences'],
+  '05': ['goals_preferences', 'exploration_reflections', 'education_context', 'application_scope', 'practical_constraints', 'experiences', 'interaction_preferences'],
   '06': ['education_context', 'academic_record', 'test_scores', 'application_scope'],
   '07': ['education_context', 'academic_record', 'test_scores', 'application_scope', 'practical_constraints', 'plans_tasks', 'findings', 'goals_preferences'],
   '08': ['experiences', 'practical_constraints', 'goals_preferences', 'education_context'],
@@ -154,7 +154,8 @@ export const ROLE_LOCAL_CATEGORIES: Readonly<Record<string, readonly DataCategor
   '02': [...ROLE_MODEL_CONTEXT_CATEGORIES['02']!, 'academic_record', 'test_scores', 'financial', 'citizenship_residency', 'family_context', 'health_accessibility', 'identity_birthdate'],
   '03': ['education_context', 'academic_record', 'test_scores', 'identity_contact', 'documents_raw'],
   '04': [...DATA_CATEGORIES],
-  '05': [...ROLE_MODEL_CONTEXT_CATEGORIES['05']!, 'academic_record'],
+  // Budget is read only by deterministic code, to filter out paid experiments (05T09); it never enters a prompt.
+  '05': [...ROLE_MODEL_CONTEXT_CATEGORIES['05']!, 'academic_record', 'financial'],
   '06': [...ROLE_MODEL_CONTEXT_CATEGORIES['06']!, 'citizenship_residency', 'identity_birthdate'],
   '07': [...ROLE_MODEL_CONTEXT_CATEGORIES['07']!, 'health_accessibility', 'financial'],
   '08': [...ROLE_MODEL_CONTEXT_CATEGORIES['08']!, 'family_context'],

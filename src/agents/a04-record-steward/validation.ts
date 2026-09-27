@@ -24,7 +24,7 @@ export const ROLE_WRITE_SCOPE: Readonly<Record<string, { entities: readonly stri
     studentAttributePrefixes: ['education.expected_graduation', 'education.school_name', 'education.qualification_system', 'education.school_country', 'education.schooling_language'],
   },
   '04': { entities: ['*'], studentAttributePrefixes: [''] },
-  '05': { entities: ['student', 'interest', 'preference', 'reflection', 'hypothesis'], studentAttributePrefixes: ['goals.'] },
+  '05': { entities: ['student', 'interest', 'preference', 'reflection', 'hypothesis', 'assessment'], studentAttributePrefixes: ['goals.'] },
   '08': { entities: ['student', 'experience', 'episode', 'award', 'research_output', 'commitment'], studentAttributePrefixes: ['support.family_responsibilities'] },
   // Direct edits by the person through the product interface.
   ui: { entities: ['*'], studentAttributePrefixes: [''] },

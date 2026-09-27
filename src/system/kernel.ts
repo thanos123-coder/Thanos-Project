@@ -202,7 +202,7 @@ export class SystemKernel {
       // A result that arrives after cancellation is never published (01T05, XT20).
       if (ctx.token.isCancelled) return fail('cancelled', 'cancelled_before_publication');
       const current = this.records.permissions.snapshot(request.actor, request.tenantId, request.studentId);
-      const v = validateResult(raw, { request, servedClaimIds: ctx.servedClaimIds, currentPermissionSnapshot: current, registry: this.contracts });
+      const v = validateResult(raw, { request, servedClaimIds: ctx.servedClaimIds, servedSourceIds: ctx.servedSourceIds, currentPermissionSnapshot: current, registry: this.contracts });
       if (!v.ok) {
         this.audit.record({ kind: 'tool_call', taskId: request.taskId, role: request.role, name: 'result_validation', outcome: 'rejected' });
         return { ...fail('failed', 'result_failed_validation', v.issues), issues: v.issues };

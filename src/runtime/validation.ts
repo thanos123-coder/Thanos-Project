@@ -41,6 +41,8 @@ const VAGUE_PHRASES = [/^may be inaccurate\.?$/i, /^might be wrong\.?$/i, /^coul
 export interface ValidationContext {
   request: RequestEnvelope;
   servedClaimIds: ReadonlySet<string>;
+  /** Source ids served to the task through tools; results may only cite these. */
+  servedSourceIds?: ReadonlySet<string>;
   /** The current permission snapshot for the task's actor; a mismatch means permissions changed mid-task. */
   currentPermissionSnapshot: string;
   registry: ContractRegistry;
@@ -74,6 +76,9 @@ export function validateResult<P = unknown>(raw: unknown, ctx: ValidationContext
 
   for (const id of result.inputVersions.claimIds) {
     if (!ctx.servedClaimIds.has(id)) issues.push(`cites claim ${id}, which was not served to this task`);
+  }
+  if (ctx.servedSourceIds) {
+    for (const id of result.sourceRefs) if (!ctx.servedSourceIds.has(id)) issues.push(`cites source ${id}, which was not served to this task`);
   }
   for (const u of result.uncertainties) {
     if (VAGUE_PHRASES.some((re) => re.test(u.description.trim()))) issues.push(`uncertainty for ${u.affects} is too vague to act on`);
