@@ -87,7 +87,8 @@ function numberForms(raw: string): string[] {
  */
 export function ungroundedTokens(text: string, payload: unknown): ConsequentialToken[] {
   const haystack = typeof payload === 'string' ? payload : JSON.stringify(payload);
-  return extractConsequentialTokens(text).filter((t) => !t.normalized.some((n) => containsToken(haystack, n)));
+  // A token is grounded when its normalized form or its exact wording appears in the payload.
+  return extractConsequentialTokens(text).filter((t) => !t.normalized.some((n) => containsToken(haystack, n)) && !containsToken(haystack, t.text));
 }
 
 function containsToken(haystack: string, needle: string): boolean {

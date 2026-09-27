@@ -50,7 +50,7 @@ export interface ToolDefinition<A = any, R = any> {
  */
 export const ROLE_TOOL_MATRIX: Readonly<Record<RoleId, readonly string[]>> = {
   '01': ['record.read_scoped', 'record.read_status', 'tasks.create', 'tasks.cancel', 'tasks.checkpoint', 'specialist.invoke', 'review.request', 'actions.propose', 'artifacts.read'],
-  '02': ['record.read_scoped', 'record.propose_change'],
+  '02': ['record.read_scoped', 'record.propose_change', 'conversation.read_turn', 'conversation.redact_turn', 'intake.session'],
   '03': ['files.read_quarantined', 'files.parse_sandboxed', 'record.read_scoped', 'record.propose_change'],
   '04': ['record.read_scoped', 'record.propose_change', 'record.commit_validated', 'record.resolve_conflict', 'record.delete_scoped', 'permissions.manage', 'artifacts.put_derived', 'artifacts.read'],
   '05': ['record.read_scoped', 'record.propose_change', 'sources.read_verified', 'artifacts.put_derived', 'actions.propose'],

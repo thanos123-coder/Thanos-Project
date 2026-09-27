@@ -17,6 +17,8 @@ export const ABSENCE_REASONS = [
   'not_supplied',
   /** The student was asked and does not know. */
   'unknown_to_student',
+  /** The student has not decided yet (a choice, not a missing fact). Never a negative answer. */
+  'not_decided',
   /** The student chose not to share. Never interpreted as a positive or negative answer. */
   'declined',
   /** A document or source exists but could not be read for this field. */
@@ -82,6 +84,8 @@ export function describeAbsence(reason: AbsenceReason): string {
       return 'not provided';
     case 'unknown_to_student':
       return 'not known yet';
+    case 'not_decided':
+      return 'not decided yet';
     case 'declined':
       return 'chose not to share';
     case 'source_unreadable':

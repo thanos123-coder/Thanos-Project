@@ -38,7 +38,8 @@ export function roleMayWrite(role: string, entity: string, attribute: string): b
   return scope.studentAttributePrefixes.some((p) => attribute === p || attribute.startsWith(p));
 }
 
-const UNKNOWN_PHRASES = /\b(i\s+)?(don'?t|do not)\s+know\b|\bnot\s+sure\b|\bno\s+idea\b|\bprefer\s+not\b|\brather\s+not\b|\bskip\b|\bunsure\b/i;
+/** Phrases meaning the answer is unknown or withheld. A value must never be stored on the strength of such a quote (04T12). */
+export const UNKNOWN_PHRASES = /\b(i\s+)?(don'?t|do not)\s+know\b|\bnot\s+sure\b|\bno\s+idea\b|\bprefer\s+not\b|\brather\s+not\b|\bskip\b|\bunsure\b/i;
 
 export interface ClaimValidation {
   ok: boolean;

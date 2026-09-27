@@ -24,6 +24,11 @@ export class RecordView {
     return this.byKey.get(fieldKey({ entity, entityId, attribute }, h));
   }
 
+  /** Field view by its full field key (entity:id.attribute[@holder]). */
+  fieldByKey(key: string): FieldView | undefined {
+    return this.byKey.get(key);
+  }
+
   student(attribute: string): FieldView | undefined {
     return this.field('student', 'self', attribute);
   }
