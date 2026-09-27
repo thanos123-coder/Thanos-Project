@@ -1,4 +1,4 @@
-import type { z } from 'zod';
+import { z } from 'zod';
 import { ResultEnvelopeSchema, type RequestEnvelope, type ResultEnvelope, type RoleId } from '../shared/envelopes.js';
 import { ungroundedTokens } from './grounding.js';
 
@@ -32,6 +32,8 @@ export class ContractRegistry {
     return this.contracts.get(id);
   }
 }
+
+export const FailurePayloadSchema = z.object({ error: z.string().min(1) }).strict();
 
 /** Phrases that describe uncertainty without naming what it affects or how to resolve it. */
 const VAGUE_PHRASES = [/^may be inaccurate\.?$/i, /^might be wrong\.?$/i, /^could be incorrect\.?$/i, /^please verify\.?$/i, /^uncertain\.?$/i, /^not sure\.?$/i];
@@ -82,13 +84,15 @@ export function validateResult<P = unknown>(raw: unknown, ctx: ValidationContext
     issues.push(`unknown completion contract ${result.completionContract}`);
     return { ok: false, issues, repairable: false };
   }
-  const payload = contract.payload.safeParse(result.payload);
+  // Failed, blocked and cancelled results carry a standard error payload instead of the contract payload.
+  const failureStatus = result.status === 'failed' || result.status === 'blocked' || result.status === 'cancelled';
+  const payload = failureStatus ? FailurePayloadSchema.safeParse(result.payload) : contract.payload.safeParse(result.payload);
   if (!payload.success) {
     issues.push(...payload.error.issues.map((i) => `payload.${i.path.join('.')}: ${i.message}`));
   } else {
     const typed = { ...result, payload: payload.data } as ResultEnvelope<unknown>;
-    if (contract.semantic) issues.push(...contract.semantic(payload.data, typed));
-    if (contract.groundSummary !== false) {
+    if (contract.semantic && !failureStatus) issues.push(...contract.semantic(payload.data, typed));
+    if (contract.groundSummary !== false && !failureStatus) {
       const ungrounded = ungroundedTokens(result.summary, { payload: payload.data, sources: result.sourceRefs, uncertainties: result.uncertainties });
       for (const t of ungrounded) issues.push(`summary mentions ${t.kind} "${t.text}" that is not in the structured payload`);
     }
