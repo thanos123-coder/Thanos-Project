@@ -376,7 +376,8 @@ function evalSubject(node: PredicateNode, p: Extract<Predicate, { type: 'subject
     }
     return same(out('unknown', 'The required subject is not on the courses recorded so far.', { resolution: { kind: 'needed_fact', text: 'Tell us whether you take or have taken this subject, or upload a full transcript.', owner: '02' }, claimIds: completeness.claimIds, dependencies: deps }));
   }
-  const evals: CourseEval[] = matching.map((c) => ({ course: c, courseKey: c.courseKey.value ?? c.entityId, ...evalCourseAgainst(node, c, p.levels, p.minimumGrade, ctx) }));
+  // Only recorded attempts (resit/retake/remark) of one course are grouped; different periods of a course are separate results.
+  const evals: CourseEval[] = matching.map((c) => ({ course: c, courseKey: c.attempt.status === 'usable' && c.courseKey.value ? c.courseKey.value : c.entityId, ...evalCourseAgainst(node, c, p.levels, p.minimumGrade, ctx) }));
   // Attempt policy: several attempts of the same course with different results stay unresolved unless the institution's policy is published.
   const byKey = new Map<string, CourseEval[]>();
   for (const e of evals) byKey.set(e.courseKey, [...(byKey.get(e.courseKey) ?? []), e]);
