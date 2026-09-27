@@ -177,6 +177,8 @@ const defs: FieldDefinition[] = [
   { entity: 'student', attribute: 'education.schooling_language', schema: z.object({ language: z.string().min(2), yearsOfInstruction: z.number().nonnegative().nullable() }).strict(), category: 'education_context', conflictPolicy: 'planning_latest_statement', consequential: true, label: 'language of instruction' },
   { entity: 'student', attribute: 'education.postsecondary_enrollment', schema: z.enum(['none', 'dual_enrollment_while_in_secondary', 'enrolled_after_secondary']), category: 'education_context', conflictPolicy: 'planning_latest_statement', consequential: true, label: 'college enrollment history' },
   { entity: 'student', attribute: 'education.school_name', schema: z.string().min(1), category: 'education_context', conflictPolicy: 'planning_latest_statement', consequential: false, label: 'school name' },
+  // Whether the recorded course list is complete for a period. Only a confirmed complete list lets a missing subject count as "not taken".
+  { entity: 'student', attribute: 'education.course_list_complete', schema: z.object({ complete: z.boolean(), throughPeriod: z.string().min(1) }).strict(), category: 'academic_record', conflictPolicy: 'planning_latest_statement', consequential: true, label: 'course list completeness' },
 
   // ---- Application scope ---------------------------------------------------
   { entity: 'student', attribute: 'application.destination_countries', schema: z.array(COUNTRY), category: 'application_scope', conflictPolicy: 'owner_latest', consequential: false, label: 'destination countries' },

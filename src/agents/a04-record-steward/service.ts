@@ -531,7 +531,7 @@ export class RecordService {
     const now = this.clock.nowIso();
     // Stale on arrival if inputs changed after the producer read them (01T06) or were deleted/superseded.
     const changedSince = s.changeLog.filter((e) => e.recordVersion > input.recordVersion).flatMap((e) => e.changedFieldKeys);
-    const stale = claims.some((c) => c.status !== 'active') || changedSince.some((k) => fieldKeys.includes(k));
+    const stale = claims.some((c) => c.status !== 'active') || changedSince.some((k) => fieldKeys.some((pattern) => fieldKeyMatches(pattern, k)));
     const artifact: DerivedArtifact = {
       id: this.ids.next('artifact'),
       tenantId: input.tenantId,
@@ -601,7 +601,7 @@ export class RecordService {
     const out: string[] = [];
     for (const a of s.artifacts.values()) {
       if (a.status !== 'current') continue;
-      if (a.inputs.fieldKeys.some((k) => changedKeys.includes(k))) {
+      if (a.inputs.fieldKeys.some((pattern) => changedKeys.some((k) => fieldKeyMatches(pattern, k)))) {
         a.status = 'stale';
         a.statusReason = reason;
         a.updatedAt = this.clock.nowIso();
@@ -857,6 +857,21 @@ export class RecordService {
     const c = this.getClaim(ctx, tenantId, studentId, v.current.claimId);
     return c ? c.evidence : [];
   }
+}
+
+/**
+ * Match a dependency pattern against a concrete field key. A pattern may use
+ * `*` as the entity id (e.g. `test_attempt:*.record`) so that a result which
+ * depended on the *absence* of any such entity is invalidated when one appears.
+ */
+export function fieldKeyMatches(pattern: string, key: string): boolean {
+  if (pattern === key) return true;
+  if (!pattern.includes(':*.')) return false;
+  const [pEntity, pRest] = pattern.split(':*.') as [string, string];
+  const m = /^([^:]+):([^.]+)\.(.+)$/.exec(key);
+  if (!m) return false;
+  const rest = m[3]!;
+  return m[1] === pEntity && (rest === pRest || rest.startsWith(`${pRest}@`));
 }
 
 function refHash(tenantId: string, studentId: string, objectId: string): string {
