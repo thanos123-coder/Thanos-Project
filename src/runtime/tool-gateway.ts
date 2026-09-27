@@ -53,10 +53,10 @@ export const ROLE_TOOL_MATRIX: Readonly<Record<RoleId, readonly string[]>> = {
   '02': ['record.read_scoped', 'record.propose_change', 'conversation.read_turn', 'conversation.redact_turn', 'intake.session'],
   '03': ['files.read_quarantined', 'files.parse_sandboxed', 'record.read_scoped', 'record.propose_change'],
   '04': ['record.read_scoped', 'record.propose_change', 'record.commit_validated', 'record.resolve_conflict', 'record.delete_scoped', 'permissions.manage', 'artifacts.put_derived', 'artifacts.read'],
-  '05': ['record.read_scoped', 'record.propose_change', 'sources.read_verified', 'artifacts.put_derived', 'actions.propose'],
+  '05': ['record.read_scoped', 'record.propose_change', 'conversation.read_turn', 'sources.read_verified', 'artifacts.put_derived', 'actions.propose'],
   '06': ['record.read_scoped', 'rules.read_verified', 'artifacts.put_derived'],
-  '07': ['record.read_scoped', 'rules.read_verified', 'calendars.read_verified', 'artifacts.put_derived', 'actions.propose'],
-  '08': ['record.read_scoped', 'record.propose_change', 'artifacts.put_derived'],
+  '07': ['record.read_scoped', 'rules.read_verified', 'calendars.read_verified', 'artifacts.read', 'artifacts.put_derived', 'actions.propose'],
+  '08': ['record.read_scoped', 'record.propose_change', 'conversation.read_turn', 'artifacts.put_derived'],
   '09': ['record.read_scoped', 'research.search_public', 'research.fetch_public', 'opportunities.read_catalog', 'opportunities.upsert_catalog', 'rules.read_verified', 'artifacts.put_derived', 'actions.propose'],
 };
 

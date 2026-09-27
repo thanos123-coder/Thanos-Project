@@ -155,6 +155,9 @@ export const AWARD_STAGES = [
 ] as const;
 export const AWARD_SCOPES = ['school', 'local', 'regional', 'national', 'international', 'unknown'] as const;
 
+/** Work that normally needs supervision or prior review before it begins (08 "Research and independent projects"). */
+export const OVERSIGHT_AREAS = ['human_participants', 'animals', 'hazardous_materials', 'none_known'] as const;
+
 export const RESEARCH_STATUSES = [
   'in_progress',
   'literature_review',
@@ -267,7 +270,7 @@ const defs: FieldDefinition[] = [
   { entity: 'episode', attribute: 'contribution', schema: z.object({ personalTasks: z.array(z.string().min(1)), decisionsInfluenced: z.array(z.string().min(1)), teamOutcomes: z.array(OutcomeSchema), personalOutcomes: z.array(OutcomeSchema), supervision: z.enum(['supervised', 'independent', 'mixed', 'unknown']) }).strict(), category: 'experiences', conflictPolicy: 'owner_latest', consequential: true, label: 'contribution' },
   { entity: 'episode', attribute: 'learning', schema: z.object({ studentWords: z.string().min(1) }).strict(), category: 'experiences', conflictPolicy: 'owner_latest', consequential: false, allowedOrigins: ['student_statement'], label: 'what you learned' },
   { entity: 'award', attribute: 'definition', schema: z.object({ title: z.string().min(1), organizer: z.string().nullable(), date: PartialDateSchema.nullable(), scope: z.enum(AWARD_SCOPES), stage: z.enum(AWARD_STAGES), attribution: z.enum(['individual', 'team']), experienceRef: z.string().nullable(), selectionNote: z.string().nullable() }).strict(), category: 'experiences', conflictPolicy: 'evidence_reconcile', consequential: true, label: 'award or distinction' },
-  { entity: 'research_output', attribute: 'definition', schema: z.object({ experienceRef: z.string().min(1), questionSummary: z.string().nullable(), status: z.enum(RESEARCH_STATUSES), studentTasks: z.array(z.string()), supervision: z.enum(['supervised', 'independent', 'unknown']), approvalStatus: z.enum(['not_required', 'approved_before_work', 'pending', 'unknown']), authorship: z.string().nullable() }).strict(), category: 'experiences', conflictPolicy: 'evidence_reconcile', consequential: true, label: 'research output' },
+  { entity: 'research_output', attribute: 'definition', schema: z.object({ experienceRef: z.string().min(1), questionSummary: z.string().nullable(), status: z.enum(RESEARCH_STATUSES), studentTasks: z.array(z.string()), supervision: z.enum(['supervised', 'independent', 'unknown']), approvalStatus: z.enum(['not_required', 'approved_before_work', 'pending', 'unknown']), authorship: z.string().nullable(), oversight: z.array(z.enum(OVERSIGHT_AREAS)).default([]) }).strict(), category: 'experiences', conflictPolicy: 'evidence_reconcile', consequential: true, label: 'research output' },
 ];
 
 export const FIELD_CATALOG: ReadonlyMap<string, FieldDefinition> = new Map(defs.map((d) => [`${d.entity}.${d.attribute}`, d]));
