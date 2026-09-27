@@ -88,6 +88,8 @@ export class SystemKernel {
     // Rule changes invalidate dependent findings through the record service.
     this.rules.onChange((c) => {
       if (!c.previousRef) return;
+      // Results computed from the previous rule version become stale everywhere at once (07T02, XT06).
+      this.records.invalidateEverywhereByRuleOrSource({ ruleVersion: c.previousRef }, `rule package changed: ${c.previousRef} -> ${c.packageRef}`);
       this.events.publish({ eventId: this.ids.next('event'), type: 'rule_package.changed', tenantId: 'public', entityRef: c.packageRef, changedFields: [], causeRef: c.previousRef, occurredAt: this.clock.nowIso(), sensitivePayloadIncluded: false });
     });
   }

@@ -208,6 +208,8 @@ export const TestingPolicySchema = z
     superscore: z.enum(['accepted', 'not_accepted', 'unknown']).default('unknown'),
     lastAcceptedTestDate: z.string().nullable().default(null),
     receiptDeadline: z.string().nullable().default(null),
+    /** Policies sharing a group are alternatives: any one satisfies the requirement ("ACT or SAT"). */
+    alternativeGroup: z.string().min(1).nullable().default(null),
     source: SourceCitationSchema,
   })
   .strict();

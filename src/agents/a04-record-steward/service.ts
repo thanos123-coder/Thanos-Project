@@ -147,6 +147,10 @@ export class RecordService {
     this.derivativeStores.push(store);
   }
 
+  private allStates(): StudentRecordState[] {
+    return [...this.students.values()].filter((s) => s.lifecycle === 'active');
+  }
+
   private state(tenantId: string, studentId: string): StudentRecordState | undefined {
     const s = this.students.get(studentKey(tenantId, studentId));
     return s && s.lifecycle === 'active' ? s : undefined;
@@ -579,6 +583,17 @@ export class RecordService {
   }
 
   /** Mark artifacts depending on a rule or source version stale (source-change events). */
+  /**
+   * A public rule package or source changed: mark every current result that
+   * used it stale, for every student (06R09, 07T02, XT06). Returns the number
+   * of artifacts invalidated.
+   */
+  invalidateEverywhereByRuleOrSource(ref: { ruleVersion?: string; sourceId?: string }, reason: string): number {
+    let n = 0;
+    for (const s of this.allStates()) n += this.invalidateByRuleOrSource(s.tenantId, s.studentId, ref, reason).length;
+    return n;
+  }
+
   invalidateByRuleOrSource(tenantId: string, studentId: string, ref: { ruleVersion?: string; sourceId?: string }, reason: string): string[] {
     const s = this.state(tenantId, studentId);
     if (!s) return [];
