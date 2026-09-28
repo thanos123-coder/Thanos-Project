@@ -221,6 +221,19 @@ export class InstitutionRegistry {
     return { status: 'resolved', entity, institution, campus, program };
   }
 
+  /** Every program (or institution without programs) in scope, with its lineage names: the candidate pool, never ordered by fame. */
+  catalog(filter: { countries?: readonly string[] } = {}): Array<{ entity: InstitutionEntity; institution: InstitutionEntity; campus: InstitutionEntity | null; coverage: CoverageEntry | null }> {
+    const out: Array<{ entity: InstitutionEntity; institution: InstitutionEntity; campus: InstitutionEntity | null; coverage: CoverageEntry | null }> = [];
+    for (const e of this.entities.values()) {
+      const inst = this.institutionOf(e.id);
+      if (!inst || inst.kind !== 'institution') continue;
+      if (filter.countries && !filter.countries.includes(inst.country)) continue;
+      const hasPrograms = [...this.entities.values()].some((x) => x.kind === 'program' && this.institutionOf(x.id)?.id === inst.id);
+      if (e.kind === 'program' || (e.kind === 'institution' && !hasPrograms)) out.push({ entity: structuredClone(e), institution: structuredClone(inst), campus: this.campusOf(e.id) ?? null, coverage: this.coverageFor(inst.id) ?? null });
+    }
+    return out.sort((a, b) => a.entity.id.localeCompare(b.entity.id));
+  }
+
   private findByName(name: string, kind: EntityKind): InstitutionEntity[] {
     const n = norm(name);
     return [...this.entities.values()].filter((e) => e.kind === kind && (norm(e.name) === n || e.aliases.some((a) => norm(a) === n)));

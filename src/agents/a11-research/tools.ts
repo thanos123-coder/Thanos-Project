@@ -64,6 +64,8 @@ export interface RetrievalStatus {
   last: { sourceId: string; retrievedAt: string } | null;
 }
 
+export type CatalogEntry = ReturnType<InstitutionRegistry['catalog']>[number];
+
 export interface ReadClaimsResult {
   claims: ClaimRecord[];
   lineage: InstitutionEntity[];
@@ -89,8 +91,10 @@ export function registerInstitutionTools(gateway: ToolGateway, registry: Institu
         .strict(),
       z.object({ op: z.literal('claim'), claimId: z.string().min(1), version: z.number().int().positive().optional() }).strict(),
       z.object({ op: z.literal('retrievals'), urls: z.array(z.string().url()).min(1).max(40) }).strict(),
+      z.object({ op: z.literal('catalog'), countries: z.array(z.string().regex(/^[A-Z]{2}$/)).max(30).optional() }).strict(),
     ]),
-    handler: async (inv, args): Promise<Resolution | ReadClaimsResult | ClaimRecord | RetrievalStatus[] | null> => {
+    handler: async (inv, args): Promise<Resolution | ReadClaimsResult | ClaimRecord | RetrievalStatus[] | CatalogEntry[] | null> => {
+      if (args.op === 'catalog') return registry.catalog(args.countries ? { countries: args.countries } : {});
       if (args.op === 'resolve') return registry.resolve({ institution: args.institution, campus: args.campus, program: args.program });
       // Group research and deduplicate identical fetches (11 "Security and efficiency").
       if (args.op === 'retrievals') return args.urls.map((url: string) => ({ url, last: store.lastRetrieval(url) }));

@@ -21,6 +21,7 @@ import { OpportunityCatalog } from '../agents/a09-opportunities/catalog.js';
 import type { ResearchProviders } from '../agents/a09-opportunities/research.js';
 import { registerOpportunityTools } from '../agents/a09-opportunities/tools.js';
 import { OfficialResearchAgent } from '../agents/a11-research/agent.js';
+import { FitMatcherAgent } from '../agents/a12-fit/agent.js';
 import { InstitutionClaimStore } from '../agents/a11-research/claims.js';
 import { InstitutionRegistry } from '../agents/a11-research/entities.js';
 import { registerInstitutionTools, type OfficialSearchProvider } from '../agents/a11-research/tools.js';
@@ -179,6 +180,7 @@ export class CounselorSystem {
     k.registerSpecialist(new ActivitiesAssessorAgent(model));
     k.registerSpecialist(new OpportunityScoutAgent(model));
     k.registerSpecialist(new OfficialResearchAgent(model));
+    k.registerSpecialist(new FitMatcherAgent(model));
     k.registerSpecialist(new AffordabilityPlannerAgent(model));
     k.registerSpecialist(new ScholarshipAdvisorAgent(model));
   }

@@ -48,7 +48,8 @@ export function roleMayWrite(role: string, entity: string, attribute: string): b
 }
 
 /** Phrases meaning the answer is unknown or withheld. A value must never be stored on the strength of such a quote (04T12). */
-export const UNKNOWN_PHRASES = /\b(i\s+)?(don'?t|do not)\s+know\b|\bnot\s+sure\b|\bno\s+idea\b|\bprefer\s+not\b|\brather\s+not\b|\bskip\b|\bunsure\b/i;
+/** Answers that decline or do not know. "I'd rather not say" declines; "I'd rather not be far from home" is a real preference. */
+export const UNKNOWN_PHRASES = /\b(i\s+)?(don'?t|do not)\s+know\b|\bnot\s+sure\b|\bno\s+idea\b|\b(?:prefer|rather)\s+not(?:\s+to)?(?:\s+(?:say|answer|share|tell|disclose|give|reply)\b|\s*[.!]?\s*$)|\bskip\b|\bunsure\b/i;
 
 export interface ClaimValidation {
   ok: boolean;
