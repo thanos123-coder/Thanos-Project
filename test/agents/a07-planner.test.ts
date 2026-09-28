@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { RuleNode, RulePackageInput, TestingPolicy } from '../../src/agents/a06-eligibility/rules.js';
 import { buildClaim } from '../../src/agents/a04-record-steward/claims.js';
+import { PLAN_CONTRACT, type PlanPayload } from '../../src/agents/a07-planner/agent.js';
 import type { Actor } from '../../src/shared/permissions.js';
 import type { EligibilityScopeInput } from '../../src/shared/scope.js';
 import { engineeringPackage, mathHL, qualificationQ, source } from '../fixtures/rule-packages.js';
@@ -151,6 +152,27 @@ describe('Agent 07 academic and testing planner', () => {
     const device = r.payload.milestones.find((m) => m.id === `device_${a.administrationId}`)!;
     expect(device).toMatchObject({ kind: 'official_deadline', due: { date: '2026-10-02', time: '23:59', timezone: 'America/New_York' } });
     expect(r.payload.milestones.find((m) => m.id === `register_${a.administrationId}`)!.dependsOn).toContain(device.id);
+  });
+
+  it('the plan contract rejects late or closed dates shown as feasible, unlabelled buffers, unsourced official dates and promised scores', async () => {
+    const h = makePlannerHarness();
+    h.addPackage(pkg(satRequired));
+    const { payload: p } = await planFor(h);
+    const check = (x: PlanPayload) => PLAN_CONTRACT.semantic!(x, {} as never);
+    expect(check(p)).toEqual([]);
+    const sel = p.attempts[0]!;
+    const a = { ...sel.primary!, feasibility: 'feasible' as const };
+    const withPrimary = (primary: typeof a) => ({ ...p, attempts: [{ ...sel, primary }, ...p.attempts.slice(1)] });
+    expect(check(withPrimary({ ...a, receipt: { ...a.receipt, meets: 'uncertain' } }))).toContain(`${a.administrationId} is presented as feasible although score receipt is uncertain`);
+    expect(check(withPrimary({ ...a, registration: { ...a.registration, status: 'closed' } }))).toContain(`${a.administrationId} has a closed registration`);
+    const official = p.milestones.find((m) => m.kind === 'official_deadline')!;
+    const withMilestone = (m: PlanPayload['milestones'][number]) => ({ ...p, milestones: p.milestones.map((x) => (x.id === m.id ? m : x)) });
+    expect(check(withMilestone({ ...official, sourceId: null }))).toContain(`official milestone ${official.id} has no source`);
+    expect(check(withMilestone({ ...official, kind: 'planning_buffer' }))).toContain(`milestone ${official.id} is a planning buffer and must be labelled as one`);
+    const need = p.testing.needs[0]!;
+    expect(check({ ...p, testing: { ...p.testing, notNeeded: [{ family: need.family, purpose: need.purposes[0]!, reason: 'x' } as never] } })).toContain(`${need.family} is both not considered and planned for ${need.purposes[0]}`);
+    expect(check({ ...p, notices: [{ code: 'x', message: 'This plan will definitely raise your score.' }] })).toContain('a notice implies a guaranteed outcome');
+    expect(check({ ...p, notices: [{ code: 'x', message: 'No plan can guarantee a score increase.' }] })).toEqual([]);
   });
 
   it('07T09 mixed ACT formats are listed separately with no homemade composite', async () => {

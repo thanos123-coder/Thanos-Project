@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { EligibilityAgent, type EligibilityPayload } from '../../src/agents/a06-eligibility/agent.js';
+import { ELIGIBILITY_CONTRACT, EligibilityAgent, type EligibilityPayload } from '../../src/agents/a06-eligibility/agent.js';
 import { combineAll, combineAny, combineAtLeast, deriveOverall, negate, type RuleState } from '../../src/agents/a06-eligibility/engine.js';
-import type { RulePackageInput } from '../../src/agents/a06-eligibility/rules.js';
+import type { RuleNode, RulePackageInput } from '../../src/agents/a06-eligibility/rules.js';
 import { absent } from '../../src/shared/absence.js';
 import type { Actor } from '../../src/shared/permissions.js';
 import type { EligibilityScopeInput } from '../../src/shared/scope.js';
@@ -127,6 +127,12 @@ describe('Agent 06 — Curriculum and eligibility contextualizer', () => {
     const enroll = await check(h, scope({ decisionStage: 'enrollment' }));
     expect(enroll.p.overall).toBe('unresolved');
     expect(finding(enroll.p, 'math_level_required').stateWithPermittedRoutes).toBe('unknown');
+    // Where the rule accepts self-reports but not future completion, a predicted grade settles nothing.
+    const strict = setup([engineeringPackage({ rules: { ...mathHL, futureCompletionPermittedAt: ['application'] } as RuleNode })]);
+    strict.seed([...baseFacts(strict.student), ...ibCourse(strict.student, 'c_math', { subject: 'ib.math_aa', level: 'IB_HL', grade: '7', status: 'predicted' })]);
+    const strictOffer = await check(strict, scope({ decisionStage: 'offer' }));
+    expect(finding(strictOffer.p, 'math_level_required').stateWithPermittedRoutes).toBe('unknown');
+    expect(strictOffer.p.overall).toBe('unresolved');
   });
 
   it('06T05 a similar course title without content equivalence is not a prerequisite match', async () => {
@@ -369,6 +375,21 @@ describe('Agent 06 — coverage, validation and safety', () => {
     expect(out.accepted).toBe(false);
     expect(out.issues.join()).toMatch(/does not follow from the rule states/);
     void h;
+  });
+
+  it('the contract rejects unresolved rules without a resolution, decisions outside coverage, and guarantee wording', async () => {
+    const h = setup();
+    h.seed([...baseFacts(h.student), ...ibCourse(h.student, 'c_math', { subject: 'ib.math_aa', level: 'IB_HL', grade: '7', status: 'final' })]);
+    const { out, p } = await check(h);
+    const check6 = (x: EligibilityPayload, summary = out.result.summary) => ELIGIBILITY_CONTRACT.semantic!(x, { ...out.result, summary, payload: x } as never);
+    expect(check6(p)).toEqual([]);
+    const f = finding(p, 'math_level_required');
+    const { resolution: _r, ...unresolved } = { ...f, state: 'unknown' as const };
+    expect(check6({ ...p, findings: p.findings.map((x) => (x.ruleId === f.ruleId ? unresolved : x)) })).toContain(`rule ${f.ruleId} is unknown but names no resolution`);
+    expect(check6({ ...p, findings: p.findings.map((x) => (x.ruleId === f.ruleId ? { ...f, resolution: { kind: 'x', text: 'y', owner: 'student' } } : x)) })).toContain(`rule ${f.ruleId} is met but lists an unresolved input`);
+    expect(check6({ ...p, coverage: { status: 'no_rule_package', note: 'n' } })).toContain('an unsupported case cannot receive an eligibility decision');
+    expect(check6({ ...p, explanation: 'You are eligible, so you will be admitted.' })).toContain('the explanation implies a guarantee or an institutional decision');
+    expect(check6(p, 'Congratulations, you are in.')).toContain('the explanation implies a guarantee or an institutional decision');
   });
 
   it('repeated attempts with different results stay unresolved unless the policy is published', async () => {

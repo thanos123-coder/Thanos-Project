@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import type { DocumentImportPayload } from '../../src/agents/a03-document-interpreter/agent.js';
+import { DOCUMENT_IMPORT_CONTRACT, type DocumentImportPayload } from '../../src/agents/a03-document-interpreter/agent.js';
 import { reconstructBlocks, type TextRun } from '../../src/agents/a03-document-interpreter/layout.js';
 import { interpretDocument, namesMatch } from '../../src/agents/a03-document-interpreter/interpret.js';
-import { sniffType } from '../../src/agents/a03-document-interpreter/quarantine.js';
+import { pdfActiveContent, sniffType } from '../../src/agents/a03-document-interpreter/quarantine.js';
 import { RecordView } from '../../src/agents/a04-record-steward/view-reader.js';
 import { ScriptedModelGateway } from '../../src/model/scripted.js';
 import { buildPdf, ibTranscriptWithPredicted, pdfWithActiveAnnotation, type PdfLine } from '../fixtures/pdfs.js';
@@ -223,6 +223,17 @@ describe('Agent 03 — Document and transcript interpreter', () => {
     expect(none.p.translation.note).toMatch(/cannot produce a certified translation/);
   });
 
+  it('the import contract rejects unflagged alternative readings, an unlabelled translation, and imports from another person\'s document', async () => {
+    const h = makeDocumentHarness();
+    const { p } = await importPdf(h, ibTranscriptWithPredicted());
+    const check = (x: DocumentImportPayload) => DOCUMENT_IMPORT_CONTRACT.semantic!(x, {} as never);
+    expect(check(p)).toEqual([]);
+    const row = p.preview[0]!;
+    expect(check({ ...p, preview: [{ ...row, grade: '6 / 8', needsReview: null }] })).toContain(`preview row ${row.entityId} shows alternative readings without flagging review`);
+    expect(check({ ...p, translation: { provided: true, label: null, text: 'Übersetzung', note: null } })).toContain('a working translation must be labelled as not certified');
+    expect(check({ ...p, identity: { ...p.identity, decision: 'mismatch' } })).toContain('nothing may be imported from a document whose subject does not match the account');
+  });
+
   it('03T15 active content inside compressed object streams is still found: scripts isolated, launch actions and attached files rejected', async () => {
     const h = makeDocumentHarness();
     const js = await h.upload(await pdfWithActiveAnnotation('javascript_link'));
@@ -230,6 +241,23 @@ describe('Agent 03 — Document and transcript interpreter', () => {
     expect(js.status === 'accepted' && js.document.quarantine.activeContent).toContain('javascript');
     expect(await h.upload(await pdfWithActiveAnnotation('launch_link'))).toMatchObject({ status: 'rejected', report: { reasons: ['pdf_active_content'] } });
     expect(await h.upload(await pdfWithActiveAnnotation('file_attachment'))).toMatchObject({ status: 'rejected', report: { reasons: ['pdf_active_content'] } });
+    // Escaped action names are read as the names they stand for.
+    expect(await h.upload(await pdfWithActiveAnnotation('escaped_launch_link'))).toMatchObject({ status: 'rejected', report: { reasons: ['pdf_active_content'] } });
+    const escapedJs = await h.upload(await pdfWithActiveAnnotation('escaped_javascript_link'));
+    expect(escapedJs.status === 'accepted' && escapedJs.document.quarantine.activeContent).toContain('javascript');
+  });
+
+  it('03T15 either reading of a PDF alone is enough to find active content', () => {
+    const none = { hasJavaScript: false, hasAttachments: false, hasLocalFileAction: false };
+    expect(pdfActiveContent('<< /Type /Page >>', none)).toEqual({ found: [], reject: false });
+    // The file's own text, with escaped names decoded.
+    expect(pdfActiveContent('<< /S /L#61unch /F (calc.exe) >>', none)).toEqual({ found: ['launch_action'], reject: true });
+    expect(pdfActiveContent('<< /S /J#61vaScript >>', none)).toEqual({ found: ['javascript'], reject: false });
+    expect(pdfActiveContent('<< /S /GoToR /F (other.pdf) >>', none)).toEqual({ found: ['remote_reference'], reject: false });
+    // What the parser resolved, when the text shows nothing.
+    expect(pdfActiveContent('', { ...none, hasLocalFileAction: true })).toEqual({ found: ['local_file_link'], reject: true });
+    expect(pdfActiveContent('', { ...none, hasJavaScript: true })).toEqual({ found: ['javascript'], reject: false });
+    expect(pdfActiveContent('', { ...none, hasAttachments: true })).toEqual({ found: ['embedded_files'], reject: true });
   });
 
   it('03T15 malformed, oversized and active-content files are rejected safely', async () => {

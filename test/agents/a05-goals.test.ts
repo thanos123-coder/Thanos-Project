@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ExperimentTemplate } from '../../src/agents/a05-goals/knowledge.js';
+import { EXPLORATION_CONTRACT, type ExplorationPayload } from '../../src/agents/a05-goals/agent.js';
 import { BUILTIN_EXPERIMENTS } from '../../src/agents/a05-goals/content.js';
 import { buildClaim } from '../../src/agents/a04-record-steward/claims.js';
 import { ScriptedModelGateway } from '../../src/model/scripted.js';
@@ -29,6 +30,24 @@ describe('Agent 05 goals and major exploration advisor', () => {
     expect(r.payload.experiments.length).toBeGreaterThan(0);
     expect(r.payload.questions[0]!.text).toMatch(/which part of it you enjoyed/);
     expect(r.status).toBe('needs_student_input');
+  });
+
+  it('the exploration contract rejects labels, guarantees, motivation judgements, unsent-contact breaches and unsourced earnings', async () => {
+    const h = makeGoalsHarness();
+    h.seed([interest(h.student, 'I love drawing and graphic design')]);
+    const { payload: p } = await h.ok({ action: 'goal_map' });
+    const check = (x: ExplorationPayload) => EXPLORATION_CONTRACT.semantic!(x, {} as never);
+    expect(check(p)).toEqual([]);
+    const hyp = p.hypotheses[0]!;
+    const withStatement = (statement: string) => ({ ...p, hypotheses: [{ ...hyp, statement }] });
+    expect(check(withStatement('You are a natural artist, so design is your true calling.')).join()).toMatch(/personality or diagnostic language/);
+    expect(check(withStatement('Design will definitely get you a job.')).join()).toMatch(/guarantee language/);
+    expect(check(withStatement('No one can guarantee a job in design.'))).toEqual([]);
+    expect(check({ ...p, notices: [{ code: 'x', message: 'You seem unmotivated in maths.' }] }).join()).toMatch(/judges the student's motivation/);
+    const exp = p.experiments[0]!;
+    expect(check({ ...p, experiments: [{ ...exp, externalContact: { ...exp.externalContact, sent: true as never } }] })).toContain('an experiment contacted someone without authorization');
+    const explanation = { subjectKey: 'computer_science', label: 'Computer science', topic: 'earnings', generalOverview: null, occupations: [], occupationNote: null, earnings: [{ occupation: 'Software developers', measure: 'median annual wage', value: '$100,000', geography: 'US', dataYear: 2025, sourceId: '', publisher: 'Example' }], earningsNotes: [], routes: [], routesNeedingVerification: [] };
+    expect(check({ ...p, explanation: explanation as never })).toContain('earnings data must carry geography, year and source');
   });
 
   it('05T02 a parent’s preferred profession stays attributed; the student’s interest stays theirs', async () => {

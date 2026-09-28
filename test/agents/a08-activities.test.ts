@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { ACTIVITIES_CONTRACT, type ActivitiesPayload } from '../../src/agents/a08-activities/agent.js';
 import { ScriptedModelGateway } from '../../src/model/scripted.js';
 import { makeActivitiesHarness } from '../helpers/activities.js';
 import { stated } from '../helpers/kernel.js';
@@ -105,6 +106,23 @@ describe('Agent 08 activities and experience assessor', () => {
     const award = h.record().fields.find((f) => f.field.entity === 'award')!;
     expect((award.current?.value as { scope: string }).scope).toBe('unknown');
     expect(r.payload.experiences[0]!.notes).toContain('“National Young Innovators Prize”: finalist; scope not known.');
+  });
+
+  it('the experience contract rejects unsupported qualities, prestige wording, planned work shown as done, and double-listed essay facts', async () => {
+    const h = makeActivitiesHarness();
+    const r0 = await h.submit({ title: 'Robotics club', category: 'club', episodes: [ep({ personalTasks: ['organized weekly practice schedules', 'kept the parts inventory'] })] });
+    const { payload: p } = await h.ok({ action: 'describe', experienceId: r0.payload.experiences[0]!.experienceId, request: 'summary' });
+    const check = (x: ActivitiesPayload) => ACTIVITIES_CONTRACT.semantic!(x, {} as never);
+    expect(check(p)).toEqual([]);
+    const x = p.experiences[0]!;
+    const quality = x.supported[0]!;
+    const withExperience = (e: typeof x) => ({ ...p, experiences: [e] });
+    expect(check(withExperience({ ...x, supported: [{ ...quality, claimIds: [] }] }))).toContain(`${x.experienceId}: a described quality has no supporting evidence`);
+    expect(check(withExperience({ ...x, supported: [{ ...quality, basis: 'This is impressive enough for top 5% schools.' }] }))).toContain(`${x.experienceId}: assessment uses prestige or guarantee language`);
+    expect(check(withExperience({ ...x, episodes: [{ ...x.episodes[0]!, lifecycle: 'planned', period: 'Summer 2027 (completed)' }] }))).toContain(`${x.experienceId}: a planned episode is described as completed`);
+    expect(check({ ...p, faithfulDescription: 'Robotics club: this will get you in.' })).toContain('description uses prestige or guarantee language');
+    const fact = { claimId: 'c1', statement: 'Robotics club member' };
+    expect(check({ ...p, essayFacts: { approved: [fact], toConfirm: [fact], reflectionQuestions: [] } })).toContain('a fact cannot be both approved and awaiting confirmation');
   });
 
   it('08T09 keeps a submitted manuscript as submitted, not published', async () => {

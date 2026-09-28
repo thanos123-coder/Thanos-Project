@@ -80,6 +80,34 @@ function isJson(s: string): boolean {
   }
 }
 
+/** Active content that makes a PDF unacceptable; anything else found is isolated (never executed). */
+const REJECTED_PDF_CONTENT: ReadonlySet<string> = new Set(['launch_action', 'local_file_link', 'embedded_files']);
+
+/**
+ * Active content in a PDF, from two independent readings: the file's own text
+ * (plain objects and decompressed object streams, with escaped names decoded)
+ * and what the parser resolved (document scripts, field scripts, attached
+ * files, links whose target is not a web address). Either reading alone is
+ * enough to report a finding. `reject` is set when anything found makes the
+ * file unacceptable; everything else is isolated (never executed).
+ */
+export function pdfActiveContent(scanText: string, parsed: Pick<PdfInspection, 'hasJavaScript' | 'hasAttachments' | 'hasLocalFileAction'>): { found: string[]; reject: boolean } {
+  const text = decodeNameEscapes(scanText);
+  const found: string[] = [];
+  if (/\/Launch\b/.test(text)) found.push('launch_action');
+  if (parsed.hasLocalFileAction) found.push('local_file_link');
+  if (/\/GoToR\b|\/GoToE\b/.test(text)) found.push('remote_reference');
+  if (/\/RichMedia\b/.test(text)) found.push('rich_media');
+  if (/\/JavaScript\b|\/JS\s*[(<]/.test(text) || parsed.hasJavaScript) found.push('javascript');
+  if (parsed.hasAttachments) found.push('embedded_files');
+  return { found, reject: found.some((f) => REJECTED_PDF_CONTENT.has(f)) };
+}
+
+/** The text of the file that is scanned for action names: the first 4 MB plus the decompressed object streams. */
+function pdfScanText(bytes: Uint8Array): string {
+  return latin1(bytes.subarray(0, Math.min(bytes.length, 4 * 1024 * 1024))) + inflatedObjectStreams(bytes);
+}
+
 /** Upper bound on decompressed bytes inspected per file, so a compression bomb cannot exhaust memory. */
 const MAX_INFLATED_BYTES = 16 * 1024 * 1024;
 
@@ -109,6 +137,11 @@ function inflatedObjectStreams(bytes: Uint8Array): string {
     }
   }
   return out.join('\n');
+}
+
+/** Decode PDF name escapes (#xx) so an escaped action name is scanned as the name it stands for. */
+function decodeNameEscapes(text: string): string {
+  return text.replace(/#([0-9A-Fa-f]{2})/g, (_, hex: string) => String.fromCharCode(parseInt(hex, 16)));
 }
 
 function latin1(bytes: Uint8Array): string {
@@ -204,12 +237,6 @@ export async function quarantine(bytes: Uint8Array, declaredMediaType: string | 
       return reject(activeContent.length ? 'office_active_content' : 'office_requires_conversion', 'Office documents are not opened directly. Please save it as a PDF and upload that instead.');
     }
     case 'pdf': {
-      // Plain objects plus the decompressed object streams, where writers usually put actions.
-      const raw = latin1(bytes.subarray(0, Math.min(bytes.length, 4 * 1024 * 1024))) + inflatedObjectStreams(bytes);
-      if (/\/Launch\b/.test(raw)) activeContent.push('launch_action');
-      if (/\/GoToR\b|\/GoToE\b/.test(raw)) activeContent.push('remote_reference');
-      if (/\/RichMedia\b/.test(raw)) activeContent.push('rich_media');
-      if (/\/JavaScript\b|\/JS\s*[(<]/.test(raw)) activeContent.push('javascript');
       const pdf = await inspectPdf(bytes, { maxPages: limits.maxPages });
       if (!pdf.ok) {
         if (pdf.reason === 'password_required') {
@@ -225,11 +252,10 @@ export async function quarantine(bytes: Uint8Array, declaredMediaType: string | 
         return reject('malformed_pdf', 'The PDF appears to be damaged and could not be read safely.');
       }
       report.pages = pdf.numPages;
-      if (pdf.hasJavaScript && !activeContent.includes('javascript')) activeContent.push('javascript');
-      if (pdf.hasAttachments) activeContent.push('embedded_files');
-      if (pdf.hasLocalFileAction && !activeContent.includes('launch_action')) activeContent.push('launch_action');
-      if (activeContent.includes('launch_action') || activeContent.includes('embedded_files')) {
-        return reject('pdf_active_content', 'This PDF contains embedded files or launch actions, which are not opened. Printing it to a new PDF usually removes them.');
+      const active = pdfActiveContent(pdfScanText(bytes), pdf);
+      activeContent.push(...active.found);
+      if (active.reject) {
+        return reject('pdf_active_content', 'This PDF contains embedded files, or actions that open other files or programs, which are not opened. Printing it to a new PDF usually removes them.');
       }
       if (activeContent.length > 0) reasons.push(`isolated active content: ${activeContent.join(', ')} (never executed)`);
       report.studentMessage = 'The document was accepted for reading.';

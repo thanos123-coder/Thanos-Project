@@ -306,6 +306,41 @@ describe('Agent 02 intake interviewer', () => {
     expect(fieldOf(h2, 'student:self.constraints.weekly_hours_available')).toBeUndefined();
   });
 
+  it('the intake contract rejects leading wording, extra questions, and a mode change that is not offered', async () => {
+    const h = makeIntakeHarness();
+    const { payload: p } = await h.start({ objective: 'explore_majors' });
+    const check = (x: IntakePayload) => INTAKE_CONTRACT.semantic!(x, {} as never);
+    expect(check(p)).toEqual([]);
+    const q = p.nextQuestion!;
+    expect(check({ ...p, nextQuestion: { ...q, text: 'Surely you want to study medicine?' } })).toContain(`question ${q.questionId} uses leading wording`);
+    expect(check({ ...p, enoughForObjective: true })).toContain('next_question must be omitted when the task has enough information');
+    expect(check({ ...p, nextQuestion: null, additionalQuestions: [q] })).toContain('additional questions without a main question');
+    expect(check({ ...p, mode: 'voice', additionalQuestions: [{ ...q, questionId: 'q_extra' }] })).toContain('voice mode asks one main question at a time');
+    const handoff = { mode: 'interview_practice' as const, message: 'Switch to interview practice?', requiresExplicitChoice: true as const, scoring: 'none_during_intake' as const };
+    expect(check({ ...p, modeHandoff: handoff })).toContain('a mode change must be offered explicitly');
+    expect(check({ ...p, modeHandoff: handoff, nextAction: 'mode_handoff' })).toEqual([]);
+  });
+
+  it('a model reading is used only where it quotes the student verbatim', async () => {
+    const model = new ScriptedModelGateway().always('intake.interpret_answer', {
+      items: [
+        { kind: 'interest', quote: 'taking old radios apart', holderLabel: null, timing: 'current' },
+        // Not what the student said: a paraphrase that upgrades the interest.
+        { kind: 'interest', quote: 'a passion for electrical engineering', holderLabel: null, timing: 'current' },
+      ],
+      followUpQuestion: null,
+      answersTheQuestion: true,
+    });
+    const h = makeIntakeHarness({ model });
+    let r = await h.start({ objective: 'explore_majors' });
+    r = await h.answer(r.payload, 'skip');
+    r = await h.answer(r.payload, 'hmm, mostly taking old radios apart on weekends I suppose');
+    expect(model.callsFor('intake.interpret_answer')).toHaveLength(1);
+    const statements = r.payload.recorded.map((x) => x.statement).join(' | ');
+    expect(statements).toMatch(/taking old radios apart/);
+    expect(statements).not.toMatch(/passion|electrical engineering/);
+  });
+
   it('02T14 a generated follow-up asking for private details is rejected and a relevant question is used', async () => {
     const model = new ScriptedModelGateway().always('intake.interpret_answer', {
       items: [],

@@ -66,7 +66,17 @@ export async function buildPdf(pages: PdfLine[][]): Promise<Uint8Array> {
  * streams (pdf-lib's default, like most writers), so the annotation's
  * dictionary is compressed and invisible to a scan of the raw bytes.
  */
-export async function pdfWithActiveAnnotation(kind: 'javascript_link' | 'launch_link' | 'file_attachment'): Promise<Uint8Array> {
+export async function pdfWithActiveAnnotation(kind: 'javascript_link' | 'launch_link' | 'file_attachment' | 'escaped_javascript_link' | 'escaped_launch_link'): Promise<Uint8Array> {
+  if (kind === 'escaped_javascript_link' || kind === 'escaped_launch_link') {
+    // The action name written with a #xx escape (/L#61unch is the name Launch), uncompressed.
+    const plain = await activeAnnotationPdf(kind === 'escaped_launch_link' ? 'launch_link' : 'javascript_link', false);
+    const text = Buffer.from(plain).toString('latin1');
+    return Uint8Array.from(Buffer.from(kind === 'escaped_launch_link' ? text.replace('/Launch', '/L#61unch') : text.replace('/JavaScript', '/J#61vaScript'), 'latin1'));
+  }
+  return activeAnnotationPdf(kind, true);
+}
+
+async function activeAnnotationPdf(kind: 'javascript_link' | 'launch_link' | 'file_attachment', objectStreams: boolean): Promise<Uint8Array> {
   const doc = await PDFDocument.create();
   const page = doc.addPage([595, 842]);
   page.drawText('Example International School - Academic Transcript', { x: 50, y: 800, size: 12, font: await doc.embedFont(StandardFonts.Helvetica) });
@@ -76,7 +86,7 @@ export async function pdfWithActiveAnnotation(kind: 'javascript_link' | 'launch_
       ? c.obj({ Type: 'Annot', Subtype: 'FileAttachment', Rect: [0, 0, 20, 20], FS: c.register(c.obj({ Type: 'Filespec', F: PDFString.of('run.exe'), EF: { F: c.register(c.flateStream('not a real program', { Type: 'EmbeddedFile' })) } })) })
       : c.obj({ Type: 'Annot', Subtype: 'Link', Rect: [0, 0, 100, 100], Border: [0, 0, 0], A: kind === 'javascript_link' ? c.obj({ S: 'JavaScript', JS: PDFString.of('app.alert(1)') }) : c.obj({ S: 'Launch', F: PDFString.of('calc.exe') }) });
   page.node.set(PDFName.of('Annots'), c.obj([c.register(annot)]));
-  return doc.save({ useObjectStreams: true });
+  return doc.save({ useObjectStreams: objectStreams });
 }
 
 /** An IB transcript with final Year 11 marks and predicted Year 12 results (03T01). */

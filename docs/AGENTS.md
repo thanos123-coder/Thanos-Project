@@ -90,7 +90,11 @@ Turns an authorized document into structured observations exactly as printed, ea
 
 **Pipeline**
 
-1. **Quarantine** (`quarantine.ts`). The real file type is sniffed, not taken from the filename. The quarantine also checks size, page and pixel limits, encryption, active content (scripts, embedded files, external references) and the malware scan when a scanner is supplied.
+1. **Quarantine** (`quarantine.ts`). The real file type is sniffed, not taken from the filename. The quarantine also checks size, page and pixel limits, encryption, and the malware scan when a scanner is supplied.
+
+   Active content in a PDF is read two independent ways: from the file's own text, including decompressed object streams and escaped names, and from what the parser resolves (scripts, attached files, links to local files or programs).
+   - Attached files, Launch actions and links that open local files or programs are rejected.
+   - Scripts and remote references are isolated, and nothing in the file is ever executed.
 2. **Parse** in a sandbox. PDF text layers go through `pdf-text.ts` and `layout.ts`; CSV and JSON exports go through `structured.ts`.
 3. **Interpret** (`interpret.ts`). This step covers the document class, identity match, grade scale, courses, levels, periods, statuses, offerings, tests, qualification and expected graduation. Ambiguous readings stay ambiguous, with their candidates listed.
 4. **Import** (`import-claims.ts`). Claims are proposed to Agent 04 with page and region anchors.
