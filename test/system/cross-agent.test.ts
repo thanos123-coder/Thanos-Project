@@ -299,3 +299,63 @@ describe('Cross-agent acceptance suite', () => {
     expect(r.answer!.headline).toMatch(/^Fits now: Free Good Fit/);
   });
 });
+
+describe('CounselorSystem — access and deletion', () => {
+  it('a message from someone with no access is refused and nothing is stored', async () => {
+    const h = makeSystem();
+    h.seed(amara(h.student));
+    const stranger: Actor = { id: 'acct_stranger', kind: 'supporter', tenantId: TENANT };
+    const r = await h.ask('Show me everything about this student', {}, stranger);
+    expect(r.accepted).toBe(false);
+    expect(r.status).toBe('blocked');
+    expect(r.answer).toBeNull();
+    expect(r.turnId).toBeNull();
+    expect(h.system.conversations.list(TENANT, h.studentId, `conv_${h.studentId}`)).toEqual([]);
+    expect(h.system.objectives.list(TENANT, h.studentId, stranger.id)).toEqual([]);
+  });
+
+  it('deleting the account stops work in flight and leaves nothing behind', async () => {
+    const g = gate();
+    const h = makeSystem({ search: async () => (await g.opened, []) });
+    h.seed(amara(h.student));
+    const pending = h.ask('Find me a summer engineering workshop', { deliveryKey: 'msg-1' });
+    await until(() => h.searches.length > 0);
+    const out = await h.system.deleteAccount(h.student, TENANT, h.studentId);
+    expect(out.cancelledTasks).toBeGreaterThan(0);
+    expect(out.processorsNotified).toEqual(expect.arrayContaining(['objective_store', 'delivery_keys']));
+    g.release();
+    const r = await pending;
+    expect(r.accepted).toBe(false);
+    // Nothing was re-created by the work that was still running.
+    expect(h.system.conversations.list(TENANT, h.studentId, `conv_${h.studentId}`)).toEqual([]);
+    expect(h.system.objectives.list(TENANT, h.studentId, h.student.id)).toEqual([]);
+    expect(h.system.kernel.records.recordVersion(TENANT, h.studentId)).toBeUndefined();
+    expect(h.system.kernel.records.deletionLedger().filter((e) => e.scope === 'account' && e.tenantId === TENANT)).toHaveLength(1);
+    // The same message delivered again is refused, not replayed.
+    const again = await h.ask('Find me a summer engineering workshop', { deliveryKey: 'msg-1' });
+    expect(again.accepted).toBe(false);
+    expect(again.turnId).toBeNull();
+  });
+
+  it('only the student can delete their account; a supporter attempt changes nothing', async () => {
+    const h = makeSystem();
+    h.seed(amara(h.student));
+    const parent: Actor = { id: 'acct_parent', kind: 'supporter', tenantId: TENANT };
+    h.system.kernel.records.permissions.grant(h.student, { tenantId: TENANT, studentId: h.studentId, granteeActorId: parent.id, relationship: 'supporter', purposes: ['counseling', 'deletion'], categories: ['practical_constraints', 'goals_preferences'], access: ['read', 'write', 'delete'], policyBasis: 'student_invitation' });
+    const before = h.system.kernel.records.recordVersion(TENANT, h.studentId);
+    await expect(h.system.deleteAccount(parent, TENANT, h.studentId)).rejects.toMatchObject({ code: 'not_found_or_denied' });
+    expect(h.system.kernel.records.recordVersion(TENANT, h.studentId)).toBe(before);
+    expect((await h.ok('What do you know about my summer plans?')).accepted).toBe(true);
+  });
+
+  it('deleting one fact through the system removes the results built from it', async () => {
+    const h = makeSystem();
+    h.system.kernel.rules.add(engineeringPackage({ rules: root([mathHL]) }));
+    const documentId = await uploadTranscript(h);
+    await h.ok('Here is my transcript. Do I meet the maths requirement for engineering?', { context: { documentIds: [documentId], targets: [target()] } });
+    const finding = h.system.kernel.records.listArtifacts(h.ui, TENANT, h.studentId, { kind: 'eligibility_finding' })[0]!;
+    const out = await h.system.deleteFact(h.student, TENANT, h.studentId, finding.inputs.claimIds[0]!);
+    expect(out.deletedClaims).toBe(1);
+    expect(h.system.kernel.records.listArtifacts(h.ui, TENANT, h.studentId, { kind: 'eligibility_finding' })).toEqual([]);
+  });
+});

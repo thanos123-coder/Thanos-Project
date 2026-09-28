@@ -140,7 +140,7 @@ export class RecordService {
   }
 
   recordVersion(tenantId: string, studentId: string): number | undefined {
-    return this.students.get(studentKey(tenantId, studentId))?.recordVersion;
+    return this.state(tenantId, studentId)?.recordVersion;
   }
 
   registerDerivativeStore(store: DerivativeStore): void {
@@ -688,18 +688,21 @@ export class RecordService {
     const s = this.state(tenantId, studentId);
     if (!s) throw denied();
     if (ctx.actor.kind !== 'student' || ctx.actor.id !== s.ownerActorId) throw denied();
+    // Access ends before anything is purged, so work still in flight cannot read
+    // or re-create content while the stores are being cleared (deletion takes
+    // precedence over queued work, spec "Shared event contract").
+    for (const g of this.permissions.listGrants(tenantId, studentId)) if (!g.revokedAt) this.permissions.revoke(ctx.actor, g.id);
+    s.lifecycle = 'deleted';
     const notified: string[] = [];
     for (const store of this.derivativeStores) {
       await store.purgeByStudent(tenantId, studentId);
       notified.push(store.name);
     }
-    for (const g of this.permissions.listGrants(tenantId, studentId)) if (!g.revokedAt) this.permissions.revoke(ctx.actor, g.id);
     s.claims.clear();
     s.claimsByField.clear();
     s.artifacts.clear();
     s.mutations.clear();
     s.changeLog = [];
-    s.lifecycle = 'deleted';
     this.outbox.push({ eventId: this.ids.next('event'), type: 'deletion.completed', tenantId, studentId, changedFields: [], causeRef: 'account_deletion', occurredAt: this.clock.nowIso(), sensitivePayloadIncluded: false });
     this.recordLedger(tenantId, studentId, 'account', [studentId], notified);
     return { processorsNotified: notified };

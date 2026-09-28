@@ -8,7 +8,7 @@ This document explains how agents 01–09 are built and how they work together. 
                  app / website back end
                           │
                   CounselorSystem            src/system/counselor-system.ts
-                          │  ask · reply · confirm · status · cancel · resume · updates · uploadDocument · approveAction
+                          │  ask · reply · confirm · status · cancel · resume · updates · uploadDocument · delete… · approveAction
                           ▼
                     SystemKernel             src/system/kernel.ts
    ┌──────────────┬───────┴──────┬───────────────┬────────────────┬──────────────┐
@@ -42,7 +42,7 @@ Every store is in memory behind a small interface. A deployment swaps in durable
 
 ## One request, end to end
 
-1. **The app calls `CounselorSystem.ask`.** The message is stored as a conversation turn. A repeated `deliveryKey` maps to the same turn, so a duplicate delivery has no second effect.
+1. **The app calls `CounselorSystem.ask`.** The system first makes the same authorization check the kernel will make; a message from someone who may not act for this student is refused and nothing is stored. Otherwise the message is stored as a conversation turn. A repeated `deliveryKey` maps to the same turn, so a duplicate delivery has no second effect.
 2. **The kernel builds a role-01 request envelope** (`kernel.buildRequest`). It holds the live record version, the actor's permission snapshot, the role's allowed tools, the role's budget, the completion contract `counselor_turn_v1` and an idempotency key.
 3. **`kernel.invoke` checks the request before any private data is read.** It checks the schema, the registered specialist and contract, that the actor is a person (agents act only for people), live authorization, and that the permission snapshot is still current.
 4. **Agent 01 classifies the request.** Rules run first. The model is used only as a fallback, and its reading must quote the message verbatim. Agent 01 then plans the smallest useful task graph (`planner.ts`) and creates or reuses an objective in the `ObjectiveStore`.
@@ -115,7 +115,7 @@ No role holds a tool that sends, pays, registers, enrolls or submits. `actions.p
   - a material change to a curated opportunity (`connectOpportunityCatalog`).
 
   Consumers see the stale state and recompute; nothing silently keeps an old answer.
-- **Deletion.** Deleting a claim, a document or the whole record purges every artifact built from it. It also purges every registered derivative store: conversations, intake sessions, documents and the objective store, including cached answers. Each deletion is written to the deletion ledger, and processors are notified. A backup restore re-applies the ledger, so deleted content does not come back.
+- **Deletion.** Deleting a claim, a document or the whole record (`deleteFact`, `deleteDocument`, `deleteAccount`) purges every artifact built from it. It also purges every registered derivative store: conversations, intake sessions, documents and the objective store, including cached answers. Each deletion is written to the deletion ledger, and processors are notified. A backup restore re-applies the ledger, so deleted content does not come back. Account deletion takes precedence over work in flight: the student's running tasks are cancelled, and all access ends before the stores are purged, so nothing still running can read or re-create deleted content.
 
 ## Events
 
@@ -126,6 +126,8 @@ The record service writes events to an outbox. The kernel moves them to the bus 
 - each consumer handles an event ID once, so duplicates have no effect;
 - a failing consumer gets up to three attempts, then the event goes to a dead-letter queue with an accountable owner;
 - `retryDeadLetters` is the recovery procedure.
+
+No agent in this volume depends on an event to stay correct. Dependents are marked stale in the same step that commits a change, and every agent reads the current state when it runs. The bus is the integration point for the app's notifications and for the later roles.
 
 ## Budgets and cancellation
 

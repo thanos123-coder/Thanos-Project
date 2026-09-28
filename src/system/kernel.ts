@@ -149,6 +149,18 @@ export class SystemKernel {
     return true;
   }
 
+  /** Cancel every running task for one student, e.g. before their account is deleted. */
+  cancelForStudent(tenantId: string, studentId: string, reason: string): number {
+    let n = 0;
+    for (const [taskId, ctx] of this.running) {
+      if (ctx.request.tenantId !== tenantId || ctx.request.studentId !== studentId || ctx.token.isCancelled) continue;
+      ctx.token.cancel(reason);
+      this.audit.record({ kind: 'tool_call', taskId, name: 'tasks.cancel', outcome: 'cancelled' });
+      n += 1;
+    }
+    return n;
+  }
+
   /**
    * Run one specialist task end to end. The request is validated and the actor's
    * authorization checked *before* any private data is read. The result is

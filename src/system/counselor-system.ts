@@ -121,6 +121,21 @@ export class CounselorSystem {
     registerTaskTools(k.gateway, this.objectives);
     k.records.registerDerivativeStore(this.objectives);
     registerOrchestrationTools(k, this.objectives);
+    // Client delivery keys are identifiers for a student's messages, so account deletion clears them too.
+    k.records.registerDerivativeStore({
+      name: 'delivery_keys',
+      purgeByDocument: () => 0,
+      purgeByClaims: () => 0,
+      purgeByStudent: (tenantId, studentId) => {
+        let n = 0;
+        for (const key of [...this.deliveries.keys()]) {
+          if (!key.startsWith(`${tenantId}:${studentId}:`)) continue;
+          this.deliveries.delete(key);
+          n += 1;
+        }
+        return n;
+      },
+    });
 
     const model = k.model;
     k.registerSpecialist(new LeadCounselorAgent(model));
@@ -143,6 +158,7 @@ export class CounselorSystem {
 
   /** Send a message to the counselor. The message is stored as a conversation turn, then handled by Agent 01. */
   async ask(actor: Actor, tenantId: string, studentId: string, message: CounselorMessage): Promise<CounselorResponse> {
+    if (!this.mayAct(actor, tenantId, studentId)) return this.refuse(actor, tenantId, studentId);
     const conversationId = message.conversationId ?? `conv_${studentId}`;
     const turnId = this.turnFor(actor, tenantId, studentId, conversationId, message.text, message.modality ?? 'text', message.deliveryKey);
     const scope: Record<string, unknown> = {
@@ -160,6 +176,7 @@ export class CounselorSystem {
 
   /** Answer the counselor's pending question for an objective; the answer is recorded through intake, then dependent work continues. */
   async reply(actor: Actor, tenantId: string, studentId: string, objectiveId: string, text: string, opts: { conversationId?: string; modality?: 'text' | 'voice'; deliveryKey?: string } = {}): Promise<CounselorResponse> {
+    if (!this.mayAct(actor, tenantId, studentId)) return this.refuse(actor, tenantId, studentId);
     const objective = this.objectives.get(tenantId, studentId, actor.id, objectiveId);
     const session = objective.intakeSessionId ? this.intakeSessions.get(tenantId, studentId, objective.intakeSessionId) : undefined;
     const conversationId = session?.conversationId ?? opts.conversationId ?? `conv_${studentId}`;
@@ -201,6 +218,36 @@ export class CounselorSystem {
     return { accepted: out.accepted, status: out.result.status, objectiveId: payload?.objectiveId ?? null, summary: out.result.summary, answer: payload, issues: out.issues, taskId: request.taskId, turnId: null };
   }
 
+  // ---------------------------------------------------------------- deletion
+
+  /** Delete an uploaded document and everything derived from it, including cached answers (04T08, XT04). */
+  async deleteDocument(actor: Actor, tenantId: string, studentId: string, documentId: string) {
+    const out = await this.kernel.records.deleteDocument({ actor, viaRole: 'ui', purpose: 'deletion' }, tenantId, studentId, documentId);
+    await this.kernel.flushEvents();
+    return out;
+  }
+
+  /** Delete one recorded fact and every result built from it. */
+  async deleteFact(actor: Actor, tenantId: string, studentId: string, claimId: string) {
+    const out = await this.kernel.records.deleteClaim({ actor, viaRole: 'ui', purpose: 'deletion' }, tenantId, studentId, claimId);
+    await this.kernel.flushEvents();
+    return out;
+  }
+
+  /**
+   * Delete the student's whole account. Only the student can. Work still running
+   * for them is cancelled first, so nothing in flight can reuse or re-create the
+   * deleted content (spec "Shared event contract": a deletion takes precedence
+   * over queued work).
+   */
+  async deleteAccount(actor: Actor, tenantId: string, studentId: string): Promise<{ processorsNotified: string[]; cancelledTasks: number }> {
+    const isOwner = actor.kind === 'student' && actor.tenantId === tenantId && this.kernel.records.ownerOf(tenantId, studentId) === actor.id;
+    const cancelledTasks = isOwner ? this.kernel.cancelForStudent(tenantId, studentId, 'The account was deleted.') : 0;
+    const out = await this.kernel.records.deleteAccount({ actor, viaRole: 'ui', purpose: 'deletion' }, tenantId, studentId);
+    await this.kernel.flushEvents();
+    return { ...out, cancelledTasks };
+  }
+
   // ---------------------------------------------------------------- documents and actions
 
   uploadDocument(actor: Actor, tenantId: string, studentId: string, bytes: Uint8Array, declared: { mediaType?: string | null; documentType?: string | null } = {}) {
@@ -224,6 +271,20 @@ export class CounselorSystem {
 
   rejectAction(actor: Actor, proposalId: string): ExternalActionRecord {
     return this.kernel.actions.reject(proposalId, actor);
+  }
+
+  /** The same check the kernel makes before any task runs; nothing is stored for someone who fails it. */
+  private mayAct(actor: Actor, tenantId: string, studentId: string): boolean {
+    return actor.kind !== 'agent' && this.kernel.records.permissions.isStillAuthorized(actor, tenantId, studentId, 'counseling');
+  }
+
+  /**
+   * Refuse a message from someone who may not act for this student, without
+   * storing it. The kernel refuses the task before any handler runs, which gives
+   * the standard blocked result and audit entry; the read-only scope is never used.
+   */
+  private async refuse(actor: Actor, tenantId: string, studentId: string): Promise<CounselorResponse> {
+    return this.lead(actor, tenantId, studentId, { action: 'review_updates' });
   }
 
   private turnFor(actor: Actor, tenantId: string, studentId: string, conversationId: string, text: string, modality: 'text' | 'voice', deliveryKey?: string): string {

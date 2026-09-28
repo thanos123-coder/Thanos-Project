@@ -54,9 +54,10 @@ await counselor.status(actor, tenantId, studentId, answer.objectiveId!);
 await counselor.cancel(actor, tenantId, studentId, answer.objectiveId!, '09');   // stop the search only
 await counselor.resume(actor, tenantId, studentId, answer.objectiveId!);
 await counselor.updates(actor, tenantId, studentId);                            // background changes to review
+await counselor.deleteAccount(actor, tenantId, studentId);                      // stops running work, then purges everything
 ```
 
-The system exposes these entry points: `ask`, `reply`, `confirm`, `status`, `cancel`, `resume`, `updates`, `uploadDocument`, `pendingActions`, `approveAction` and `rejectAction`. Lower-level access to every agent module is available through the namespaces exported from the package root (`leadCounselor`, `intake`, `documents`, `record`, `goals`, `eligibility`, `planner`, `activities`, `opportunities`, `shared`, `runtime`, `model`).
+The system exposes these entry points: `ask`, `reply`, `confirm`, `status`, `cancel`, `resume`, `updates`, `uploadDocument`, `deleteDocument`, `deleteFact`, `deleteAccount`, `pendingActions`, `approveAction` and `rejectAction`. A message from someone who may not act for the student is refused before anything is stored. Lower-level access to every agent module is available through the namespaces exported from the package root (`leadCounselor`, `intake`, `documents`, `record`, `goals`, `eligibility`, `planner`, `activities`, `opportunities`, `shared`, `runtime`, `model`).
 
 ## What is enforced in code, not left to a prompt
 
