@@ -104,6 +104,8 @@ export interface DerivedArtifact {
   studentId: string;
   kind: string;
   producedByRole: string;
+  /** The task that produced it, so a coordinator can tell which of its results went stale. */
+  producedByTask?: string;
   /** Stable scope key, e.g. an eligibility scope key; a newer artifact with the same kind+scopeKey supersedes the older one. */
   scopeKey: string;
   payload: unknown;

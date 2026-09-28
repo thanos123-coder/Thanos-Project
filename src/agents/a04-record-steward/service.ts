@@ -542,6 +542,7 @@ export class RecordService {
       studentId: input.studentId,
       kind: input.kind,
       producedByRole: ctx.viaRole,
+      ...(ctx.taskId ? { producedByTask: ctx.taskId } : {}),
       scopeKey: input.scopeKey,
       payload: structuredClone(input.payload),
       inputs: { fieldKeys, claimIds: [...input.inputClaimIds], ruleVersions: [...(input.ruleVersions ?? [])], sourceIds: [...(input.sourceIds ?? [])] },

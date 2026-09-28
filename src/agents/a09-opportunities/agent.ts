@@ -167,6 +167,11 @@ export const OPPORTUNITY_CONTRACT: ContractDefinition<OpportunityPayload> = {
   },
 };
 
+/** Tasks whose optional research steps were skipped because the effort budget ran low. */
+const limited = new WeakSet<TaskContext>();
+/** Tasks in which a public search provider failed part-way. */
+const searchFailed = new WeakSet<TaskContext>();
+
 const LOCAL_ENTITIES = ['student', 'interest', 'preference', 'hypothesis', 'commitment', 'age_attestation', 'course', 'qualification'];
 const MAX_FINALIST_CHECKS = 3;
 const MAX_NEW_LEADS = 4;
@@ -241,6 +246,11 @@ export class OpportunityScoutAgent implements SpecialistAgent {
     const notes: string[] = [];
     if (!ctx.request.allowedTools.includes('research.fetch_public')) return notes;
     for (const e of cards.slice(0, MAX_FINALIST_CHECKS)) {
+      // Reopening a page costs two calls; one more must stay free to save the result.
+      if (!ctx.budget.canConsume('tool_calls', 3)) {
+        limited.add(ctx);
+        break;
+      }
       const o = catalog.opportunities.find((x) => x.id === e.opportunityId);
       const cycle = o?.cycles.find((c) => c.id === e.cycle?.id);
       const source = cycle ? catalog.sources.find((s) => s.id === cycle.sourceId) : undefined;
@@ -296,8 +306,16 @@ export class OpportunityScoutAgent implements SpecialistAgent {
     const hits: SearchOutcome['results'] = [];
     let ran = false;
     for (const q of queries) {
+      if (!ctx.budget.canConsume('tool_calls', 2)) {
+        limited.add(ctx);
+        break;
+      }
       const r = await ctx.tryCall<SearchOutcome>('research.search_public', { query: q });
       if (!r.ok || !r.value.available) break;
+      if (r.value.error) {
+        searchFailed.add(ctx);
+        break;
+      }
       ran = true;
       log.push({ queryText: r.value.queryText, results: r.value.results.length });
       for (const h of r.value.results) if (!hits.some((x) => x.url === h.url)) hits.push(h);
@@ -307,10 +325,14 @@ export class OpportunityScoutAgent implements SpecialistAgent {
     for (const h of hits) {
       if (leads.length >= MAX_NEW_LEADS) break;
       if (catalog.leads.some((l) => l.url === h.url)) continue;
+      if (!ctx.budget.canConsume('tool_calls', 2)) {
+        limited.add(ctx);
+        break;
+      }
       let pageSays: Array<{ field: string; quote: string }> = [];
       let pastCycleOnly: boolean | null = null;
       let injectionSignals: string[] = [];
-      if (reads < MAX_LEAD_READS && ctx.request.allowedTools.includes('research.fetch_public')) {
+      if (reads < MAX_LEAD_READS && ctx.request.allowedTools.includes('research.fetch_public') && ctx.budget.canConsume('tool_calls', 3)) {
         reads += 1;
         const f = await ctx.tryCall<FetchOutcome>('research.fetch_public', { url: h.url });
         if (f.ok && f.value.accessible) {
@@ -445,6 +467,9 @@ export class OpportunityScoutAgent implements SpecialistAgent {
       payload.alternatives = payload.noResult.alternatives;
     }
     for (const n of verificationNotes) payload.notices.push({ code: 'verification', message: n });
+    const budgetLimited = limited.has(ctx);
+    if (searchFailed.has(ctx)) payload.notices.push({ code: 'search_failed', message: 'A public search did not complete, so the list of new leads may be incomplete. What is shown was found before the failure; searching again will not duplicate it.' });
+    if (budgetLimited) payload.notices.push({ code: 'budget_limit', message: 'The effort budget for this search ran out before every step was done: some official pages were not reopened or no new leads were searched. What is shown was checked; the rest can be resumed.' });
     payload.notices.push({ code: 'admissions', message: ADMISSIONS_NOTE });
     if (leads.length > 0) payload.notices.push({ code: 'leads_unverified', message: 'Leads found through search are listed separately. They have not been checked against the organizer’s own pages, so they are not recommendations.' });
 
@@ -459,7 +484,7 @@ export class OpportunityScoutAgent implements SpecialistAgent {
     const uncertainties: Uncertainty[] = cards
       .flatMap((e) => e.unresolved.filter((u) => u.material).slice(0, 2).map((u) => ({ affects: `opportunity:${e.opportunityId}`, description: u.text.length >= 10 ? u.text : `${e.title}: ${u.text}`, resolution: u.question ?? (u.owner === 'organizer' ? 'Ask the organizer or check the official page.' : 'Review with a qualified adult.'), consequence: 'changes_decision' as const })))
       .slice(0, 20);
-    const status: ResultStatus = picked.length === 0 ? 'completed' : feasibleNow.length > 0 ? 'completed' : 'partial';
+    const status: ResultStatus = budgetLimited ? 'partial' : picked.length === 0 ? 'completed' : feasibleNow.length > 0 ? 'completed' : 'partial';
     const summary = picked.length === 0
       ? 'No verified opportunity currently meets all of your constraints. The search boundary, the reasons options dropped out and other routes are listed.'
       : [
@@ -476,7 +501,7 @@ export class OpportunityScoutAgent implements SpecialistAgent {
       sourceRefs: this.servedSources(ctx, cards),
       uncertainties,
       handoffs,
-      completionReason: picked.length === 0 ? 'no_verified_match' : 'shortlisted',
+      completionReason: budgetLimited ? 'budget_limited' : picked.length === 0 ? 'no_verified_match' : 'shortlisted',
     });
   }
 

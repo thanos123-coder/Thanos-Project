@@ -68,6 +68,8 @@ export interface AtomicFinding {
   claimIds: string[];
   source: PredicateNode['source'];
   publishedRemedy?: string;
+  /** Concrete record fields this finding read (no wildcards), so a coordinator can ask for exactly these. */
+  inputFields: string[];
 }
 
 export interface GroupFinding {
@@ -667,6 +669,7 @@ function finding(node: PredicateNode, state: RuleState, routeState: RuleState, a
     futureConditions: route && route.state === 'met' && route.viaFuture ? route.conditions : [],
     claimIds: [...new Set([...achieved.claimIds, ...(route?.claimIds ?? [])])],
     source: node.source,
+    inputFields: [...new Set([...achieved.dependencies, ...(route?.dependencies ?? [])])].filter((k) => !k.includes('*')),
   };
   const resolution = achieved.resolution ?? route?.resolution;
   if (resolution && state !== 'met' && state !== 'not_applicable') f.resolution = resolution;

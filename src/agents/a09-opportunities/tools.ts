@@ -11,6 +11,8 @@ export interface SearchOutcome {
   available: boolean;
   queryText: string;
   results: SearchHit[];
+  /** Set when the provider failed (e.g. timed out); earlier work is unaffected. */
+  error?: string;
 }
 
 /**
@@ -66,7 +68,13 @@ export function registerOpportunityTools(gateway: ToolGateway, catalog: Opportun
     handler: async (_inv, args): Promise<SearchOutcome> => {
       const queryText = renderQueryText(args.query, countryName);
       if (!providers.search) return { available: false, queryText, results: [] };
-      const hits = await providers.search.search(args.query, queryText);
+      let hits: SearchHit[];
+      try {
+        hits = await providers.search.search(args.query, queryText);
+      } catch (e) {
+        // A provider failure is reported, not turned into results (XT16).
+        return { available: true, queryText, results: [], error: e instanceof Error ? e.message.slice(0, 200) : 'search failed' };
+      }
       const results = hits
         .filter((h) => isPublicHttpsUrl(h.url))
         .slice(0, 10)

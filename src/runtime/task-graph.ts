@@ -33,6 +33,8 @@ export interface TaskNode {
   dependsOn: string[];
   /** Whether a dependency's partial/needs_* result is enough to proceed (e.g. use supported work). */
   acceptsPartialDependencies: boolean;
+  /** Exact dependency states that let this node run, overriding acceptsPartialDependencies (e.g. plan on a partial finding, but wait while it needs the student's answer). */
+  acceptStates?: TaskNodeState[];
   state: TaskNodeState;
   attempts: number;
   result?: ResultEnvelope;
@@ -51,21 +53,21 @@ export function stateFromResultStatus(status: ResultStatus): TaskNodeState {
   return status;
 }
 
-export class TaskGraph {
-  private readonly nodes = new Map<string, TaskNode>();
+export class TaskGraph<N extends TaskNode = TaskNode> {
+  private readonly nodes = new Map<string, N>();
 
-  add(node: Omit<TaskNode, 'state' | 'attempts'> & Partial<Pick<TaskNode, 'state' | 'attempts'>>): TaskNode {
+  add(node: Omit<N, 'state' | 'attempts'> & Partial<Pick<N, 'state' | 'attempts'>>): N {
     if (this.nodes.has(node.id)) throw new Error(`Duplicate task node ${node.id}`);
-    const n: TaskNode = { ...node, state: node.state ?? 'pending', attempts: node.attempts ?? 0 };
+    const n = { ...node, state: node.state ?? 'pending', attempts: node.attempts ?? 0 } as N;
     this.nodes.set(n.id, n);
     return n;
   }
 
-  get(id: string): TaskNode | undefined {
+  get(id: string): N | undefined {
     return this.nodes.get(id);
   }
 
-  all(): TaskNode[] {
+  all(): N[] {
     return [...this.nodes.values()];
   }
 
@@ -88,17 +90,18 @@ export class TaskGraph {
   }
 
   /** Pending nodes whose dependencies are satisfied. */
-  ready(): TaskNode[] {
+  ready(): N[] {
     return this.all().filter((n) => n.state === 'pending' && n.dependsOn.every((d) => this.dependencySatisfied(n, d)));
   }
 
   /** Pending nodes that can never run because a dependency ended unusably. */
-  unrunnable(): TaskNode[] {
+  unrunnable(): N[] {
     return this.all().filter((n) => n.state === 'pending' && n.dependsOn.some((d) => this.dependencyDead(n, d)));
   }
 
   private dependencySatisfied(n: TaskNode, depId: string): boolean {
     const d = this.nodes.get(depId)!;
+    if (n.acceptStates) return n.acceptStates.includes(d.state);
     return n.acceptsPartialDependencies ? USABLE_PARTIAL_STATES.has(d.state) : SUCCESS_STATES.has(d.state);
   }
 
@@ -109,7 +112,7 @@ export class TaskGraph {
   }
 
   /** Transitive dependents of a node. */
-  dependents(id: string): TaskNode[] {
+  dependents(id: string): N[] {
     const out = new Set<string>();
     const stack = [id];
     while (stack.length > 0) {
@@ -125,9 +128,9 @@ export class TaskGraph {
   }
 
   /** Cancel a node and everything that depends on it. Completed work stays completed. */
-  cancelBranch(id: string, reason: string): TaskNode[] {
+  cancelBranch(id: string, reason: string): N[] {
     const affected = [this.nodes.get(id)!, ...this.dependents(id)].filter(Boolean);
-    const cancelled: TaskNode[] = [];
+    const cancelled: N[] = [];
     for (const n of affected) {
       if (!TERMINAL_STATES.has(n.state) || n.state === 'needs_student_input') {
         n.state = 'cancelled';
@@ -139,8 +142,8 @@ export class TaskGraph {
   }
 
   /** Mark nodes stale (their inputs changed); they return to pending so they can be recomputed. */
-  markStale(ids: readonly string[]): TaskNode[] {
-    const out: TaskNode[] = [];
+  markStale(ids: readonly string[]): N[] {
+    const out: N[] = [];
     for (const id of ids) {
       const n = this.nodes.get(id);
       if (!n || n.state === 'cancelled') continue;

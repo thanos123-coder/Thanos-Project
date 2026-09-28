@@ -39,6 +39,7 @@ export const AtomicFindingSchema = z
     claimIds: z.array(z.string()),
     source: z.object({ sourceId: z.string(), section: z.string().optional(), quote: z.string() }).strict(),
     publishedRemedy: z.string().optional(),
+    inputFields: z.array(z.string()).default([]),
   })
   .strict();
 
@@ -218,7 +219,14 @@ export class EligibilityAgent implements SpecialistAgent {
     };
     const claimIds = [...new Set([...evals.flatMap((e) => e.tree.claimIds), ...system.claimIds])];
     const deps = [...new Set([...evals.flatMap((e) => e.tree.dependencies), system.fieldKey])];
-    return this.finish(ctx, payload, view.recordVersion, [packageVersionRef(pkg)], claimIds, deps, this.handoffsFor(findings, scope, category === null), pkg.sources.map((s) => s.id));
+    // Only fields that are not settled go to intake: unconfirmed or conflicting values first, then missing ones.
+    const rank = (k: string): number => {
+      const f = view.fieldByKey(k);
+      if (!f) return 1;
+      if (f.state === 'conflict' || f.needsConfirmation) return 0;
+      return f.state === 'current' ? 9 : 1;
+    };
+    return this.finish(ctx, payload, view.recordVersion, [packageVersionRef(pkg)], claimIds, deps, this.handoffsFor(findings, scope, category === null, rank), pkg.sources.map((s) => s.id));
   }
 
   private pkgRef(p: RulePackage): EligibilityPayload['rulePackage'] {
@@ -248,13 +256,13 @@ export class EligibilityAgent implements SpecialistAgent {
     }
   }
 
-  private handoffsFor(findings: AtomicFinding[], scope: EligibilityScope, categoryUnknown: boolean): Handoff[] {
+  private handoffsFor(findings: AtomicFinding[], scope: EligibilityScope, categoryUnknown: boolean, rank: (fieldKey: string) => number = () => 1): Handoff[] {
     const out: Handoff[] = [];
     const unresolved = findings.filter((f) => f.mandatory && f.state !== 'met' && f.state !== 'not_applicable' && f.resolution);
     const byOwner = (owners: string[]) => unresolved.filter((f) => owners.includes(f.resolution!.owner));
     const studentFacts = byOwner(['02', 'student']).filter((f) => f.resolution!.kind === 'needed_fact' || f.resolution!.kind === 'confirm_fact');
     if (studentFacts.length > 0 || categoryUnknown) {
-      out.push({ toRole: '02', reason: 'Consequential facts are missing or unconfirmed for an eligibility rule.', requestedOutcome: 'Ask targeted questions and return attributed facts.', inputRefs: studentFacts.map((f) => `rule:${f.ruleId}`), unresolved: [...studentFacts.map((f) => f.resolution!.text), ...(categoryUnknown ? ['Confirm applicant category (any college study after secondary school?)'] : [])], completionCondition: 'Each listed fact is confirmed, declined, or recorded as unknown.' });
+      out.push({ toRole: '02', reason: 'Consequential facts are missing or unconfirmed for an eligibility rule.', requestedOutcome: 'Ask targeted questions and return attributed facts.', inputRefs: [...studentFacts.map((f) => `rule:${f.ruleId}`), ...mostUrgent([...new Set(studentFacts.flatMap((f) => f.inputFields))], rank).map((k) => `field:${k}`)], unresolved: [...studentFacts.map((f) => f.resolution!.text), ...(categoryUnknown ? ['Confirm applicant category (any college study after secondary school?)'] : [])], completionCondition: 'Each listed fact is confirmed, declined, or recorded as unknown.' });
     }
     const docs = byOwner(['03']);
     if (docs.length > 0) out.push({ toRole: '03', reason: 'A document would resolve an eligibility input.', requestedOutcome: 'Extract the specific field from an uploaded school record.', inputRefs: docs.map((f) => `rule:${f.ruleId}`), unresolved: docs.map((f) => f.resolution!.text), completionCondition: 'The field is extracted with a source anchor or marked unreadable.' });
@@ -318,6 +326,14 @@ export class EligibilityAgent implements SpecialistAgent {
       completionReason: `eligibility_${payload.overall}`,
     });
   }
+}
+
+/** The unsettled fields to ask about: unconfirmed or conflicting ones if there are any, otherwise the missing ones. */
+function mostUrgent(keys: readonly string[], rank: (k: string) => number): string[] {
+  const open = keys.filter((k) => rank(k) < 9);
+  if (open.length === 0) return [];
+  const best = Math.min(...open.map(rank));
+  return open.filter((k) => rank(k) === best);
 }
 
 function statusFor(p: EligibilityPayload): ResultStatus {

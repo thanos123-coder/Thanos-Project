@@ -137,7 +137,10 @@ function minDefined(a: number | undefined, b: number | undefined): number | unde
  * measured guarantees.
  */
 export const DEFAULT_ROLE_BUDGETS: Readonly<Record<string, BudgetLimits>> = {
-  '01': { maxToolCalls: 40, maxModelCalls: 3, maxRevisions: 1 },
+  // The lead counselor's budget is the aggregate for the whole request, because every
+  // specialist it starts consumes the parent budget too. Its own planning and
+  // synthesis calls are capped separately in the agent (three model calls, one repair).
+  '01': { maxToolCalls: 150, maxModelCalls: 30, maxRevisions: 6 },
   '02': { maxToolCalls: 12, maxModelCalls: 2, maxRevisions: 1 },
   '03': { maxToolCalls: 20, maxModelCalls: 4, maxRevisions: 1 },
   '04': { maxToolCalls: 10, maxModelCalls: 0, maxRevisions: 1 },

@@ -54,7 +54,7 @@ export function registerRecordTools(gateway: ToolGateway, records: RecordService
         recordVersion: view.recordVersion,
         openConflicts: view.fields.filter((f) => f.state === 'conflict').map((f) => ({ fieldKey: f.fieldKey, label: f.label })),
         needsConfirmation: view.fields.filter((f) => f.needsConfirmation && f.consequential).map((f) => ({ fieldKey: f.fieldKey, label: f.label })),
-        staleArtifacts: stale.map((a) => ({ id: a.id, kind: a.kind })),
+        staleArtifacts: stale.map((a) => ({ id: a.id, kind: a.kind, scopeKey: a.scopeKey, producedByTask: a.producedByTask ?? null, reason: a.statusReason ?? null })),
       };
     },
   });
