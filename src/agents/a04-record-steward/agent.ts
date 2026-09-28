@@ -39,6 +39,8 @@ export const RecordChangePayloadSchema = z
   .object({
     outcome: z.enum(['accepted', 'rejected', 'conflict', 'requires_review']),
     changedFields: z.array(z.object({ fieldKey: z.string(), label: z.string() }).strict()),
+    /** Fields where the correction and another source now disagree (kept as a conflict, nothing lost). */
+    conflicts: z.array(z.object({ fieldKey: z.string(), label: z.string() }).strict()).default([]),
     invalidatedArtifactIds: z.array(z.string()),
     studentSummary: z.string(),
     reasons: z.array(z.string()),
@@ -126,6 +128,7 @@ export class RecordStewardAgent implements SpecialistAgent {
     const payload = {
       outcome: response.outcome,
       changedFields: response.changedFieldKeys.map((k) => ({ fieldKey: k, label: labels.get(k) ?? k })),
+      conflicts: response.conflictedFieldKeys.map((k) => ({ fieldKey: k, label: labels.get(k) ?? k })),
       invalidatedArtifactIds: response.invalidatedArtifactIds,
       studentSummary: response.studentSummary,
       reasons: response.reasons,

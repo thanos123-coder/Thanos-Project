@@ -216,8 +216,11 @@ export function reconcile(nodes: readonly NodeRecord[], recordEntryCycle: string
   }
   for (const n of nodes) {
     if (!n.result) continue;
-    if (n.role === '04' && (n.result.payload as { outcome?: string }).outcome === 'conflict') {
-      conflicts.push({ kind: 'fact', description: `Your correction disagrees with another source, so both are kept until the difference is resolved. ${(n.result.payload as { studentSummary?: string }).studentSummary ?? ''}`.trim(), routeTo: '04', question: null, nodeIds: [n.id] });
+    if (n.role === '04') {
+      const p = n.result.payload as { outcome?: string; conflicts?: Array<{ label: string }> };
+      // A fact conflict goes to the record steward; both values are kept until evidence or review resolves it.
+      if (p.outcome === 'conflict') conflicts.push({ kind: 'fact', description: 'The record changed while your correction was being prepared, so it was not applied; please review the latest version.', routeTo: '04', question: null, nodeIds: [n.id] });
+      for (const c of p.conflicts ?? []) conflicts.push({ kind: 'fact', description: `Your ${c.label} now disagrees with another source, so both are kept until the difference is resolved with a document or your school.`, routeTo: '04', question: null, nodeIds: [n.id] });
     }
     for (const h of n.result.handoffs) {
       if (n.role === '06' && h.toRole === '11' && h.reason.startsWith('Official sources conflict')) conflicts.push({ kind: 'rule', description: `Official sources disagree about a requirement: ${h.unresolved.join('; ')}`, routeTo: '11', question: null, nodeIds: [n.id] });

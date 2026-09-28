@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
 import { LeadCounselorAgent } from '../../src/agents/a01-orchestrator/agent.js';
 import { checkAnswer, emptyPayload } from '../../src/agents/a01-orchestrator/compose.js';
+import { classifyRequest } from '../../src/agents/a01-orchestrator/intents.js';
 import { ObjectiveStore, registerTaskTools } from '../../src/agents/a01-orchestrator/objectives.js';
 import { makeResult, type SpecialistAgent } from '../../src/agents/common/specialist.js';
 import { NullModelGateway } from '../../src/model/gateway.js';
@@ -379,6 +380,24 @@ describe('Agent 01 — Lead counselor and orchestrator', () => {
     expect(checkAnswer({ ...base, headline: 'No one can guarantee admission.' }, 'No one can guarantee admission.')).toEqual([]);
     expect(checkAnswer({ ...base, headline: 'A counselor has accepted your case.' }, 'x')).toContain('the answer implies a person has taken up the case');
     expect(checkAnswer({ ...base, headline: 'Done.', question: { text: 'Which year?', whyNeeded: '', blockedTasks: [], nextRole: 'student', intakeSessionId: null, options: [], reviewItems: [] } }, 'Done.')).toContain('a completed answer still has an open question');
+  });
+
+  it('classifies by outcome, keeping several goals and not mistaking an activity search for a subject choice', () => {
+    expect(classifyRequest('Should I study economics or engineering?').outcomes).toContain('explore_goals');
+    expect(classifyRequest('Find me a summer engineering or physics activity').outcomes).toEqual(['find_opportunities']);
+    expect(classifyRequest('Can I apply, and what should I do this year?').outcomes).toEqual(['check_requirement', 'plan_academics']);
+    expect(classifyRequest('How long will this take?')).toMatchObject({ control: 'status', outcomes: [] });
+    expect(classifyRequest('Stop searching please')).toMatchObject({ control: 'cancel', cancelBranch: '09' });
+    expect(classifyRequest("I'd like a master's in data science").graduate).toBe(true);
+  });
+
+  it('puts concrete options before open-ended exploration in the headline', async () => {
+    const h = makeSystem();
+    h.seed(amara(h.student));
+    addCommunityProject(h);
+    const r = await h.ok('Should I study economics or engineering? Also find me a summer activity.');
+    expect(r.answer!.progress.map((p) => p.role)).toEqual(['05', '09']);
+    expect(r.answer!.headline).toMatch(/^Fits now: Community Repair Project/);
   });
 
   it('turns "make my application perfect" into concrete choices without starting work', async () => {

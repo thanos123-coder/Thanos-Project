@@ -6,6 +6,7 @@ import type { RoleId } from '../../shared/envelopes.js';
 import { RoleIdSchema } from '../../shared/envelopes.js';
 import { AccessDeniedError } from '../../shared/errors.js';
 import type { IdGenerator } from '../../shared/ids.js';
+import type { DerivativeStore } from '../a04-record-steward/types.js';
 
 /**
  * Task state for the lead counselor (01 "Data and tool contract"): objectives
@@ -104,7 +105,13 @@ const EventKindSchema = z.enum(['created', 'wave_finished', 'status_requested', 
 
 const TERMINAL: ReadonlySet<TaskNodeState> = new Set(['completed', 'partial', 'needs_student_input', 'needs_source', 'needs_human_review', 'blocked', 'failed', 'cancelled', 'invalid']);
 
-export class ObjectiveStore {
+/**
+ * The objective store holds specialist results and composed answers, so it is
+ * a derivative store: deleting a document, a fact or a whole record removes
+ * every stored result and answer built from it (scenario six, XT04).
+ */
+export class ObjectiveStore implements DerivativeStore {
+  readonly name = 'objective_store';
   private readonly objectives = new Map<string, ObjectiveRecord>();
   /** objectiveId -> running task id -> the node and role it runs for (null for the coordinating task). */
   private readonly running = new Map<string, Map<string, { nodeId: string; role: RoleId } | null>>();
@@ -218,6 +225,50 @@ export class ObjectiveStore {
 
   isNodeCancelled(objectiveId: string, nodeId: string): boolean {
     return this.objectives.get(objectiveId)?.nodes.find((n) => n.id === nodeId)?.state === 'cancelled';
+  }
+
+  purgeByDocument(tenantId: string, studentId: string, documentId: string): number {
+    return this.purge(tenantId, studentId, (n) => n.scope['documentId'] === documentId);
+  }
+
+  purgeByClaims(tenantId: string, studentId: string, claimIds: readonly string[]): number {
+    const ids = new Set(claimIds);
+    return this.purge(tenantId, studentId, (n) => (n.result?.inputVersions.claimIds ?? []).some((c) => ids.has(c)));
+  }
+
+  purgeByStudent(tenantId: string, studentId: string): number {
+    let n = 0;
+    for (const [id, o] of this.objectives) {
+      if (o.tenantId === tenantId && o.studentId === studentId) {
+        this.objectives.delete(id);
+        this.running.delete(id);
+        n += 1;
+      }
+    }
+    return n;
+  }
+
+  /** Drop results built from removed evidence; the node becomes stale and the stored answer is discarded. */
+  private purge(tenantId: string, studentId: string, affected: (n: NodeRecord) => boolean): number {
+    let count = 0;
+    for (const o of this.objectives.values()) {
+      if (o.tenantId !== tenantId || o.studentId !== studentId) continue;
+      let changed = false;
+      for (const n of o.nodes) {
+        if (!affected(n)) continue;
+        delete n.result;
+        n.issues = [];
+        if (n.state !== 'cancelled') n.state = 'stale';
+        n.error = 'based on information that was deleted';
+        changed = true;
+        count += 1;
+      }
+      if (changed) {
+        o.answer = null;
+        this.event(o, 'revalidated', 'Results based on deleted information were removed; they are recomputed from the remaining record if the request continues.');
+      }
+    }
+    return count;
   }
 
   private event(o: ObjectiveRecord, kind: ObjectiveEvent['kind'], detail: string): void {

@@ -89,6 +89,8 @@ export interface MutationResponse {
   /** New record version when committed. */
   recordVersion?: number;
   changedFieldKeys: string[];
+  /** Changed fields whose sources now disagree; both values are kept until resolved (04R05). */
+  conflictedFieldKeys: string[];
   createdClaimIds: string[];
   supersededClaimIds: string[];
   invalidatedArtifactIds: string[];

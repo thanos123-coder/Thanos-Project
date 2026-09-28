@@ -119,6 +119,7 @@ export class CounselorSystem {
 
     this.objectives = new ObjectiveStore(k.clock, k.ids, (taskId, reason) => k.cancel(taskId, reason));
     registerTaskTools(k.gateway, this.objectives);
+    k.records.registerDerivativeStore(this.objectives);
     registerOrchestrationTools(k, this.objectives);
 
     const model = k.model;

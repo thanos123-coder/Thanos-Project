@@ -479,7 +479,8 @@ export class LeadCounselorAgent implements SpecialistAgent {
     const scope = payload.conflicts.find((c) => c.kind === 'scope' && c.question);
     if (scope) return { text: scope.question!, whyNeeded: scope.description, blockedTasks: scope.nodeIds.map((id) => taskName(nodes.find((n) => n.id === id)!)), nextRole: 'student', intakeSessionId: null, options: [], reviewItems: [] };
     const intake = [...nodes].reverse().find((n) => n.role === '02' && n.result);
-    if (intake && waiting.some((n) => n.role !== '02')) {
+    // Intake questions are asked when other work waits on them, or when the interview is itself the request.
+    if (intake && (waiting.some((n) => n.role !== '02') || intake.reasons.includes('requested_by_student'))) {
       const p = intake.result!.payload as IntakeView;
       const why = waiting.find((n) => n.role !== '02' && n.result)?.result?.uncertainties[0]?.description ?? 'Your answer decides the next step.';
       const review = reviewItemsOf(p);
@@ -502,8 +503,9 @@ export class LeadCounselorAgent implements SpecialistAgent {
     const parts: string[] = [];
     if (p.priorities[0]?.reasons.includes('deadline_dependency')) parts.push(p.priorities[0].text);
     if (p.status === 'cancelled') parts.push('Stopped as you asked. Work that finished before that is kept.');
-    // The useful result first, from validated specialist summaries.
-    const useful = p.sections.filter((s) => s.role !== '02' && (s.status === 'completed' || s.status === 'partial' || s.status === 'needs_source'));
+    // The useful result first, from validated specialist summaries: concrete findings and options before open-ended exploration.
+    const order: Record<string, number> = { '09': 0, '06': 1, '07': 2, '04': 3, '08': 4, '03': 5, '05': 6 };
+    const useful = p.sections.filter((s) => s.role !== '02' && (s.status === 'completed' || s.status === 'partial' || s.status === 'needs_source')).sort((a, b) => (order[a.role] ?? 9) - (order[b.role] ?? 9));
     for (const s of useful.slice(0, 2)) parts.push(firstSentence(s.summary));
     const scope = p.conflicts.find((c) => c.kind === 'scope');
     if (scope) parts.push(scope.description);
@@ -684,9 +686,12 @@ export class LeadCounselorAgent implements SpecialistAgent {
     const run: RunState = { objectiveId, ownModelCalls: 0, ownRepairs: 0, budgetStopped: false, revalidated: [], notices: [] };
     await this.runNode(ctx, run, n);
     await this.save(ctx, objectiveId, { event: { kind: 'answered', detail: `Answer recorded through intake (${n.state}).` } });
-    if (!n.result) {
-      const payload = emptyPayload('answer', objectiveId, ctx.request.recordVersion);
-      return this.finish(ctx, run, objectiveId, [...o.nodes.filter((x) => x.role !== '02'), n], payload);
+    const others = o.nodes.filter((x) => x.role !== '02');
+    const waitingWork = others.some((x) => ['waiting', 'needs_student_input', 'pending', 'stale'].includes(x.state));
+    if (!n.result || !waitingWork) {
+      // Nothing else waits on this answer (e.g. the interview is the request): show the interview's next step.
+      if (o.nodes.some((x) => x.role === '02' && x.reasons.includes('requested_by_student'))) n.reasons = ['requested_by_student'];
+      return this.finish(ctx, run, objectiveId, [...others, n], emptyPayload('answer', objectiveId, ctx.request.recordVersion));
     }
     // Recheck the waiting work at once; another question is asked only if it still needs one (01R04).
     return this.resume(ctx, objectiveId, n);
