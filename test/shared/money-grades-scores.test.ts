@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { absent } from '../../src/shared/absence.js';
 import { validateTestScore, sameScale, type TestScoreRecord } from '../../src/shared/assessments.js';
-import { compareGrades, meetsGradeThreshold, parseGrade, parseLocalizedNumber } from '../../src/shared/grades.js';
+import { compareGrades, meetsGradeThreshold, parseGrade, parseLocalizedNumber, REFERENCE_SCALES, type GradingScale } from '../../src/shared/grades.js';
 import {
   CurrencyMismatchError,
   addMoney,
@@ -10,6 +10,7 @@ import {
   convertMoney,
   formatMoney,
   money,
+  totalCoveredCosts,
   type CostComponent,
 } from '../../src/shared/money.js';
 
@@ -62,6 +63,16 @@ describe('money', () => {
     expect(checkAffordability(costs, budget).verdict).toBe('unresolved');
   });
 
+  it('a total that includes an estimate or a converted amount says so', () => {
+    const exact: CostComponent[] = [{ component: 'tuition', amount: money(100, 'EUR'), estimate: false, required: true }];
+    expect(totalCoveredCosts(exact, budget).includesEstimates).toBe(false);
+    const estimated: CostComponent[] = [...exact, { component: 'travel', amount: money(20, 'EUR'), estimate: true, required: true }];
+    expect(totalCoveredCosts(estimated, budget)).toMatchObject({ known: { amount: '120.00' }, includesEstimates: true });
+    const converted: CostComponent[] = [...exact, { component: 'travel', amount: money(10, 'USD'), estimate: false, required: true }];
+    const rate = { from: 'USD', to: 'EUR', rate: '0.90', asOf: '2026-09-01', source: 'test rate' };
+    expect(totalCoveredCosts(converted, budget, [rate])).toMatchObject({ known: { amount: '109.00' }, includesEstimates: true });
+  });
+
   it('a foreign-currency cost without a rate stays unresolved', () => {
     const costs: CostComponent[] = [{ component: 'tuition', amount: money(100, 'USD'), estimate: false, required: true }];
     expect(checkAffordability(costs, budget)).toMatchObject({ verdict: 'unresolved', reason: 'unconvertible_currency' });
@@ -97,6 +108,15 @@ describe('grades are preserved and never converted across scales', () => {
     expect(compareGrades({ original: 'A*', scaleRef: 'a_level_letter', status: 'final', weighting: null }, { original: 'A', scaleRef: 'a_level_letter', status: 'final', weighting: null })).toBe(1);
     expect(meetsGradeThreshold(a, { original: '6', scaleRef: 'ib_subject_1_7' })).toBe(true);
     expect(meetsGradeThreshold(c, { original: '6', scaleRef: 'ib_subject_1_7' })).toBe('unknown');
+  });
+
+  it('on a scale where lower is better, a lower number is the better grade', () => {
+    const oneToSix: GradingScale = { id: 'one_to_six', name: 'Grades 1 (best) to 6', kind: 'numeric', min: 1, max: 6, step: 0.1, direction: 'lower_is_better', origin: 'document_legend' };
+    const scales = { ...REFERENCE_SCALES, one_to_six: oneToSix };
+    const g = (original: string) => ({ original, scaleRef: 'one_to_six', status: 'final' as const, weighting: null });
+    expect(compareGrades(g('1.3'), g('2.0'), scales)).toBe(1);
+    expect(meetsGradeThreshold(g('1.7'), { original: '2.5', scaleRef: 'one_to_six' }, scales)).toBe(true);
+    expect(meetsGradeThreshold(g('3.0'), { original: '2.5', scaleRef: 'one_to_six' }, scales)).toBe(false);
   });
 });
 

@@ -72,6 +72,12 @@ The system exposes these entry points: `ask`, `reply`, `confirm`, `status`, `can
 
 The architecture is described in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), each agent in [docs/AGENTS.md](docs/AGENTS.md), and the mapping of all 103 requirements and 164 acceptance cases to code and tests in [docs/TRACEABILITY.md](docs/TRACEABILITY.md).
 
+## How it is verified
+
+- **Acceptance cases.** Every acceptance case in the specification (144 role cases and the 20 cross-agent cases) has a test named after it. `test/docs/traceability.test.ts` fails if a requirement loses its citation in the code or a case loses its test.
+- **End to end.** The cross-agent suite and the demo run the real agents together through `CounselorSystem`, with deterministic time, IDs and research providers.
+- **Mutation check.** `npm run mutation` disables 87 safeguards one at a time and runs the tests that should notice. These cover permission checks, scope checks, validation rules, budgets, cancellation, deletion, PDF active-content detection, time zones, money and grades. Each must make at least one test fail. One case is marked equivalent (it cannot change behaviour), with the reason recorded in `scripts/mutations.json`. A case whose code has moved is reported as stale so the list stays current. The full run takes several minutes.
+
 ## Models
 
 Every agent works without a model. The deterministic path covers every consequential decision, and the whole test suite runs with no model. When a model is configured (`model.AnthropicModelGateway`, default `claude-opus-5` with adaptive thinking), it is used only for bounded, validated steps:
@@ -112,8 +118,9 @@ src/
   system/                                        kernel, CounselorSystem, orchestration tools, catalog wiring
 test/
   agents/        one suite per agent (its acceptance cases and more)
-  system/        the cross-agent acceptance suite (XT01–XT20)
+  system/        the cross-agent acceptance suite (XT01–XT20), kernel safeguards, access and deletion
   docs/          keeps the traceability matrix in step with the code
 examples/demo.ts
+scripts/         mutation check (mutation-check.mjs, mutations.json)
 docs/            ARCHITECTURE.md, AGENTS.md, TRACEABILITY.md
 ```

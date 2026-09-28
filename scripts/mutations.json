@@ -1,0 +1,803 @@
+{
+ "description": "Each case disables one safeguard; at least one test must then fail. Run with npm run mutation.",
+ "cases": [
+  {
+   "id": "02a",
+   "safeguard": "contract: prohibited question topic",
+   "file": "src/agents/a02-intake/agent.ts",
+   "find": "if (q && !questionIsPermitted(q.text)) issues.push",
+   "replace": "if (false && q) issues.push",
+   "tests": [
+    "test/agents/a02-intake.test.ts",
+    "test/agents/a02/parsers.test.ts"
+   ]
+  },
+  {
+   "id": "02b",
+   "safeguard": "prohibited topic filter",
+   "file": "src/agents/a02-intake/question-bank.ts",
+   "find": "return !PROHIBITED_QUESTION_TOPICS.some((re) => re.test(text));",
+   "replace": "return true;",
+   "tests": [
+    "test/agents/a02-intake.test.ts",
+    "test/agents/a02/parsers.test.ts"
+   ]
+  },
+  {
+   "id": "02c",
+   "safeguard": "contract: voice asks one question",
+   "file": "src/agents/a02-intake/agent.ts",
+   "find": "if (p.mode === 'voice' && p.additionalQuestions.length > 0)",
+   "replace": "if (false)",
+   "tests": [
+    "test/agents/a02-intake.test.ts",
+    "test/agents/a02/parsers.test.ts"
+   ]
+  },
+  {
+   "id": "02d",
+   "safeguard": "model quote must be verbatim",
+   "file": "src/agents/a02-intake/model-interpret.ts",
+   "find": "if (!answer.includes(normalize(quote))) {",
+   "replace": "if (false) {",
+   "tests": [
+    "test/agents/a02-intake.test.ts",
+    "test/agents/a02/parsers.test.ts"
+   ]
+  },
+  {
+   "id": "02e",
+   "safeguard": "consequential answers need review",
+   "file": "src/agents/a02-intake/agent.ts",
+   "find": "const unreviewed = unreviewedItems(reviewEntries).filter((e) => e.consequential);",
+   "replace": "const unreviewed = unreviewedItems(reviewEntries).filter((e) => false);",
+   "tests": [
+    "test/agents/a02-intake.test.ts",
+    "test/agents/a02/parsers.test.ts"
+   ]
+  },
+  {
+   "id": "02f",
+   "safeguard": "specialist wording is filtered",
+   "file": "src/agents/a02-intake/agent.ts",
+   "find": "if (questionIsPermitted(v) && /\\?\\s*$/.test(v.trim()))",
+   "replace": "if (/\\?\\s*$/.test(v.trim()))",
+   "tests": [
+    "test/agents/a02-intake.test.ts",
+    "test/agents/a02/parsers.test.ts"
+   ]
+  },
+  {
+   "id": "02g",
+   "safeguard": "contract: no question once enough",
+   "file": "src/agents/a02-intake/agent.ts",
+   "find": "if (p.enoughForObjective && p.nextQuestion !== null)",
+   "replace": "if (false)",
+   "tests": [
+    "test/agents/a02-intake.test.ts",
+    "test/agents/a02/parsers.test.ts"
+   ]
+  },
+  {
+   "id": "03a",
+   "safeguard": "contract: nothing imported on identity mismatch",
+   "file": "src/agents/a03-document-interpreter/agent.ts",
+   "find": "if (p.identity.decision === 'mismatch' && (p.preview.length > 0 || p.imported.claimCount > 0))",
+   "replace": "if (false)",
+   "tests": [
+    "test/agents/a03-document-interpreter.test.ts"
+   ]
+  },
+  {
+   "id": "03b",
+   "safeguard": "injection text flagged",
+   "file": "src/agents/a03-document-interpreter/interpret.ts",
+   "find": "if (signals.length > 0) concerns.push({ kind: 'injection_signal'",
+   "replace": "if (false) concerns.push({ kind: 'injection_signal'",
+   "tests": [
+    "test/agents/a03-document-interpreter.test.ts"
+   ]
+  },
+  {
+   "id": "03c",
+   "safeguard": "contract: translation label",
+   "file": "src/agents/a03-document-interpreter/agent.ts",
+   "find": "if (p.translation.provided && p.translation.label !== 'planning_translation_not_certified')",
+   "replace": "if (false)",
+   "tests": [
+    "test/agents/a03-document-interpreter.test.ts"
+   ]
+  },
+  {
+   "id": "03e",
+   "safeguard": "contract: alternative readings flagged",
+   "file": "src/agents/a03-document-interpreter/agent.ts",
+   "find": "for (const r of p.preview) if (r.grade?.includes(' / ') && !r.needsReview)",
+   "replace": "for (const r of p.preview) if (false)",
+   "tests": [
+    "test/agents/a03-document-interpreter.test.ts"
+   ]
+  },
+  {
+   "id": "04a",
+   "safeguard": "future expected version rejected",
+   "file": "src/agents/a04-record-steward/service.ts",
+   "find": "if (m.expectedRecordVersion > s.recordVersion) return finish(",
+   "replace": "if (false) return finish(",
+   "tests": [
+    "test/agents/a04-record-steward.test.ts"
+   ]
+  },
+  {
+   "id": "04b",
+   "safeguard": "stale-version conflict",
+   "file": "src/agents/a04-record-steward/service.ts",
+   "find": "      if (conflicting.length > 0) {\n        return finish({ ...empty('conflict'",
+   "replace": "      if (false) {\n        return finish({ ...empty('conflict'",
+   "tests": [
+    "test/agents/a04-record-steward.test.ts"
+   ]
+  },
+  {
+   "id": "04c",
+   "safeguard": "delete permission for a claim",
+   "file": "src/agents/a04-record-steward/service.ts",
+   "find": "    this.requireDelete(ctx, tenantId, studentId, c.category);",
+   "replace": "",
+   "tests": [
+    "test/agents/a04-record-steward.test.ts"
+   ]
+  },
+  {
+   "id": "04d",
+   "safeguard": "grant purpose limitation",
+   "file": "src/agents/a04-record-steward/permissions.ts",
+   "find": "g.categories.includes(req.category) && g.access.includes(req.access) && g.purposes.includes(req.purpose)",
+   "replace": "g.categories.includes(req.category) && g.access.includes(req.access)",
+   "tests": [
+    "test/agents/a04-record-steward.test.ts"
+   ]
+  },
+  {
+   "id": "04e",
+   "safeguard": "grant expiry",
+   "file": "src/agents/a04-record-steward/permissions.ts",
+   "find": "(g) => g.granteeActorId === actorId && g.tenantId === tenantId && g.studentId === studentId && !g.revokedAt && (!g.expiresAt || g.expiresAt > now),",
+   "replace": "(g) => g.granteeActorId === actorId && g.tenantId === tenantId && g.studentId === studentId && !g.revokedAt,",
+   "tests": [
+    "test/agents/a04-record-steward.test.ts",
+    "test/system/cross-agent.test.ts"
+   ]
+  },
+  {
+   "id": "05a",
+   "safeguard": "contract: personality language",
+   "file": "src/agents/a05-goals/agent.ts",
+   "find": "if (PERSONALITY.test(t)) issues.push",
+   "replace": "if (false) issues.push",
+   "tests": [
+    "test/agents/a05-goals.test.ts"
+   ]
+  },
+  {
+   "id": "05b",
+   "safeguard": "contract: earnings context",
+   "file": "src/agents/a05-goals/agent.ts",
+   "find": "if (p.explanation?.earnings.some((e) => !e.geography || !e.dataYear || !e.sourceId))",
+   "replace": "if (false)",
+   "tests": [
+    "test/agents/a05-goals.test.ts"
+   ]
+  },
+  {
+   "id": "05c",
+   "safeguard": "contract: no contact sent",
+   "file": "src/agents/a05-goals/agent.ts",
+   "find": "for (const e of p.experiments) if (e.externalContact.sent)",
+   "replace": "for (const e of p.experiments) if (false)",
+   "tests": [
+    "test/agents/a05-goals.test.ts"
+   ]
+  },
+  {
+   "id": "05d",
+   "safeguard": "contract: motivation judgement",
+   "file": "src/agents/a05-goals/agent.ts",
+   "find": "if (MOTIVATION_JUDGMENT.test(t)) issues.push",
+   "replace": "if (false) issues.push",
+   "tests": [
+    "test/agents/a05-goals.test.ts"
+   ]
+  },
+  {
+   "id": "06a",
+   "safeguard": "contract: overall follows rules",
+   "file": "src/agents/a06-eligibility/agent.ts",
+   "find": "if (!categoryUnknown && derived !== p.overall)",
+   "replace": "if (false)",
+   "tests": [
+    "test/agents/a06-eligibility.test.ts"
+   ]
+  },
+  {
+   "id": "06b",
+   "safeguard": "contract: unknown names resolution",
+   "file": "src/agents/a06-eligibility/agent.ts",
+   "find": "if (f.mandatory && f.state === 'unknown' && !f.resolution)",
+   "replace": "if (false)",
+   "tests": [
+    "test/agents/a06-eligibility.test.ts"
+   ]
+  },
+  {
+   "id": "06c",
+   "safeguard": "contract: no guarantee",
+   "file": "src/agents/a06-eligibility/agent.ts",
+   "find": "if (GUARANTEE_WORDS.test(result.summary) || GUARANTEE_WORDS.test(p.explanation))",
+   "replace": "if (false)",
+   "tests": [
+    "test/agents/a06-eligibility.test.ts"
+   ]
+  },
+  {
+   "id": "06d",
+   "safeguard": "pending waiver is not approved",
+   "file": "src/agents/a06-eligibility/engine.ts",
+   "find": "  if (s === 'approved') return out('met', 'The institution approved the waiver.', base);",
+   "replace": "  if (s === 'approved' || s === 'pending') return out('met', 'The institution approved the waiver.', base);",
+   "tests": [
+    "test/agents/a06-eligibility.test.ts"
+   ]
+  },
+  {
+   "id": "06e",
+   "safeguard": "future completion only where permitted",
+   "file": "src/agents/a06-eligibility/engine.ts",
+   "find": "      meets && mayUseFuture(node, ctx)",
+   "replace": "      meets",
+   "tests": [
+    "test/agents/a06-eligibility.test.ts"
+   ]
+  },
+  {
+   "id": "06f",
+   "safeguard": "contract: unsupported gets no decision",
+   "file": "src/agents/a06-eligibility/agent.ts",
+   "find": "if (p.coverage.status !== 'supported' && !['outside_supported_coverage', 'unresolved'].includes(p.overall))",
+   "replace": "if (false)",
+   "tests": [
+    "test/agents/a06-eligibility.test.ts"
+   ]
+  },
+  {
+   "id": "07a",
+   "safeguard": "contract: late scores not feasible",
+   "file": "src/agents/a07-planner/agent.ts",
+   "find": "if ((a.receipt.meets === 'no' || a.receipt.meets === 'uncertain') && (a.feasibility === 'feasible' || a.feasibility === 'feasible_with_dependencies'))",
+   "replace": "if (false)",
+   "tests": [
+    "test/agents/a07-planner.test.ts"
+   ]
+  },
+  {
+   "id": "07b",
+   "safeguard": "contract: buffer labelled",
+   "file": "src/agents/a07-planner/agent.ts",
+   "find": "if (m.kind === 'planning_buffer' && (m.sourceId !== null || !/buffer/i.test(m.title)))",
+   "replace": "if (false)",
+   "tests": [
+    "test/agents/a07-planner.test.ts"
+   ]
+  },
+  {
+   "id": "07c",
+   "safeguard": "contract: official date has source",
+   "file": "src/agents/a07-planner/agent.ts",
+   "find": "if ((m.kind === 'official_deadline' || m.kind === 'official_date') && m.sourceId === null)",
+   "replace": "if (false)",
+   "tests": [
+    "test/agents/a07-planner.test.ts"
+   ]
+  },
+  {
+   "id": "07d",
+   "safeguard": "contract: no guaranteed score",
+   "file": "src/agents/a07-planner/agent.ts",
+   "find": "for (const n of p.notices) if (GUARANTEE.test(n.message) && !NEGATED.test(n.message))",
+   "replace": "for (const n of p.notices) if (false)",
+   "tests": [
+    "test/agents/a07-planner.test.ts"
+   ]
+  },
+  {
+   "id": "08a",
+   "safeguard": "contract: quality cites evidence",
+   "file": "src/agents/a08-activities/agent.ts",
+   "find": "if (s.claimIds.length === 0) issues.push",
+   "replace": "if (false) issues.push",
+   "tests": [
+    "test/agents/a08-activities.test.ts"
+   ]
+  },
+  {
+   "id": "08b",
+   "safeguard": "contract: planned not completed",
+   "file": "src/agents/a08-activities/agent.ts",
+   "find": "for (const e of x.episodes) if ((e.lifecycle === 'planned' || e.lifecycle === 'considering') && /\\b(completed|done)\\b/i.test(e.period))",
+   "replace": "for (const e of x.episodes) if (false)",
+   "tests": [
+    "test/agents/a08-activities.test.ts"
+   ]
+  },
+  {
+   "id": "08c",
+   "safeguard": "model quote must be verbatim",
+   "file": "src/agents/a08-activities/agent.ts",
+   "find": "if (!body.includes(norm(x.quote)) || mentionsPrivateDetail(x.quote)) continue;",
+   "replace": "if (mentionsPrivateDetail(x.quote)) continue;",
+   "tests": [
+    "test/agents/a08-activities.test.ts"
+   ]
+  },
+  {
+   "id": "08d",
+   "safeguard": "contract: no prestige language",
+   "file": "src/agents/a08-activities/agent.ts",
+   "find": "if (p.faithfulDescription && PRESTIGE_OR_GUARANTEE.test(p.faithfulDescription))",
+   "replace": "if (false)",
+   "tests": [
+    "test/agents/a08-activities.test.ts"
+   ]
+  },
+  {
+   "id": "08e",
+   "safeguard": "contract: approved xor to-confirm",
+   "file": "src/agents/a08-activities/agent.ts",
+   "find": "if (p.essayFacts && p.essayFacts.approved.some((a) => p.essayFacts!.toConfirm.some((t) => t.claimId === a.claimId)))",
+   "replace": "if (false)",
+   "tests": [
+    "test/agents/a08-activities.test.ts"
+   ]
+  },
+  {
+   "id": "03f",
+   "safeguard": "attachment annotation found",
+   "file": "src/agents/a03-document-interpreter/pdf-text.ts",
+   "find": "        if (a.file) hasAttachments = true;\n",
+   "replace": "",
+   "tests": [
+    "test/agents/a03-document-interpreter.test.ts"
+   ]
+  },
+  {
+   "id": "03d",
+   "safeguard": "JS found in file text",
+   "file": "src/agents/a03-document-interpreter/quarantine.ts",
+   "find": "  if (/\\/JavaScript\\b|\\/JS\\s*[(<]/.test(text) || parsed.hasJavaScript) found.push('javascript');",
+   "replace": "  if (parsed.hasJavaScript) found.push('javascript');",
+   "tests": [
+    "test/agents/a03-document-interpreter.test.ts"
+   ]
+  },
+  {
+   "id": "03g",
+   "safeguard": "parser local-file link reported",
+   "file": "src/agents/a03-document-interpreter/quarantine.ts",
+   "find": "  if (parsed.hasLocalFileAction) found.push('local_file_link');",
+   "replace": "",
+   "tests": [
+    "test/agents/a03-document-interpreter.test.ts"
+   ]
+  },
+  {
+   "id": "03h",
+   "safeguard": "object streams scanned",
+   "file": "src/agents/a03-document-interpreter/quarantine.ts",
+   "find": "  return out.join('\\n');\n}",
+   "replace": "  return '';\n}",
+   "tests": [
+    "test/agents/a03-document-interpreter.test.ts"
+   ]
+  },
+  {
+   "id": "03i",
+   "safeguard": "escaped names decoded",
+   "file": "src/agents/a03-document-interpreter/quarantine.ts",
+   "find": "  return text.replace(/#([0-9A-Fa-f]{2})/g, (_, hex: string) => String.fromCharCode(parseInt(hex, 16)));",
+   "replace": "  return text;",
+   "tests": [
+    "test/agents/a03-document-interpreter.test.ts"
+   ]
+  },
+  {
+   "id": "03j",
+   "safeguard": "local-file link rejected",
+   "file": "src/agents/a03-document-interpreter/quarantine.ts",
+   "find": "new Set(['launch_action', 'local_file_link', 'embedded_files'])",
+   "replace": "new Set(['launch_action', 'embedded_files'])",
+   "tests": [
+    "test/agents/a03-document-interpreter.test.ts"
+   ]
+  },
+  {
+   "id": "03k",
+   "safeguard": "Launch found in file text",
+   "file": "src/agents/a03-document-interpreter/quarantine.ts",
+   "find": "  if (/\\/Launch\\b/.test(text)) found.push('launch_action');",
+   "replace": "",
+   "tests": [
+    "test/agents/a03-document-interpreter.test.ts"
+   ]
+  },
+  {
+   "id": "R1",
+   "safeguard": "role matrix",
+   "file": "src/runtime/tool-gateway.ts",
+   "find": "    if (!ROLE_TOOL_MATRIX[req.role].includes(name)) deny(",
+   "replace": "    if (false) deny(",
+   "tests": []
+  },
+  {
+   "id": "R2",
+   "safeguard": "task allow-list",
+   "file": "src/runtime/tool-gateway.ts",
+   "find": "    if (!req.allowedTools.includes(name)) deny(",
+   "replace": "    if (false) deny(",
+   "tests": []
+  },
+  {
+   "id": "R3",
+   "safeguard": "tenant scope",
+   "file": "src/runtime/tool-gateway.ts",
+   "find": "      if ('tenantId' in args && args['tenantId'] !== req.tenantId) deny(",
+   "replace": "      if (false) deny(",
+   "tests": []
+  },
+  {
+   "id": "R4",
+   "safeguard": "student scope",
+   "file": "src/runtime/tool-gateway.ts",
+   "find": "      if ('studentId' in args && args['studentId'] !== req.studentId) deny(",
+   "replace": "      if (false) deny(",
+   "tests": []
+  },
+  {
+   "id": "R5",
+   "safeguard": "live authorization",
+   "file": "src/runtime/tool-gateway.ts",
+   "find": "    if (!this.authorization.isStillAuthorized(req.actor, req.tenantId, req.studentId, req.purpose)) {",
+   "replace": "    if (false) {",
+   "tests": []
+  },
+  {
+   "id": "R6",
+   "safeguard": "tool budget",
+   "file": "src/runtime/tool-gateway.ts",
+   "find": "      ctx.budget.consume('tool_calls');",
+   "replace": "",
+   "tests": []
+  },
+  {
+   "id": "R7",
+   "safeguard": "cancelled before call",
+   "file": "src/runtime/tool-gateway.ts",
+   "find": "    if (ctx.token.isCancelled) deny('task_cancelled',",
+   "replace": "    if (false) deny('task_cancelled',",
+   "tests": []
+  },
+  {
+   "id": "R8",
+   "safeguard": "cancelled after call",
+   "file": "src/runtime/tool-gateway.ts",
+   "find": "      if (ctx.token.isCancelled) throw new TaskCancelledError(req.taskId);",
+   "replace": "",
+   "tests": []
+  },
+  {
+   "id": "R9",
+   "safeguard": "argument schema",
+   "file": "src/runtime/tool-gateway.ts",
+   "find": "    if (!parsed.success) deny('invalid_arguments',",
+   "replace": "    if (false) deny('invalid_arguments',",
+   "tests": []
+  },
+  {
+   "id": "R10",
+   "safeguard": "agents act for people",
+   "file": "src/system/kernel.ts",
+   "find": "    if (request.actor.kind === 'agent') return fail('blocked', 'agents_act_for_people');",
+   "replace": "",
+   "tests": []
+  },
+  {
+   "id": "R11",
+   "safeguard": "authorization before run",
+   "file": "src/system/kernel.ts",
+   "find": "    if (!this.records.permissions.isStillAuthorized(request.actor, request.tenantId, request.studentId, request.purpose)) return fail('blocked', 'not_found_or_denied');",
+   "replace": "",
+   "tests": []
+  },
+  {
+   "id": "R12",
+   "safeguard": "snapshot current before run",
+   "file": "src/system/kernel.ts",
+   "find": "    if (this.records.permissions.snapshot(request.actor, request.tenantId, request.studentId) !== request.permissionSnapshot) return fail('blocked', 'permission_snapshot_stale');",
+   "replace": "",
+   "tests": []
+  },
+  {
+   "id": "R13",
+   "safeguard": "late result discarded",
+   "file": "src/system/kernel.ts",
+   "find": "      if (ctx.token.isCancelled) return fail('cancelled', 'cancelled_before_publication');",
+   "replace": "",
+   "tests": []
+  },
+  {
+   "id": "R14",
+   "safeguard": "cited claims served",
+   "file": "src/runtime/validation.ts",
+   "find": "    if (!ctx.servedClaimIds.has(id)) issues.push(",
+   "replace": "    if (false) issues.push(",
+   "tests": []
+  },
+  {
+   "id": "R15",
+   "safeguard": "cited sources served",
+   "file": "src/runtime/validation.ts",
+   "find": "    for (const id of result.sourceRefs) if (!ctx.servedSourceIds.has(id)) issues.push(",
+   "replace": "    for (const id of result.sourceRefs) if (false) issues.push(",
+   "tests": []
+  },
+  {
+   "id": "R16",
+   "safeguard": "vague uncertainty",
+   "file": "src/runtime/validation.ts",
+   "find": "    if (VAGUE_PHRASES.some((re) => re.test(u.description.trim()))) issues.push(",
+   "replace": "    if (false) issues.push(",
+   "tests": []
+  },
+  {
+   "id": "R17",
+   "safeguard": "older record version",
+   "file": "src/runtime/validation.ts",
+   "find": "  if (result.inputVersions.recordVersion < ctx.request.recordVersion) issues.push(",
+   "replace": "  if (false) issues.push(",
+   "tests": []
+  },
+  {
+   "id": "R18",
+   "safeguard": "snapshot changed during task",
+   "file": "src/runtime/validation.ts",
+   "find": "  if (result.inputVersions.permissionSnapshot !== ctx.request.permissionSnapshot || ctx.currentPermissionSnapshot !== ctx.request.permissionSnapshot) {",
+   "replace": "  if (false) {",
+   "tests": []
+  },
+  {
+   "id": "R19",
+   "safeguard": "summary grounding",
+   "file": "src/runtime/validation.ts",
+   "find": "      for (const t of ungrounded) issues.push(",
+   "replace": "      for (const t of ungrounded) if (false) issues.push(",
+   "tests": []
+  },
+  {
+   "id": "R20",
+   "safeguard": "task identity",
+   "file": "src/runtime/validation.ts",
+   "find": "  if (result.taskId !== ctx.request.taskId) {",
+   "replace": "  if (false) {",
+   "tests": []
+  },
+  {
+   "id": "R21",
+   "safeguard": "child budget capped by parent",
+   "file": "src/runtime/budget.ts",
+   "find": "      maxToolCalls: Math.min(requested.maxToolCalls, remaining.maxToolCalls),",
+   "replace": "      maxToolCalls: requested.maxToolCalls,",
+   "tests": []
+  },
+  {
+   "id": "R22",
+   "safeguard": "child usage counts against parent",
+   "file": "src/runtime/budget.ts",
+   "find": "    this.parent?.apply(dimension, amount);",
+   "replace": "",
+   "tests": []
+  },
+  {
+   "id": "R23",
+   "safeguard": "parent limit checked",
+   "file": "src/runtime/budget.ts",
+   "find": "    return this.parent ? this.parent.canConsume(dimension, amount) : true;",
+   "replace": "    return true;",
+   "tests": []
+  },
+  {
+   "id": "R24",
+   "safeguard": "event dedup",
+   "file": "src/runtime/event-bus.ts",
+   "find": "            if (done.has(event.eventId)) continue; // duplicate delivery: no effect",
+   "replace": "",
+   "tests": []
+  },
+  {
+   "id": "R25",
+   "safeguard": "boundary neutralized",
+   "file": "src/runtime/untrusted.ts",
+   "find": "  const safe = content.text.split(boundary).join('[boundary removed]');",
+   "replace": "  const safe = content.text;",
+   "tests": []
+  },
+  {
+   "id": "R26",
+   "safeguard": "contract belongs to role",
+   "file": "src/system/orchestration-tools.ts",
+   "find": "      if (!contract || contract.role !== role) throw new AccessDeniedError(",
+   "replace": "      if (!contract) throw new AccessDeniedError(",
+   "tests": []
+  },
+  {
+   "id": "R27",
+   "safeguard": "only accepted results make evidence citable",
+   "file": "src/system/orchestration-tools.ts",
+   "find": "        if (out.accepted) {\n          // Evidence",
+   "replace": "        if (true) {\n          // Evidence",
+   "tests": [],
+   "equivalent": "A rejected child result is always the kernel failure envelope, which carries no claims or sources, so this guard cannot change behaviour. Kept to state the intent."
+  },
+  {
+   "id": "R28",
+   "safeguard": "token boundary",
+   "file": "src/runtime/grounding.ts",
+   "find": "    if (boundaryBefore && boundaryAfter) return true;",
+   "replace": "    return true;",
+   "tests": []
+  },
+  {
+   "id": "R29",
+   "safeguard": "model output schema-checked",
+   "file": "src/model/gateway.ts",
+   "find": "      if (parsed.success) return { ok: true, output: parsed.data,",
+   "replace": "      if (true) return { ok: true, output: (parsed.data ?? json) as T,",
+   "tests": []
+  },
+  {
+   "id": "R30",
+   "safeguard": "cancel cascades",
+   "file": "src/runtime/cancellation.ts",
+   "find": "    for (const c of this.children) c.cancel(reason);",
+   "replace": "",
+   "tests": []
+  },
+  {
+   "id": "R31",
+   "safeguard": "unstaffed review is a referral",
+   "file": "src/runtime/human-review.ts",
+   "find": "    if (!this.isStaffed()) {",
+   "replace": "    if (false) {",
+   "tests": []
+  },
+  {
+   "id": "R32",
+   "safeguard": "agents cannot approve",
+   "file": "src/runtime/external-actions.ts",
+   "find": "    if (approver.kind === 'agent') throw new Error('Agents cannot approve external actions');",
+   "replace": "",
+   "tests": []
+  },
+  {
+   "id": "R33",
+   "safeguard": "execution needs approval",
+   "file": "src/runtime/external-actions.ts",
+   "find": "    if (r.state !== 'approved') throw new Error(",
+   "replace": "    if (false) throw new Error(",
+   "tests": []
+  },
+  {
+   "id": "S1",
+   "safeguard": "birthday not yet reached",
+   "file": "src/shared/time.ts",
+   "find": "    if (ref.month < bd.month || (ref.month === bd.month && ref.day < bd.day)) age -= 1;",
+   "replace": "    if (ref.month < bd.month) age -= 1;",
+   "tests": [
+    "test/shared/time.test.ts",
+    "test/shared/money-grades-scores.test.ts"
+   ]
+  },
+  {
+   "id": "S2",
+   "safeguard": "imprecise birth date range",
+   "file": "src/shared/time.ts",
+   "find": "  return { min: ageForBirthDay(b.end), max: ageForBirthDay(b.start) };",
+   "replace": "  return { min: ageForBirthDay(b.start), max: ageForBirthDay(b.start) };",
+   "tests": [
+    "test/shared/time.test.ts",
+    "test/shared/money-grades-scores.test.ts"
+   ]
+  },
+  {
+   "id": "S3",
+   "safeguard": "max age with uncertainty",
+   "file": "src/shared/time.ts",
+   "find": "  if (max <= maximumAgeInclusive) return true;",
+   "replace": "  if (min <= maximumAgeInclusive) return true;",
+   "tests": [
+    "test/shared/time.test.ts",
+    "test/shared/money-grades-scores.test.ts"
+   ]
+  },
+  {
+   "id": "S4",
+   "safeguard": "missing timezone unresolved",
+   "file": "src/shared/time.ts",
+   "find": "  if (deadline.timezone === null) return { ok: false, reason: 'timezone_missing' };",
+   "replace": "",
+   "tests": []
+  },
+  {
+   "id": "S5",
+   "safeguard": "earliest instant uses UTC+14",
+   "file": "src/shared/time.ts",
+   "find": "  return DateTime.fromISO(deadline.date, { zone: 'UTC+14' })",
+   "replace": "  return DateTime.fromISO(deadline.date, { zone: 'UTC' })",
+   "tests": []
+  },
+  {
+   "id": "S6",
+   "safeguard": "currency mismatch",
+   "file": "src/shared/money.ts",
+   "find": "  if (a.currency !== b.currency) throw new CurrencyMismatchError(a.currency, b.currency);",
+   "replace": "",
+   "tests": []
+  },
+  {
+   "id": "S7",
+   "safeguard": "unknown cost is not zero",
+   "file": "src/shared/money.ts",
+   "find": "      if (amount.reason === 'not_applicable' || amount.reason === 'confirmed_absent') continue;\n      unknownComponents.push(c.component);",
+   "replace": "      continue;",
+   "tests": []
+  },
+  {
+   "id": "S8",
+   "safeguard": "conversion is an estimate",
+   "file": "src/shared/money.ts",
+   "find": "      includesEstimates = true;\n    }\n  }\n  return { known",
+   "replace": "    }\n  }\n  return { known",
+   "tests": []
+  },
+  {
+   "id": "S9",
+   "safeguard": "estimate flag carried",
+   "file": "src/shared/money.ts",
+   "find": "    if (c.estimate) includesEstimates = true;",
+   "replace": "",
+   "tests": []
+  },
+  {
+   "id": "S10",
+   "safeguard": "no cross-scale comparison",
+   "file": "src/shared/grades.ts",
+   "find": "  if (a.scaleRef === null || b.scaleRef === null || a.scaleRef !== b.scaleRef) return 'incomparable';",
+   "replace": "  if (a.scaleRef === null || b.scaleRef === null) return 'incomparable';",
+   "tests": []
+  },
+  {
+   "id": "S11",
+   "safeguard": "lower-is-better scales",
+   "file": "src/shared/grades.ts",
+   "find": "    return (scale.direction === 'higher_is_better' ? raw : -raw) as -1 | 0 | 1;",
+   "replace": "    return raw as -1 | 0 | 1;",
+   "tests": []
+  },
+  {
+   "id": "S12",
+   "safeguard": "incomparable is unknown, not failing",
+   "file": "src/shared/grades.ts",
+   "find": "  if (cmp === 'incomparable') return 'unknown';",
+   "replace": "  if (cmp === 'incomparable') return false;",
+   "tests": []
+  }
+ ]
+}

@@ -76,6 +76,8 @@ describe('age at the organizer reference date', () => {
   it('checks maximum ages inclusively', () => {
     expect(meetsMaximumAge('2008-09-01', '2027-06-01', 18)).toBe(true);
     expect(meetsMaximumAge('2008-05-01', '2027-06-01', 18)).toBe(false);
+    // Born some time in 2008: 18 or 19 on 1 June 2027, so the limit cannot be settled.
+    expect(meetsMaximumAge('2008', '2027-06-01', 18)).toBe('unknown');
   });
 });
 

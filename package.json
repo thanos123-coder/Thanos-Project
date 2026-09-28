@@ -22,7 +22,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "check": "npm run typecheck && npm run test",
-    "demo": "tsc -p tsconfig.examples.json && node .demo-build/examples/demo.js"
+    "demo": "tsc -p tsconfig.examples.json && node .demo-build/examples/demo.js",
+    "mutation": "node scripts/mutation-check.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.128.0",
