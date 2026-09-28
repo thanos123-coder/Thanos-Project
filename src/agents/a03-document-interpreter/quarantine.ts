@@ -1,3 +1,4 @@
+import { inflateSync } from 'node:zlib';
 import { inspectPdf, type PdfInspection } from './pdf-text.js';
 
 /**
@@ -77,6 +78,37 @@ function isJson(s: string): boolean {
   } catch {
     return false;
   }
+}
+
+/** Upper bound on decompressed bytes inspected per file, so a compression bomb cannot exhaust memory. */
+const MAX_INFLATED_BYTES = 16 * 1024 * 1024;
+
+/**
+ * Text of the file's Flate-compressed object streams (/Type /ObjStm). Most PDF
+ * writers store dictionaries, including actions, inside them, where a scan of
+ * the raw bytes cannot see them. Page content streams are not included, so
+ * text printed on a page cannot trigger a finding. Streams that fail to
+ * inflate are skipped; the parser decides whether the file is malformed.
+ */
+function inflatedObjectStreams(bytes: Uint8Array): string {
+  const text = latin1(bytes);
+  const out: string[] = [];
+  let budget = MAX_INFLATED_BYTES;
+  for (const m of text.matchAll(/\bobj\b((?:(?!\bendobj\b)[\s\S]){0,1000}?)\bstream\r?\n/g)) {
+    const dict = m[1]!;
+    if (!/\/Type\s*\/ObjStm\b/.test(dict) || !/\/FlateDecode\b/.test(dict)) continue;
+    const start = m.index! + m[0].length;
+    const end = text.indexOf('endstream', start);
+    if (end < 0 || budget <= 0) continue;
+    try {
+      const inflated = inflateSync(bytes.subarray(start, end), { maxOutputLength: Math.min(budget, 4 * 1024 * 1024) });
+      budget -= inflated.length;
+      out.push(latin1(inflated));
+    } catch {
+      // Not inflatable within the limits: skipped.
+    }
+  }
+  return out.join('\n');
 }
 
 function latin1(bytes: Uint8Array): string {
@@ -172,7 +204,8 @@ export async function quarantine(bytes: Uint8Array, declaredMediaType: string | 
       return reject(activeContent.length ? 'office_active_content' : 'office_requires_conversion', 'Office documents are not opened directly. Please save it as a PDF and upload that instead.');
     }
     case 'pdf': {
-      const raw = latin1(bytes.subarray(0, Math.min(bytes.length, 4 * 1024 * 1024)));
+      // Plain objects plus the decompressed object streams, where writers usually put actions.
+      const raw = latin1(bytes.subarray(0, Math.min(bytes.length, 4 * 1024 * 1024))) + inflatedObjectStreams(bytes);
       if (/\/Launch\b/.test(raw)) activeContent.push('launch_action');
       if (/\/GoToR\b|\/GoToE\b/.test(raw)) activeContent.push('remote_reference');
       if (/\/RichMedia\b/.test(raw)) activeContent.push('rich_media');
@@ -194,6 +227,7 @@ export async function quarantine(bytes: Uint8Array, declaredMediaType: string | 
       report.pages = pdf.numPages;
       if (pdf.hasJavaScript && !activeContent.includes('javascript')) activeContent.push('javascript');
       if (pdf.hasAttachments) activeContent.push('embedded_files');
+      if (pdf.hasLocalFileAction && !activeContent.includes('launch_action')) activeContent.push('launch_action');
       if (activeContent.includes('launch_action') || activeContent.includes('embedded_files')) {
         return reject('pdf_active_content', 'This PDF contains embedded files or launch actions, which are not opened. Printing it to a new PDF usually removes them.');
       }

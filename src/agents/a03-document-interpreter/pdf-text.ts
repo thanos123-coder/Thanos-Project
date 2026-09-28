@@ -23,6 +23,8 @@ export interface PdfInspection {
   numPages: number;
   hasJavaScript: boolean;
   hasAttachments: boolean;
+  /** A link or action that opens a local file or program rather than a web address (Launch, GoToR). */
+  hasLocalFileAction: boolean;
   pages: PdfPageText[];
 }
 
@@ -65,7 +67,9 @@ export async function inspectPdf(bytes: Uint8Array, opts: { maxPages: number }):
   try {
     if (doc.numPages > opts.maxPages) return { ok: false, reason: 'too_many_pages', detail: `${doc.numPages} pages exceeds the limit of ${opts.maxPages}`, numPages: doc.numPages };
     const [attachments, js] = await Promise.all([doc.getAttachments().catch(() => null), doc.getJSActions().catch(() => null)]);
-    const hasJavaScript = !!js && Object.keys(js).length > 0;
+    let hasJavaScript = !!js && Object.keys(js).length > 0;
+    let hasAttachments = !!attachments && Object.keys(attachments).length > 0;
+    let hasLocalFileAction = false;
     const pages: PdfPageText[] = [];
     for (let n = 1; n <= doc.numPages; n += 1) {
       const page = await doc.getPage(n);
@@ -77,11 +81,19 @@ export async function inspectPdf(bytes: Uint8Array, opts: { maxPages: number }):
         const [vx, vy] = viewport.convertToViewportPoint(item.transform[4] as number, item.transform[5] as number) as [number, number];
         runs.push({ str: item.str, x: vx, y: viewport.height - vy, width: item.width, height: item.height });
       }
+      // Annotations are read from the parsed document, so they are found even inside
+      // compressed object streams: an attached file, a field script, or a link whose
+      // target is not a web address (pdf.js resolves Launch and GoToR targets as unsafeUrl only).
+      for (const a of (await page.getAnnotations().catch(() => [])) as Array<{ file?: unknown; actions?: Record<string, unknown> | null; url?: string; unsafeUrl?: string }>) {
+        if (a.file) hasAttachments = true;
+        if (a.actions && Object.keys(a.actions).length > 0) hasJavaScript = true;
+        if (a.unsafeUrl && !a.url && !/^(https?|mailto|tel):/i.test(a.unsafeUrl)) hasLocalFileAction = true;
+      }
       const rot = ((page.rotate % 360) + 360) % 360;
       pages.push({ page: n, rotation: (rot === 90 || rot === 180 || rot === 270 ? rot : 0) as PdfPageText['rotation'], width: viewport.width, height: viewport.height, runs });
       page.cleanup();
     }
-    return { ok: true, numPages: doc.numPages, hasJavaScript, hasAttachments: !!attachments && Object.keys(attachments).length > 0, pages };
+    return { ok: true, numPages: doc.numPages, hasJavaScript, hasAttachments, hasLocalFileAction, pages };
   } finally {
     await loadingTask.destroy();
   }

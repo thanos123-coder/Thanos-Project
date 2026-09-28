@@ -1,4 +1,4 @@
-import { PDFDocument, StandardFonts, type PDFFont, type PDFPage } from 'pdf-lib';
+import { PDFDocument, PDFName, PDFString, StandardFonts, type PDFFont, type PDFPage } from 'pdf-lib';
 
 /**
  * Synthetic PDF builders. All names, schools and results are fictional.
@@ -59,6 +59,24 @@ export async function buildPdf(pages: PdfLine[][]): Promise<Uint8Array> {
   const bold = await doc.embedFont(StandardFonts.HelveticaBold);
   for (const lines of pages) draw(doc.addPage([595, 842]), font, bold, lines);
   return doc.save();
+}
+
+/**
+ * A one-page PDF carrying active content in an annotation. Saved with object
+ * streams (pdf-lib's default, like most writers), so the annotation's
+ * dictionary is compressed and invisible to a scan of the raw bytes.
+ */
+export async function pdfWithActiveAnnotation(kind: 'javascript_link' | 'launch_link' | 'file_attachment'): Promise<Uint8Array> {
+  const doc = await PDFDocument.create();
+  const page = doc.addPage([595, 842]);
+  page.drawText('Example International School - Academic Transcript', { x: 50, y: 800, size: 12, font: await doc.embedFont(StandardFonts.Helvetica) });
+  const c = doc.context;
+  const annot =
+    kind === 'file_attachment'
+      ? c.obj({ Type: 'Annot', Subtype: 'FileAttachment', Rect: [0, 0, 20, 20], FS: c.register(c.obj({ Type: 'Filespec', F: PDFString.of('run.exe'), EF: { F: c.register(c.flateStream('not a real program', { Type: 'EmbeddedFile' })) } })) })
+      : c.obj({ Type: 'Annot', Subtype: 'Link', Rect: [0, 0, 100, 100], Border: [0, 0, 0], A: kind === 'javascript_link' ? c.obj({ S: 'JavaScript', JS: PDFString.of('app.alert(1)') }) : c.obj({ S: 'Launch', F: PDFString.of('calc.exe') }) });
+  page.node.set(PDFName.of('Annots'), c.obj([c.register(annot)]));
+  return doc.save({ useObjectStreams: true });
 }
 
 /** An IB transcript with final Year 11 marks and predicted Year 12 results (03T01). */

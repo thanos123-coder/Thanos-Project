@@ -298,4 +298,35 @@ describe('Agent 04 — worked examples and cross-cutting behavior', () => {
     const v = new RecordView(records.readScoped(ui, { tenantId: TENANT, studentId, role: '05', mode: 'local' }));
     expect(v.field('hypothesis', 'h1', 'statement')).toBeUndefined();
   });
+
+  it('a grant covers only its own purposes, and stops at its expiry time', () => {
+    const { records, studentId, studentActor, clock } = makeRecords();
+    const parent: Actor = { id: 'acct_parent', kind: 'supporter', tenantId: TENANT };
+    records.permissions.grant(studentActor, { tenantId: TENANT, studentId, granteeActorId: parent.id, relationship: 'supporter', purposes: ['schedule_view'], categories: ['plans_tasks'], access: ['read'], policyBasis: 'student_invitation', expiresAt: '2026-10-01T00:00:00.000Z' });
+    expect(records.permissions.isStillAuthorized(parent, TENANT, studentId, 'schedule_view')).toBe(true);
+    // The same category for another purpose is not covered.
+    expect(records.permissions.isStillAuthorized(parent, TENANT, studentId, 'counseling')).toBe(false);
+    expect(() => records.readScoped({ actor: parent, viaRole: '01', purpose: 'counseling' }, { tenantId: TENANT, studentId, role: '01', mode: 'local' })).toThrow(AccessDeniedError);
+    clock.set('2026-10-01T00:00:00.000Z');
+    expect(records.permissions.isStillAuthorized(parent, TENANT, studentId, 'schedule_view')).toBe(false);
+  });
+
+  it('deleting a fact needs delete access to its category; a supporter with read and write cannot', async () => {
+    const { records, studentId, ui, studentActor, mutation } = makeRecords();
+    const parent: Actor = { id: 'acct_parent', kind: 'supporter', tenantId: TENANT };
+    records.permissions.grant(studentActor, { tenantId: TENANT, studentId, granteeActorId: parent.id, relationship: 'supporter', purposes: ['counseling', 'deletion'], categories: ['goals_preferences'], access: ['read', 'write'], policyBasis: 'student_invitation' });
+    const r = records.applyMutation(ui, TENANT, studentId, mutation([buildClaim({ entity: 'preference', entityId: 'p1', attribute: 'statement', value: { text: 'I like building things', topic: 'field_of_study', normalized: ['engineering'] }, origin: 'student_statement', evidence: [said('I like building things')], actor: studentActor, viaRole: 'ui' })]));
+    await expect(records.deleteClaim({ actor: parent, viaRole: 'ui', purpose: 'deletion' }, TENANT, studentId, r.createdClaimIds[0]!)).rejects.toThrow(AccessDeniedError);
+    expect(records.getClaim(ui, TENANT, studentId, r.createdClaimIds[0]!)).toBeDefined();
+    await records.deleteClaim({ ...ui, purpose: 'deletion' }, TENANT, studentId, r.createdClaimIds[0]!);
+    expect(records.getClaim(ui, TENANT, studentId, r.createdClaimIds[0]!)).toBeUndefined();
+  });
+
+  it('a mutation that claims a record version newer than the record is rejected', () => {
+    const { records, studentId, ui, studentActor, mutation } = makeRecords();
+    const r = records.applyMutation(ui, TENANT, studentId, mutation([buildClaim({ attribute: 'preferences.interaction_mode', value: 'text', origin: 'student_statement', evidence: [said('text please')], actor: studentActor, viaRole: 'ui' })], 5));
+    expect(r.outcome).toBe('rejected');
+    expect(r.reasons.join()).toMatch(/newer than the record/);
+    expect(records.recordVersion(TENANT, studentId)).toBe(0);
+  });
 });

@@ -5,7 +5,7 @@ import { interpretDocument, namesMatch } from '../../src/agents/a03-document-int
 import { sniffType } from '../../src/agents/a03-document-interpreter/quarantine.js';
 import { RecordView } from '../../src/agents/a04-record-steward/view-reader.js';
 import { ScriptedModelGateway } from '../../src/model/scripted.js';
-import { buildPdf, ibTranscriptWithPredicted, type PdfLine } from '../fixtures/pdfs.js';
+import { buildPdf, ibTranscriptWithPredicted, pdfWithActiveAnnotation, type PdfLine } from '../fixtures/pdfs.js';
 import { makeDocumentHarness } from '../helpers/documents.js';
 import { TENANT, stated } from '../helpers/kernel.js';
 
@@ -221,6 +221,15 @@ describe('Agent 03 — Document and transcript interpreter', () => {
     const none = await importPdf(makeDocumentHarness(), [[{ kind: 'heading', text: 'Bulletin' }]], { certifiedTranslationRequested: true });
     expect(none.p.translation).toMatchObject({ provided: false });
     expect(none.p.translation.note).toMatch(/cannot produce a certified translation/);
+  });
+
+  it('03T15 active content inside compressed object streams is still found: scripts isolated, launch actions and attached files rejected', async () => {
+    const h = makeDocumentHarness();
+    const js = await h.upload(await pdfWithActiveAnnotation('javascript_link'));
+    expect(js.status).toBe('accepted');
+    expect(js.status === 'accepted' && js.document.quarantine.activeContent).toContain('javascript');
+    expect(await h.upload(await pdfWithActiveAnnotation('launch_link'))).toMatchObject({ status: 'rejected', report: { reasons: ['pdf_active_content'] } });
+    expect(await h.upload(await pdfWithActiveAnnotation('file_attachment'))).toMatchObject({ status: 'rejected', report: { reasons: ['pdf_active_content'] } });
   });
 
   it('03T15 malformed, oversized and active-content files are rejected safely', async () => {
