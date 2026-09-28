@@ -30,3 +30,4 @@ export * as planner from './agents/a07-planner/index.js';
 export * as activities from './agents/a08-activities/index.js';
 export * as opportunities from './agents/a09-opportunities/index.js';
 export * as officialResearch from './agents/a11-research/index.js';
+export * as affordability from './agents/a15-affordability/index.js';

@@ -24,6 +24,8 @@ import { OfficialResearchAgent } from '../agents/a11-research/agent.js';
 import { InstitutionClaimStore } from '../agents/a11-research/claims.js';
 import { InstitutionRegistry } from '../agents/a11-research/entities.js';
 import { registerInstitutionTools, type OfficialSearchProvider } from '../agents/a11-research/tools.js';
+import { AffordabilityPlannerAgent } from '../agents/a15-affordability/agent.js';
+import { registerFinanceTools, type ExchangeRateProvider } from '../agents/a15-affordability/tools.js';
 import type { ModelGateway } from '../model/gateway.js';
 import type { ExternalActionRecord } from '../runtime/external-actions.js';
 import type { ReviewStaffing } from '../runtime/human-review.js';
@@ -53,6 +55,8 @@ export interface CounselorSystemOptions {
   research?: ResearchProviders;
   /** Search restricted to an institution's official pages (Agent 11). */
   officialSearch?: OfficialSearchProvider;
+  /** Reference exchange rates for affordability scenarios (Agent 15); without one, conversions need a stated rate. */
+  exchangeRates?: ExchangeRateProvider;
   documents?: { scanner?: MalwareScanner | null; limits?: QuarantineLimits; fingerprintSecret?: string };
 }
 
@@ -132,6 +136,7 @@ export class CounselorSystem {
     this.institutionClaims = new InstitutionClaimStore(() => k.clock.nowIso());
     registerInstitutionTools(k.gateway, this.institutions, this.institutionClaims, options.officialSearch);
     connectInstitutionClaims(k, this.institutionClaims);
+    registerFinanceTools(k.gateway, options.exchangeRates);
 
     this.objectives = new ObjectiveStore(k.clock, k.ids, (taskId, reason) => k.cancel(taskId, reason));
     registerTaskTools(k.gateway, this.objectives);
@@ -164,6 +169,7 @@ export class CounselorSystem {
     k.registerSpecialist(new ActivitiesAssessorAgent(model));
     k.registerSpecialist(new OpportunityScoutAgent(model));
     k.registerSpecialist(new OfficialResearchAgent(model));
+    k.registerSpecialist(new AffordabilityPlannerAgent(model));
   }
 
   /** Create a student record owned by the student's own account. */

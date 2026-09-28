@@ -174,7 +174,7 @@ export const APPLICATION_ITEM_OWNERS = ['student', 'school', 'recommender', 'tes
 export const APPLICATION_ITEM_STATES = ['not_started', 'in_progress', 'requested', 'sent', 'received', 'waived'] as const;
 export const FUNDING_KINDS = ['institutional_grant', 'external_scholarship', 'government_grant', 'tuition_waiver', 'loan', 'work', 'other'] as const;
 /** Funding states; only offered-or-later items can count as funding, and only confirmed ones in a confirmed scenario (15 "Aid record and conditions"). */
-export const FUNDING_STAGES = ['identified', 'applied', 'nominated', 'semifinalist', 'finalist', 'offered', 'accepted', 'confirmed_for_disbursement', 'disbursed', 'revised', 'withdrawn', 'declined', 'not_selected'] as const;
+export const FUNDING_STAGES = ['identified', 'applied', 'nominated', 'semifinalist', 'finalist', 'estimated', 'offered', 'accepted', 'confirmed_for_disbursement', 'disbursed', 'revised', 'withdrawn', 'declined', 'not_selected'] as const;
 export const FUNDING_PERIODS = ['one_term', 'one_academic_year', 'full_degree', 'one_time'] as const;
 /** How the student lets an experience be used for writing work (17 "Session setup and control"). */
 export const STORY_USE_STATES = ['private', 'discuss_only', 'possible_writing_material', 'do_not_use'] as const;
@@ -258,7 +258,15 @@ export const FundingAwardSchema = z
     stage: z.enum(FUNDING_STAGES),
     /** The program-scoped option the award belongs to, if destination restricted. */
     optionRef: z.string().max(200).nullable(),
-    renewal: z.object({ renewable: z.boolean(), conditions: z.array(z.string().min(1)).max(10) }).strict().nullable(),
+    renewal: z.object({ renewable: z.boolean(), conditions: z.array(z.string().min(1)).max(10), maxYears: z.number().int().positive().nullable().default(null) }).strict().nullable(),
+    /** Need-based and merit aid are kept separate (15 "Aid record and conditions"). */
+    basis: z.enum(['need_based', 'merit', 'other', 'unknown']).default('unknown'),
+    /** A government program whose eligibility rules apply (e.g. 'us_federal'); admission alone never implies it. */
+    eligibilityProgram: z.string().regex(/^[a-z0-9_]+$/).nullable().default(null),
+    /** When the money is expected to arrive, if known; timing matters more than the annual total (15 "Cost ledger construction"). */
+    disbursesOn: CalendarDateSchema.nullable().default(null),
+    /** The same award as known to other sources (a scholarship record, an award letter line), so it is never counted twice. */
+    externalRefs: z.array(z.string().min(1).max(200)).max(10).default([]),
   })
   .strict();
 export type FundingAward = z.infer<typeof FundingAwardSchema>;
@@ -338,6 +346,9 @@ const defs: FieldDefinition[] = [
   { entity: 'student', attribute: 'constraints.remote_preference', schema: z.enum(['remote_only', 'prefer_remote', 'no_preference', 'prefer_in_person', 'in_person_only']), category: 'practical_constraints', conflictPolicy: 'owner_latest', consequential: false, label: 'online or in person' },
   { entity: 'student', attribute: 'constraints.device_access', schema: z.enum(['reliable_own_device', 'shared_device', 'limited', 'none']), category: 'practical_constraints', conflictPolicy: 'owner_latest', consequential: false, label: 'device access' },
   { entity: 'student', attribute: 'finance.aid_needed', schema: z.enum(['yes', 'no', 'unsure']), category: 'financial', conflictPolicy: 'owner_latest', consequential: false, label: 'needs financial help' },
+  // Raw household finances stay in the restricted financial detail category; other roles receive aggregates (15T16).
+  { entity: 'student', attribute: 'finance.household_income', schema: z.object({ amount: MoneySchema, period: z.enum(['annual', 'monthly']), taxYear: z.string().regex(/^\d{4}$/).nullable() }).strict(), category: 'financial_detail', conflictPolicy: 'owner_latest', consequential: true, label: 'household income' },
+  { entity: 'student', attribute: 'finance.household_assets', schema: z.object({ amount: MoneySchema, kind: z.enum(['savings', 'investments', 'property', 'other']) }).strict(), category: 'financial_detail', conflictPolicy: 'owner_latest', consequential: true, label: 'household assets' },
   { entity: 'student', attribute: 'support.family_responsibilities', schema: z.object({ hasRegularResponsibilities: z.boolean(), broadDescription: z.string().nullable(), hoursPerWeek: HoursRangeSchema.nullable() }).strict(), category: 'family_context', conflictPolicy: 'owner_latest', consequential: false, label: 'family responsibilities' },
 
   // ---- Interaction and accessibility -------------------------------------

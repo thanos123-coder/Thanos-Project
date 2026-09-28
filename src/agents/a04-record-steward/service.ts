@@ -662,6 +662,18 @@ export class RecordService {
     for (const id of ids) {
       this.outbox.push({ eventId: this.ids.next('event'), type: 'derived_artifact.invalidated', tenantId: s.tenantId, studentId: s.studentId, entityRef: id, changedFields: [], recordVersion: s.recordVersion, causeRef: reason.slice(0, 120), occurredAt: this.clock.nowIso(), sensitivePayloadIncluded: false });
     }
+    // A result built on another result (cited as "artifact:<id>") becomes stale with it, so a plan never outlives the calculation it used.
+    const dependents: string[] = [];
+    for (const a of s.artifacts.values()) {
+      if (a.status !== 'current') continue;
+      const cited = ids.find((id) => a.inputs.sourceIds.includes(artifactRef(id)));
+      if (!cited) continue;
+      a.status = 'stale';
+      a.statusReason = `an input result (${cited}) became stale: ${reason}`.slice(0, 400);
+      a.updatedAt = this.clock.nowIso();
+      dependents.push(a.id);
+    }
+    if (dependents.length > 0) this.emitInvalidations(s, dependents, reason);
   }
 
   // ---------------------------------------------------------------- deletion
@@ -913,6 +925,11 @@ export class RecordService {
  * `*` as the entity id (e.g. `test_attempt:*.record`) so that a result which
  * depended on the *absence* of any such entity is invalidated when one appears.
  */
+/** How a derived result cites another derived result among its inputs. */
+export function artifactRef(artifactId: string): string {
+  return `artifact:${artifactId}`;
+}
+
 export function fieldKeyMatches(pattern: string, key: string): boolean {
   if (pattern === key) return true;
   if (!pattern.includes(':*.')) return false;
