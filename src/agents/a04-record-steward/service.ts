@@ -313,6 +313,7 @@ export class RecordService {
     }
     if ((m.operation === 'add_claims' || m.operation === 'confirm_claim' || m.operation === 'resolve_conflict') && m.claims.length === 0) issues.push('no claims supplied');
     if (m.operation === 'retract_claim' && m.targetClaimIds.length === 0) issues.push('no claims to retract');
+    issues.push(...this.crossFieldIssues(s, validated));
     if (issues.length > 0) return finish(empty('rejected', m.mutationId, issues));
 
     // Targets for supersession/retraction must exist, be active and belong to this student.
@@ -499,6 +500,33 @@ export class RecordService {
       studentSummary: explainChanges(changedKeys.map((k) => ({ before: beforeViews.get(k), after: afterViews.get(k) })), invalidated.length),
     };
     return finish(response);
+  }
+
+  /**
+   * Checks that need the rest of the record. A project completion may not credit
+   * the student with work the project's own contribution log attributes to
+   * someone else: shared work is never merged into individual credit (10
+   * "Scope and meaningful success", XT01). The log in the same mutation, if
+   * any, is the one that counts.
+   */
+  private crossFieldIssues(s: StudentRecordState, validated: ReadonlyArray<{ claim: ClaimInputParsed; key: string }>): string[] {
+    const issues: string[] = [];
+    for (const [i, v] of validated.entries()) {
+      if (catalogKey(v.claim.field) !== 'project.completion' || isAbsence(v.claim.value)) continue;
+      const logKey = fieldKey({ ...v.claim.field, attribute: 'contribution_log' });
+      const inMutation = validated.find((x) => x.key === logKey && !isAbsence(x.claim.value));
+      const stored = this.viewOfKey(s, logKey)?.current?.value;
+      const log = (inMutation?.claim.value ?? (stored && !isAbsence(stored) ? stored : undefined)) as { items: Array<{ description: string; by: string }> } | undefined;
+      if (!log) continue;
+      const completion = v.claim.value as { studentContribution: string[] };
+      for (const item of completion.studentContribution) {
+        const n = normalizeContribution(item);
+        const byStudent = log.items.some((x) => x.by === 'student' && contributionsMatch(normalizeContribution(x.description), n));
+        const byOther = log.items.find((x) => x.by !== 'student' && contributionsMatch(normalizeContribution(x.description), n));
+        if (byOther && !byStudent) issues.push(`claims[${i}]: the completion credits you with "${item}", which the project's contribution record attributes to ${byOther.by.replace('_', ' ')}`);
+      }
+    }
+    return issues;
   }
 
   private viewOfKey(s: StudentRecordState, key: string): FieldView | undefined {
@@ -914,6 +942,18 @@ function jointGroupOf(key: string, s: StudentRecordState): string | undefined {
 }
 
 /** Same speaker, or a newer version of the same document: the earlier assertion is replaced, not contradicted. */
+function normalizeContribution(text: string): string {
+  return text.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, ' ').replace(/\b(i|we|my|our|the|a|an)\b/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+/** Two descriptions name the same piece of work when one contains the other (ignoring short fragments). */
+function contributionsMatch(a: string, b: string): boolean {
+  if (a.length === 0 || b.length === 0) return false;
+  if (a === b) return true;
+  const [short, long] = a.length <= b.length ? [a, b] : [b, a];
+  return short.length >= 8 && long.includes(short);
+}
+
 function sameSourceClass(prev: StoredClaim, next: StoredClaim): boolean {
   if (STATEMENT_ORIGINS.has(prev.origin) && prev.origin === next.origin) {
     return prev.assertedBy.actorId === next.assertedBy.actorId;

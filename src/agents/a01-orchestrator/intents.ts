@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import type { ModelGateway } from '../../model/gateway.js';
 import type { TaskContext } from '../../runtime/tool-gateway.js';
-import type { LaterRoleId, RoleId } from '../../shared/envelopes.js';
+import type { AnyRoleId, RoleId } from '../../shared/envelopes.js';
 import { BUILTIN_PROFILES } from '../a05-goals/content.js';
 import { matchSubjects } from '../a05-goals/explore.js';
 import { OUTCOMES, OutcomeSchema, type Outcome } from './objectives.js';
@@ -17,7 +17,7 @@ import { OUTCOMES, OutcomeSchema, type Outcome } from './objectives.js';
  */
 
 export interface LaterRoute {
-  toRole: LaterRoleId;
+  toRole: AnyRoleId;
   topic: string;
   text: string;
 }
@@ -53,7 +53,7 @@ const STATUS = /\b(how long (will|does|is)|status|where are (we|you) (at|with)|w
 const CANCEL = /\b(stop|cancel|never ?mind|forget (it|that)|don'?t (bother|search|look))\b/i;
 const GRADUATE = /\b(master'?s|masters|mba|ph\.?\s?d|doctorate|doctoral|graduate (school|program|programme|admissions?|degree)|grad school|postgraduate|post-graduate|msc|m\.sc|llm)\b/i;
 
-const LATER: ReadonlyArray<{ toRole: LaterRoleId; topic: string; re: RegExp; text: string }> = [
+const LATER: ReadonlyArray<{ toRole: AnyRoleId; topic: string; re: RegExp; text: string }> = [
   { toRole: '21', topic: 'essay review', re: /\b(review|feedback on|grade|check) (my )?(essay|personal statement|supplement)\b/i, text: 'Feedback on a draft essay is handled by the essay review service, which keeps your authorship and each institution’s AI policy in force.' },
   { toRole: '17', topic: 'essay brainstorming', re: /\b(essay|personal statement|supplement(al)? (essay|question))\b/i, text: 'Essay brainstorming is handled by the essay interviewer, which helps you find your own material and never writes the essay for you.' },
   { toRole: '29', topic: 'interview practice', re: /\b(mock interview|interview practice|practice (an |my )?interview|admissions interview)\b/i, text: 'Interview practice is a separate, explicitly chosen mode; intake questions are never turned into a scored interview.' },

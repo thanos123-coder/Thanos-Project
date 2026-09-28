@@ -11,17 +11,15 @@ import { ActorSchema, PurposeSchema } from './permissions.js';
  * record changes, requested handoffs, and a completion reason."
  */
 
-export const ROLE_IDS = ['01', '02', '03', '04', '05', '06', '07', '08', '09'] as const;
+export const ROLE_IDS = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18'] as const;
 export type RoleId = (typeof ROLE_IDS)[number];
 export const RoleIdSchema = z.enum(ROLE_IDS);
 
-/** Later roles (10-36) that these nine may hand off to; they are interfaces only in this volume. */
-export const LATER_ROLE_IDS = [
-  '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27',
-  '28', '29', '30', '31', '32', '33', '34', '35', '36',
-] as const;
+/** Later roles (19-36) that the first eighteen may hand off to; they are interfaces only so far. */
+export const LATER_ROLE_IDS = ['19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31', '32', '33', '34', '35', '36'] as const;
 export type LaterRoleId = (typeof LATER_ROLE_IDS)[number];
 export const AnyRoleIdSchema = z.enum([...ROLE_IDS, ...LATER_ROLE_IDS]);
+export type AnyRoleId = z.infer<typeof AnyRoleIdSchema>;
 
 export const ROLE_NAMES: Readonly<Record<RoleId, string>> = {
   '01': 'Lead counselor and orchestrator',
@@ -33,6 +31,15 @@ export const ROLE_NAMES: Readonly<Record<RoleId, string>> = {
   '07': 'Academic and testing planner',
   '08': 'Activities and experience assessor',
   '09': 'Opportunity research scout',
+  '10': 'Project mentor and workload planner',
+  '11': 'Official college and program researcher',
+  '12': 'College and program fit matcher',
+  '13': 'Admissions uncertainty advisor',
+  '14': 'Application portfolio and round strategist',
+  '15': 'Affordability and financial aid planner',
+  '16': 'Scholarship eligibility and matching advisor',
+  '17': 'Personal essay brainstorming interviewer',
+  '18': 'Narrative portfolio coordinator',
 };
 
 export const BudgetLimitsSchema = z

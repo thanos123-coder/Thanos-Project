@@ -26,6 +26,15 @@ export const ROLE_WRITE_SCOPE: Readonly<Record<string, { entities: readonly stri
   '04': { entities: ['*'], studentAttributePrefixes: [''] },
   '05': { entities: ['student', 'interest', 'preference', 'reflection', 'hypothesis', 'assessment'], studentAttributePrefixes: ['goals.'] },
   '08': { entities: ['student', 'experience', 'episode', 'award', 'research_output', 'commitment'], studentAttributePrefixes: ['support.family_responsibilities'] },
+  // Volume two. The researcher (11) and uncertainty advisor (13) propose no student facts.
+  '10': { entities: ['project'], studentAttributePrefixes: [] },
+  '12': { entities: ['fit_priority', 'option_decision'], studentAttributePrefixes: [] },
+  '14': { entities: ['application', 'application_item'], studentAttributePrefixes: [] },
+  '15': { entities: ['attendance_budget', 'funding_award', 'aid_eligibility', 'fee_status'], studentAttributePrefixes: [] },
+  '16': { entities: ['funding_award', 'scholarship_application'], studentAttributePrefixes: [] },
+  // Approved factual corrections found while exploring or reviewing writing go through Agent 04 (17 "Story bank", 18 "Factual consistency").
+  '17': { entities: ['story_use', 'project', 'experience', 'episode'], studentAttributePrefixes: [] },
+  '18': { entities: ['project', 'experience', 'episode', 'award'], studentAttributePrefixes: [] },
   // Direct edits by the person through the product interface.
   ui: { entities: ['*'], studentAttributePrefixes: [''] },
 };
@@ -141,6 +150,10 @@ export function validateClaim(raw: unknown, actor: Actor, viaRole: string): Clai
   return issues.length === 0 ? { ok: true, claim, definition: def, category, issues } : { ok: false, claim, definition: def, issues };
 }
 
+function hasReceipt(claim: ClaimInputParsed): boolean {
+  return claim.evidence.some((e) => e.kind === 'document_anchor') || ['issuer_report', 'school_feed', 'institution_source'].includes(claim.origin);
+}
+
 function semanticIssues(key: string, claim: ClaimInputParsed): string[] {
   const issues: string[] = [];
   if (isAbsence(claim.value)) return issues;
@@ -172,6 +185,23 @@ function semanticIssues(key: string, claim: ClaimInputParsed): string[] {
     case 'test_attempt.record': {
       const errors = validateTestScore(claim.value as TestScoreRecord).filter((i) => i.severity === 'error');
       for (const e of errors) issues.push(`test score: ${e.message}`);
+      break;
+    }
+    // A receipt or completeness state needs a receipt, not a ticked task (14 "Data contract and states").
+    case 'application.status':
+    case 'application_item.definition': {
+      const status = key === 'application.status' ? (claim.value as string) : (v['status'] as string);
+      if (['received', 'complete'].includes(status) && !hasReceipt(claim)) issues.push(`a ${status} state needs a receipt (a document or an issuer report), not only a statement`);
+      break;
+    }
+    // Funds are confirmed only by the provider's documents (15 "Aid record and conditions").
+    case 'funding_award.definition': {
+      if (['confirmed_for_disbursement', 'disbursed'].includes(v['stage'] as string) && !hasReceipt(claim)) issues.push('confirmed or disbursed funding needs the provider’s document or report');
+      break;
+    }
+    // A student estimate is not a supporter's commitment (15 "Intake with minimum necessary data").
+    case 'attendance_budget.definition': {
+      if (v['basis'] === 'supporter_confirmed' && claim.holder?.kind !== 'supporter') issues.push('a supporter-confirmed amount must be stated by that supporter');
       break;
     }
     default:

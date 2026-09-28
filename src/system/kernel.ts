@@ -3,6 +3,7 @@ import { RecordService } from '../agents/a04-record-steward/service.js';
 import { RulePackageRegistry, registerRuleTools } from '../agents/a06-eligibility/registry.js';
 import type { SpecialistAgent } from '../agents/common/specialist.js';
 import { NullModelGateway, type ModelGateway } from '../model/gateway.js';
+import { AssistanceOperationSchema, AssistancePolicyRegistry, DestinationRefSchema } from '../policy/assistance.js';
 import { AuditLog } from '../runtime/audit.js';
 import { BudgetTracker, DEFAULT_ROLE_BUDGETS } from '../runtime/budget.js';
 import { CancellationToken } from '../runtime/cancellation.js';
@@ -67,6 +68,8 @@ export class SystemKernel {
   readonly actions: ExternalActionService;
   readonly review: HumanReviewService;
   readonly contracts = new ContractRegistry();
+  /** Reviewed, operation-specific assistance policies (the interface Agent 22 will own). */
+  readonly policies = new AssistancePolicyRegistry();
   readonly model: ModelGateway;
   private readonly specialists = new Map<RoleId, SpecialistAgent>();
   private readonly running = new Map<string, TaskContext>();
@@ -86,6 +89,12 @@ export class SystemKernel {
     this.records.registerDerivativeStore(this.actions);
     registerRuleTools(this.gateway, this.rules);
     this.registerActionTools();
+    this.registerPolicyTools();
+    // A revised assistance policy makes every result that relied on the earlier version stale (18 "Operating procedure", step 7).
+    this.policies.onChange((c) => {
+      if (!c.previousRef) return;
+      this.records.invalidateEverywhereByRuleOrSource({ ruleVersion: c.previousRef }, `assistance policy changed: ${c.previousRef} -> ${c.policyRef}`);
+    });
     // Rule changes invalidate dependent findings through the record service.
     this.rules.onChange((c) => {
       if (!c.previousRef) return;
@@ -233,6 +242,20 @@ export class SystemKernel {
   async flushEvents(): Promise<void> {
     for (const e of this.records.takeOutbox()) this.events.publish(e);
     await this.events.drain();
+  }
+
+  private registerPolicyTools(): void {
+    this.gateway.register({
+      name: 'policy.check_operation',
+      description: 'Operation-specific assistance decision for the named destinations: allowed, prohibited or unclear, with sources.',
+      kind: 'read',
+      args: z.object({ operation: AssistanceOperationSchema, destinations: z.array(DestinationRefSchema).max(20) }).strict(),
+      handler: async (inv, args) => {
+        const d = this.policies.evaluate(args.operation, args.destinations);
+        for (const p of d.perDestination) if (p.sourceId) inv.context.servedSourceIds.add(p.sourceId);
+        return d;
+      },
+    });
   }
 
   private registerActionTools(): void {

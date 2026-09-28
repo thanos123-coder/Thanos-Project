@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { TestScoreRecordSchema, TestFamilySchema } from './assessments.js';
 import { CreditValueSchema, GradeValueSchema } from './grades.js';
-import { BudgetSchema } from './money.js';
+import { BudgetSchema, CostComponentKindSchema, MoneySchema } from './money.js';
 import type { Origin } from './facts.js';
 import type { DataCategory } from './permissions.js';
 import { AcademicPeriodSchema, CalendarDateSchema, DateIntervalSchema, LocalTimeSchema, PartialDateSchema, TimezoneSchema } from './time.js';
@@ -158,6 +158,132 @@ export const AWARD_SCOPES = ['school', 'local', 'regional', 'national', 'interna
 /** Work that normally needs supervision or prior review before it begins (08 "Research and independent projects"). */
 export const OVERSIGHT_AREAS = ['human_participants', 'animals', 'hazardous_materials', 'none_known'] as const;
 
+// ---- Volume two vocabularies ---------------------------------------------
+
+/** The context that decides which project help is permitted (10 "Planning procedure", step 2). */
+export const PROJECT_CONTEXTS = ['personal_learning', 'school_assessed', 'competition', 'organization', 'research_program'] as const;
+/** What a project output actually is. One state is never relabelled as another (10 "Scope and meaningful success", 10T15). */
+export const PROJECT_OUTPUT_STATES = ['idea', 'prototype', 'private_demo', 'deployed', 'literature_review', 'draft', 'submitted', 'accepted', 'published', 'presented'] as const;
+export const PROJECT_STATUSES = ['exploring', 'active', 'paused', 'completed', 'stopped'] as const;
+export const CONTRIBUTORS = ['student', 'team', 'mentor', 'other_student', 'organization', 'tool'] as const;
+/** Application action states; each transition needs its own evidence (14 "Data contract and states"). */
+export const APPLICATION_STATES = ['planned', 'approved', 'initiated', 'submitted', 'received', 'complete', 'withdrawn'] as const;
+export const APPLICATION_OUTCOMES = ['admitted', 'admitted_other_program', 'denied', 'waitlisted', 'deferred', 'withdrawn', 'incomplete', 'conditional_offer'] as const;
+export const APPLICATION_SYSTEMS = ['direct', 'common_app', 'coalition', 'ucas', 'uc', 'other'] as const;
+export const APPLICATION_ITEM_OWNERS = ['student', 'school', 'recommender', 'testing_agency', 'institution', 'supporter', 'other'] as const;
+export const APPLICATION_ITEM_STATES = ['not_started', 'in_progress', 'requested', 'sent', 'received', 'waived'] as const;
+export const FUNDING_KINDS = ['institutional_grant', 'external_scholarship', 'government_grant', 'tuition_waiver', 'loan', 'work', 'other'] as const;
+/** Funding states; only offered-or-later items can count as funding, and only confirmed ones in a confirmed scenario (15 "Aid record and conditions"). */
+export const FUNDING_STAGES = ['identified', 'applied', 'nominated', 'semifinalist', 'finalist', 'offered', 'accepted', 'confirmed_for_disbursement', 'disbursed', 'revised', 'withdrawn', 'declined', 'not_selected'] as const;
+export const FUNDING_PERIODS = ['one_term', 'one_academic_year', 'full_degree', 'one_time'] as const;
+/** How the student lets an experience be used for writing work (17 "Session setup and control"). */
+export const STORY_USE_STATES = ['private', 'discuss_only', 'possible_writing_material', 'do_not_use'] as const;
+export const SCHOLARSHIP_TRACKING_STAGES = ['considering', 'pursuing', 'nomination_requested', 'nominated', 'not_nominated', 'applied', 'interview', 'semifinalist', 'finalist', 'offered', 'not_selected', 'stopped'] as const;
+
+export const ProjectDefinitionSchema = z
+  .object({
+    /** A neutral title the student chose or approved; planning notes, not application language. */
+    title: z.string().min(1).max(120),
+    goal: z.string().min(1).max(300),
+    audience: z.string().max(200).nullable(),
+    context: z.enum(PROJECT_CONTEXTS),
+    /** The school course, competition and cycle, or organization whose rules apply. */
+    contextRef: z.string().max(120).nullable(),
+  })
+  .strict();
+
+export const ContributionItemSchema = z
+  .object({
+    description: z.string().min(1).max(300),
+    by: z.enum(CONTRIBUTORS),
+    /** Where the contribution can be seen (a commit, a note, a supervisor's comment), in the student's words. */
+    evidence: z.string().max(300).nullable(),
+  })
+  .strict();
+
+export const ProjectCompletionSchema = z
+  .object({
+    outputs: z.array(z.object({ description: z.string().min(1).max(300), state: z.enum(PROJECT_OUTPUT_STATES) }).strict()).max(20),
+    studentContribution: z.array(z.string().min(1).max(300)).max(30),
+    teamContribution: z.array(z.string().min(1).max(300)).max(30),
+    otherContributions: z.array(z.object({ by: z.enum(CONTRIBUTORS), description: z.string().min(1).max(300) }).strict()).max(30),
+    measures: z.array(MeasureSchema).max(10),
+    unfinished: z.array(z.string().min(1).max(300)).max(20),
+    learned: z.string().max(1000).nullable(),
+  })
+  .strict();
+export type ProjectCompletion = z.infer<typeof ProjectCompletionSchema>;
+
+export const FitPrioritySchema = z
+  .object({
+    /** A dimension from the fit matcher's vocabulary, e.g. 'direct_program_access' or 'setting'. */
+    dimension: z.string().regex(/^[a-z_]+$/),
+    kind: z.enum(['hard_constraint', 'preference']),
+    /** The requirement in the holder's own words. */
+    statement: z.string().min(1).max(300),
+    value: z.union([z.string(), z.number(), z.boolean(), z.array(z.string())]).nullable(),
+    /** 0-5 preference setting the student can inspect and change; null for a hard constraint. */
+    weight: z.number().int().min(0).max(5).nullable(),
+    /** "I think my family can contribute about this" is provisional, not a permanent cutoff (12 "Preferences the student can own"). */
+    provisional: z.boolean(),
+  })
+  .strict();
+export type FitPriority = z.infer<typeof FitPrioritySchema>;
+
+export const AttendanceBudgetSchema = z
+  .object({
+    min: MoneySchema.nullable(),
+    max: MoneySchema,
+    period: z.enum(['annual', 'total_degree']),
+    /** Whether the amount also has to cover travel and personal costs; null when not stated. */
+    includesTravelAndPersonal: z.boolean().nullable(),
+    basis: z.enum(['student_estimate', 'supporter_confirmed', 'worksheet']),
+    /** When the money is actually available; a planned contribution is not cash in hand (15 "Intake"). */
+    availableFrom: PartialDateSchema.nullable(),
+  })
+  .strict()
+  .refine((b) => b.min === null || b.min.currency === b.max.currency, 'min and max must use the same currency')
+  .refine((b) => b.min === null || Number(b.min.amount) <= Number(b.max.amount), 'min must not exceed max');
+export type AttendanceBudget = z.infer<typeof AttendanceBudgetSchema>;
+
+export const FundingAwardSchema = z
+  .object({
+    provider: z.string().min(1).max(200),
+    name: z.string().min(1).max(200),
+    kind: z.enum(FUNDING_KINDS),
+    amount: MoneySchema,
+    period: z.enum(FUNDING_PERIODS),
+    /** Costs the award may pay for; null when the provider does not restrict it. */
+    coveredCosts: z.array(CostComponentKindSchema).nullable(),
+    stage: z.enum(FUNDING_STAGES),
+    /** The program-scoped option the award belongs to, if destination restricted. */
+    optionRef: z.string().max(200).nullable(),
+    renewal: z.object({ renewable: z.boolean(), conditions: z.array(z.string().min(1)).max(10) }).strict().nullable(),
+  })
+  .strict();
+export type FundingAward = z.infer<typeof FundingAwardSchema>;
+
+export const ApplicationDefinitionSchema = z
+  .object({
+    optionRef: z.string().min(1).max(200),
+    institutionRef: z.string().min(1).max(120),
+    campusRef: z.string().max(120).nullable(),
+    programRef: z.string().max(120).nullable(),
+    cycle: z.string().min(4).max(20),
+    roundRef: z.string().max(120).nullable(),
+    system: z.enum(APPLICATION_SYSTEMS),
+  })
+  .strict();
+
+export const ApplicationItemSchema = z
+  .object({
+    applicationRef: z.string().min(1).max(200),
+    item: z.string().min(1).max(160),
+    owner: z.enum(APPLICATION_ITEM_OWNERS),
+    status: z.enum(APPLICATION_ITEM_STATES),
+  })
+  .strict();
+
 export const RESEARCH_STATUSES = [
   'in_progress',
   'literature_review',
@@ -273,6 +399,31 @@ const defs: FieldDefinition[] = [
   { entity: 'episode', attribute: 'learning', schema: z.object({ studentWords: z.string().min(1) }).strict(), category: 'experiences', conflictPolicy: 'owner_latest', consequential: false, allowedOrigins: ['student_statement'], label: 'what you learned' },
   { entity: 'award', attribute: 'definition', schema: z.object({ title: z.string().min(1), organizer: z.string().nullable(), date: PartialDateSchema.nullable(), scope: z.enum(AWARD_SCOPES), stage: z.enum(AWARD_STAGES), attribution: z.enum(['individual', 'team']), experienceRef: z.string().nullable(), selectionNote: z.string().nullable() }).strict(), category: 'experiences', conflictPolicy: 'evidence_reconcile', consequential: true, label: 'award or distinction' },
   { entity: 'research_output', attribute: 'definition', schema: z.object({ experienceRef: z.string().min(1), questionSummary: z.string().nullable(), status: z.enum(RESEARCH_STATUSES), studentTasks: z.array(z.string()), supervision: z.enum(['supervised', 'independent', 'unknown']), approvalStatus: z.enum(['not_required', 'approved_before_work', 'pending', 'unknown']), authorship: z.string().nullable(), oversight: z.array(z.enum(OVERSIGHT_AREAS)).default([]) }).strict(), category: 'experiences', conflictPolicy: 'evidence_reconcile', consequential: true, label: 'research output' },
+
+  // ---- Projects (Agent 10) ------------------------------------------------
+  { entity: 'project', attribute: 'definition', schema: ProjectDefinitionSchema, category: 'experiences', conflictPolicy: 'owner_latest', consequential: false, allowedOrigins: STATEMENT_ORIGINS, label: 'project' },
+  { entity: 'project', attribute: 'status', schema: z.enum(PROJECT_STATUSES), category: 'experiences', conflictPolicy: 'owner_latest', consequential: false, allowedOrigins: STATEMENT_ORIGINS, label: 'project status' },
+  // Who did what, recorded as the work happens; completion claims are checked against it (XT01).
+  { entity: 'project', attribute: 'contribution_log', schema: z.object({ items: z.array(ContributionItemSchema).max(60) }).strict(), category: 'experiences', conflictPolicy: 'owner_latest', consequential: true, allowedOrigins: STATEMENT_ORIGINS, label: 'who did what' },
+  { entity: 'project', attribute: 'completion', schema: ProjectCompletionSchema, category: 'experiences', conflictPolicy: 'owner_latest', consequential: true, allowedOrigins: STATEMENT_ORIGINS, label: 'what the project produced' },
+
+  // ---- Writing material permissions (Agents 10, 17, 18) --------------------
+  { entity: 'story_use', attribute: 'permission', schema: z.object({ sourceRef: z.string().min(1).max(200), state: z.enum(STORY_USE_STATES) }).strict(), category: 'interaction_preferences', conflictPolicy: 'owner_latest', consequential: true, allowedOrigins: ['student_statement'], label: 'use for writing' },
+
+  // ---- College fit and choices (Agents 12 and 14) --------------------------
+  { entity: 'fit_priority', attribute: 'definition', schema: FitPrioritySchema, category: 'goals_preferences', conflictPolicy: 'owner_latest', consequential: true, holderScoped: true, allowedOrigins: STATEMENT_ORIGINS, label: 'college priority' },
+  { entity: 'option_decision', attribute: 'definition', schema: z.object({ optionRef: z.string().min(1).max(200), decision: z.enum(['explore', 'retain', 'reject', 'undecided']), reason: z.string().max(300).nullable() }).strict(), category: 'goals_preferences', conflictPolicy: 'owner_latest', consequential: false, allowedOrigins: ['student_statement'], label: 'decision about an option' },
+  { entity: 'application', attribute: 'definition', schema: ApplicationDefinitionSchema, category: 'application_scope', conflictPolicy: 'owner_latest', consequential: true, label: 'application' },
+  { entity: 'application', attribute: 'status', schema: z.enum(APPLICATION_STATES), category: 'application_scope', conflictPolicy: 'planning_latest_statement', consequential: true, label: 'application status' },
+  { entity: 'application', attribute: 'outcome', schema: z.enum(APPLICATION_OUTCOMES), category: 'application_scope', conflictPolicy: 'evidence_reconcile', consequential: true, label: 'application decision' },
+  { entity: 'application_item', attribute: 'definition', schema: ApplicationItemSchema, category: 'plans_tasks', conflictPolicy: 'planning_latest_statement', consequential: true, label: 'application item' },
+
+  // ---- Funding (Agents 15 and 16) -----------------------------------------
+  { entity: 'attendance_budget', attribute: 'definition', schema: AttendanceBudgetSchema, category: 'financial', conflictPolicy: 'owner_latest', consequential: true, holderScoped: true, allowedOrigins: STATEMENT_ORIGINS, label: 'amount available for college' },
+  { entity: 'funding_award', attribute: 'definition', schema: FundingAwardSchema, category: 'financial', conflictPolicy: 'evidence_reconcile', consequential: true, label: 'aid or scholarship' },
+  { entity: 'aid_eligibility', attribute: 'status', schema: z.object({ program: z.string().min(2).max(80), status: z.enum(['confirmed_eligible', 'confirmed_ineligible', 'student_believes_eligible', 'unknown']), basis: z.string().max(200).nullable() }).strict(), category: 'citizenship_residency', conflictPolicy: 'evidence_reconcile', consequential: true, label: 'aid program eligibility' },
+  { entity: 'fee_status', attribute: 'assessment', schema: z.object({ jurisdiction: COUNTRY, institutionRef: z.string().max(120).nullable(), status: z.enum(['home', 'in_state', 'out_of_state', 'overseas', 'international', 'unknown']), basis: z.enum(['institution_assessment', 'student_belief']) }).strict(), category: 'citizenship_residency', conflictPolicy: 'evidence_reconcile', consequential: true, label: 'fee status' },
+  { entity: 'scholarship_application', attribute: 'status', schema: z.object({ opportunityRef: z.string().min(1).max(200), stage: z.enum(SCHOLARSHIP_TRACKING_STAGES) }).strict(), category: 'plans_tasks', conflictPolicy: 'planning_latest_statement', consequential: false, label: 'scholarship application' },
 ];
 
 export const FIELD_CATALOG: ReadonlyMap<string, FieldDefinition> = new Map(defs.map((d) => [`${d.entity}.${d.attribute}`, d]));

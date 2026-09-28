@@ -330,3 +330,41 @@ describe('Agent 04 — worked examples and cross-cutting behavior', () => {
     expect(records.recordVersion(TENANT, studentId)).toBe(0);
   });
 });
+
+describe('Agent 04 — volume two fields', () => {
+  const project = (studentActor: Actor, attribute: string, value: unknown) => buildClaim({ entity: 'project', entityId: 'p1', attribute, value, origin: 'student_statement', evidence: [said('as I described it')], actor: studentActor, viaRole: 'ui' });
+  const log = { items: [{ description: 'Chose the five links to keep', by: 'student', evidence: 'my notes' }, { description: 'Built the search feature', by: 'other_student', evidence: 'repository history' }] };
+  const completion = (studentContribution: string[]) => ({ outputs: [{ description: 'Club resource page', state: 'prototype' }], studentContribution, teamContribution: [], otherContributions: [], measures: [], unfinished: [], learned: null });
+
+  it('a project completion cannot credit the student with work the contribution log gives to someone else (XT01)', () => {
+    const { records, studentId, ui, studentActor, mutation } = makeRecords();
+    records.applyMutation(ui, TENANT, studentId, mutation([project(studentActor, 'contribution_log', log)]));
+    const overstated = records.applyMutation(ui, TENANT, studentId, mutation([project(studentActor, 'completion', completion(['Chose the five links to keep', 'Built the search feature']))]));
+    expect(overstated.outcome).toBe('rejected');
+    expect(overstated.reasons.join()).toMatch(/credits you with "Built the search feature", which the project's contribution record attributes to other student/);
+    const accurate = records.applyMutation(ui, TENANT, studentId, mutation([project(studentActor, 'completion', completion(['Chose the five links to keep']))]));
+    expect(accurate.outcome).toBe('accepted');
+  });
+
+  it('a received or complete application state needs a receipt, not a ticked task', () => {
+    const { records, studentId, ui, studentActor, mutation } = makeRecords();
+    const status = (value: string, evidence: ReturnType<typeof said>) => buildClaim({ entity: 'application', entityId: 'app1', attribute: 'status', value, origin: value === 'received' && evidence.kind === 'document_anchor' ? 'document_extraction' : 'student_statement', evidence: [evidence], actor: studentActor, viaRole: 'ui' });
+    expect(records.applyMutation(ui, TENANT, studentId, mutation([status('submitted', said('I submitted it'))])).outcome).toBe('accepted');
+    const noReceipt = records.applyMutation(ui, TENANT, studentId, mutation([status('received', said('they got it'))]));
+    expect(noReceipt.outcome).toBe('rejected');
+    expect(noReceipt.reasons.join()).toMatch(/needs a receipt/);
+    expect(records.applyMutation(ui, TENANT, studentId, mutation([status('received', docAnchor('doc_receipt', 1, 1, 'Application received'))])).outcome).toBe('accepted');
+  });
+
+  it('confirmed funding needs the provider’s document; a student estimate cannot claim a supporter’s confirmation', () => {
+    const { records, studentId, ui, studentActor, mutation } = makeRecords();
+    const award = { provider: 'Fictional Foundation', name: 'Fictional Award', kind: 'external_scholarship', amount: { amount: '5000.00', currency: 'USD' }, period: 'one_academic_year', coveredCosts: null, stage: 'confirmed_for_disbursement', optionRef: null, renewal: null };
+    const said1 = records.applyMutation(ui, TENANT, studentId, mutation([buildClaim({ entity: 'funding_award', entityId: 'award_1', attribute: 'definition', value: award, origin: 'student_statement', evidence: [said('they said it is confirmed')], actor: studentActor, viaRole: 'ui' })]));
+    expect(said1.outcome).toBe('rejected');
+    expect(said1.reasons.join()).toMatch(/provider’s document/);
+    const budget = { min: null, max: { amount: '18000.00', currency: 'USD' }, period: 'annual', includesTravelAndPersonal: null, basis: 'supporter_confirmed', availableFrom: null };
+    const selfConfirmed = records.applyMutation(ui, TENANT, studentId, mutation([buildClaim({ entity: 'attendance_budget', entityId: 'b1', attribute: 'definition', value: budget, origin: 'student_statement', evidence: [said('my parents can do 18000')], actor: studentActor, viaRole: 'ui' })]));
+    expect(selfConfirmed.outcome).toBe('rejected');
+    expect(selfConfirmed.reasons.join()).toMatch(/must be stated by that supporter/);
+  });
+});

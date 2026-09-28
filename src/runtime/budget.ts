@@ -149,4 +149,15 @@ export const DEFAULT_ROLE_BUDGETS: Readonly<Record<string, BudgetLimits>> = {
   '07': { maxToolCalls: 12, maxModelCalls: 2, maxRevisions: 1 },
   '08': { maxToolCalls: 10, maxModelCalls: 2, maxRevisions: 1 },
   '09': { maxToolCalls: 40, maxModelCalls: 12, maxRevisions: 1 },
+  // Volume two ("Proposed operating budgets"): a cost recalculation needs no model call, a shortlist
+  // explanation one bounded call, a new institution research task several fetches; one structured repair.
+  '10': { maxToolCalls: 12, maxModelCalls: 2, maxRevisions: 1 },
+  '11': { maxToolCalls: 40, maxModelCalls: 6, maxRevisions: 1 },
+  '12': { maxToolCalls: 16, maxModelCalls: 1, maxRevisions: 1 },
+  '13': { maxToolCalls: 10, maxModelCalls: 1, maxRevisions: 1 },
+  '14': { maxToolCalls: 24, maxModelCalls: 1, maxRevisions: 1 },
+  '15': { maxToolCalls: 14, maxModelCalls: 1, maxRevisions: 1 },
+  '16': { maxToolCalls: 30, maxModelCalls: 3, maxRevisions: 1 },
+  '17': { maxToolCalls: 14, maxModelCalls: 3, maxRevisions: 1 },
+  '18': { maxToolCalls: 14, maxModelCalls: 2, maxRevisions: 1 },
 };

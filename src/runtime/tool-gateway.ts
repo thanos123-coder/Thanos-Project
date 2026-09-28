@@ -58,6 +58,17 @@ export const ROLE_TOOL_MATRIX: Readonly<Record<RoleId, readonly string[]>> = {
   '07': ['record.read_scoped', 'rules.read_verified', 'calendars.read_verified', 'artifacts.read', 'artifacts.put_derived', 'actions.propose'],
   '08': ['record.read_scoped', 'record.propose_change', 'conversation.read_turn', 'artifacts.put_derived'],
   '09': ['record.read_scoped', 'research.search_public', 'research.fetch_public', 'opportunities.read_catalog', 'opportunities.upsert_catalog', 'rules.read_verified', 'artifacts.read', 'artifacts.put_derived', 'actions.propose'],
+  // Volume two. Each role still reaches student data only through its scoped view; public evidence
+  // comes from the shared institution and scholarship stores.
+  '10': ['record.read_scoped', 'record.propose_change', 'artifacts.read', 'artifacts.put_derived', 'projects.notebook', 'policy.check_operation'],
+  '11': ['record.read_scoped', 'research.search_public', 'research.fetch_public', 'institutions.read', 'institutions.write', 'artifacts.read'],
+  '12': ['record.read_scoped', 'record.propose_change', 'institutions.read', 'artifacts.read', 'artifacts.put_derived'],
+  '13': ['record.read_scoped', 'institutions.read', 'models.read_registry', 'artifacts.read', 'artifacts.put_derived'],
+  '14': ['record.read_scoped', 'record.propose_change', 'institutions.read', 'scholarships.read', 'artifacts.read', 'artifacts.put_derived', 'actions.propose'],
+  '15': ['record.read_scoped', 'record.propose_change', 'institutions.read', 'finance.exchange_rate', 'files.read_quarantined', 'files.parse_sandboxed', 'artifacts.read', 'artifacts.put_derived'],
+  '16': ['record.read_scoped', 'record.propose_change', 'research.search_public', 'research.fetch_public', 'scholarships.read', 'scholarships.write', 'institutions.read', 'policy.check_operation', 'artifacts.read', 'artifacts.put_derived', 'actions.propose'],
+  '17': ['record.read_scoped', 'record.propose_change', 'conversation.read_turn', 'story.bank', 'policy.check_operation', 'artifacts.read', 'artifacts.put_derived'],
+  '18': ['record.read_scoped', 'record.propose_change', 'drafts.registry', 'story.read_permitted', 'institutions.read', 'policy.check_operation', 'artifacts.read', 'artifacts.put_derived'],
 };
 
 /** Hook used to re-check that the acting person is still authorized (revocation takes effect immediately). */
