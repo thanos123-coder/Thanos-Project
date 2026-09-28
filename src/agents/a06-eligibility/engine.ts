@@ -83,7 +83,8 @@ export interface EvaluationContext {
   facts: StudentFacts;
   stage: DecisionStage;
   applicantCategory: ApplicantCategory | null;
-  pkg: RulePackage;
+  /** Only the rule tree and its source conflicts are read, so other rule sets (e.g. opportunity eligibility) can reuse the engine. */
+  pkg: Pick<RulePackage, 'rules' | 'sourceConflicts'>;
   asOf: CalendarDate;
 }
 

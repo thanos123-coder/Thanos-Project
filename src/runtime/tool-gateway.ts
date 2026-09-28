@@ -57,7 +57,7 @@ export const ROLE_TOOL_MATRIX: Readonly<Record<RoleId, readonly string[]>> = {
   '06': ['record.read_scoped', 'rules.read_verified', 'artifacts.put_derived'],
   '07': ['record.read_scoped', 'rules.read_verified', 'calendars.read_verified', 'artifacts.read', 'artifacts.put_derived', 'actions.propose'],
   '08': ['record.read_scoped', 'record.propose_change', 'conversation.read_turn', 'artifacts.put_derived'],
-  '09': ['record.read_scoped', 'research.search_public', 'research.fetch_public', 'opportunities.read_catalog', 'opportunities.upsert_catalog', 'rules.read_verified', 'artifacts.put_derived', 'actions.propose'],
+  '09': ['record.read_scoped', 'research.search_public', 'research.fetch_public', 'opportunities.read_catalog', 'opportunities.upsert_catalog', 'rules.read_verified', 'artifacts.read', 'artifacts.put_derived', 'actions.propose'],
 };
 
 /** Hook used to re-check that the acting person is still authorized (revocation takes effect immediately). */
