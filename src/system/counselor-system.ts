@@ -20,6 +20,10 @@ import { OpportunityScoutAgent } from '../agents/a09-opportunities/agent.js';
 import { OpportunityCatalog } from '../agents/a09-opportunities/catalog.js';
 import type { ResearchProviders } from '../agents/a09-opportunities/research.js';
 import { registerOpportunityTools } from '../agents/a09-opportunities/tools.js';
+import { OfficialResearchAgent } from '../agents/a11-research/agent.js';
+import { InstitutionClaimStore } from '../agents/a11-research/claims.js';
+import { InstitutionRegistry } from '../agents/a11-research/entities.js';
+import { registerInstitutionTools, type OfficialSearchProvider } from '../agents/a11-research/tools.js';
 import type { ModelGateway } from '../model/gateway.js';
 import type { ExternalActionRecord } from '../runtime/external-actions.js';
 import type { ReviewStaffing } from '../runtime/human-review.js';
@@ -28,6 +32,7 @@ import type { ResultEnvelope, RoleId } from '../shared/envelopes.js';
 import type { IdGenerator } from '../shared/ids.js';
 import type { Actor } from '../shared/permissions.js';
 import { SystemKernel } from './kernel.js';
+import { connectInstitutionClaims } from './institution-wiring.js';
 import { connectOpportunityCatalog } from './opportunity-wiring.js';
 import { registerOrchestrationTools } from './orchestration-tools.js';
 
@@ -46,6 +51,8 @@ export interface CounselorSystemOptions {
   model?: ModelGateway;
   reviewStaffing?: ReviewStaffing;
   research?: ResearchProviders;
+  /** Search restricted to an institution's official pages (Agent 11). */
+  officialSearch?: OfficialSearchProvider;
   documents?: { scanner?: MalwareScanner | null; limits?: QuarantineLimits; fingerprintSecret?: string };
 }
 
@@ -82,6 +89,10 @@ export class CounselorSystem {
   readonly knowledge: SubjectKnowledgeRegistry;
   readonly calendars: TestCalendarRegistry;
   readonly opportunities: OpportunityCatalog;
+  /** Institutions, campuses, programs and platforms with their official domains, pages and coverage. */
+  readonly institutions: InstitutionRegistry;
+  /** Versioned, anchored official claims shared by every role that needs them. */
+  readonly institutionClaims: InstitutionClaimStore;
   readonly objectives: ObjectiveStore;
   private readonly deliveries = new Map<string, string>();
 
@@ -117,6 +128,11 @@ export class CounselorSystem {
     registerOpportunityTools(k.gateway, this.opportunities, options.research ?? {});
     connectOpportunityCatalog(k, this.opportunities);
 
+    this.institutions = new InstitutionRegistry();
+    this.institutionClaims = new InstitutionClaimStore(() => k.clock.nowIso());
+    registerInstitutionTools(k.gateway, this.institutions, this.institutionClaims, options.officialSearch);
+    connectInstitutionClaims(k, this.institutionClaims);
+
     this.objectives = new ObjectiveStore(k.clock, k.ids, (taskId, reason) => k.cancel(taskId, reason));
     registerTaskTools(k.gateway, this.objectives);
     k.records.registerDerivativeStore(this.objectives);
@@ -147,6 +163,7 @@ export class CounselorSystem {
     k.registerSpecialist(new AcademicPlannerAgent());
     k.registerSpecialist(new ActivitiesAssessorAgent(model));
     k.registerSpecialist(new OpportunityScoutAgent(model));
+    k.registerSpecialist(new OfficialResearchAgent(model));
   }
 
   /** Create a student record owned by the student's own account. */

@@ -61,7 +61,7 @@ export const ROLE_TOOL_MATRIX: Readonly<Record<RoleId, readonly string[]>> = {
   // Volume two. Each role still reaches student data only through its scoped view; public evidence
   // comes from the shared institution and scholarship stores.
   '10': ['record.read_scoped', 'record.propose_change', 'artifacts.read', 'artifacts.put_derived', 'projects.notebook', 'policy.check_operation'],
-  '11': ['record.read_scoped', 'research.search_public', 'research.fetch_public', 'institutions.read', 'institutions.write', 'artifacts.read'],
+  '11': ['record.read_scoped', 'institutions.search_official', 'research.fetch_public', 'institutions.read', 'institutions.write', 'artifacts.read'],
   '12': ['record.read_scoped', 'record.propose_change', 'institutions.read', 'artifacts.read', 'artifacts.put_derived'],
   '13': ['record.read_scoped', 'institutions.read', 'models.read_registry', 'artifacts.read', 'artifacts.put_derived'],
   '14': ['record.read_scoped', 'record.propose_change', 'institutions.read', 'scholarships.read', 'artifacts.read', 'artifacts.put_derived', 'actions.propose'],
