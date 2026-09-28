@@ -206,7 +206,7 @@ Counts: 103 requirements, 164 acceptance cases (144 role cases and 20 cross-agen
 |---|---|---|
 | 06R01 | Establish the exact question | `src/agents/a06-eligibility/agent.ts` |
 | 06R02 | Validate coverage | `src/agents/a06-eligibility/agent.ts` |
-| 06R03 | Retrieve the current rule package | `src/agents/a06-eligibility/agent.ts`, `src/agents/a06-eligibility/registry.ts`, `src/shared/sources.ts` |
+| 06R03 | Retrieve the current rule package | `src/agents/a06-eligibility/agent.ts`, `src/agents/a06-eligibility/registry.ts`, `src/agents/a06-eligibility/rules.ts`, `src/shared/sources.ts` |
 | 06R04 | Read the needed student facts | `src/agents/a06-eligibility/agent.ts`, `src/agents/common/student-facts.ts` |
 | 06R05 | Match credentials and subjects | `src/agents/a06-eligibility/agent.ts` |
 | 06R06 | Evaluate atomic predicates | `src/agents/a06-eligibility/engine.ts` |

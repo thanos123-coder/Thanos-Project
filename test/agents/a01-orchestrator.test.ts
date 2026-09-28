@@ -91,6 +91,9 @@ describe('Agent 01 — Lead counselor and orchestrator', () => {
     expect(r3.answer!.headline).toMatch(/on track, provided that: Final grade in Mathematics/);
     // The research was not repeated.
     expect(childTasks(h, '09')).toBe(opportunitiesBefore);
+    // A status check keeps finished work apart from work that finished with open points.
+    const s = await h.system.status(h.student, TENANT, h.studentId, r.objectiveId!);
+    expect(s.answer!.headline).toMatch(/Done: checking program requirements, the opportunity search\. Done with open points: your course and testing plan\./);
   });
 
   it('01T01: correcting an activity date routes one scoped mutation and nothing else', async () => {

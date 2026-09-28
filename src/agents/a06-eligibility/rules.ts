@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { TestFamilySchema } from '../../shared/assessments.js';
 import { COURSE_LEVELS } from '../../shared/fields.js';
 import { ApplicantCategorySchema, DECISION_STAGES, DecisionStageSchema, type DecisionStage } from '../../shared/scope.js';
-import { SourceRecordSchema } from '../../shared/sources.js';
+import { SourceRecordSchema, canEstablishConsequentialClaim } from '../../shared/sources.js';
 import { CalendarDateSchema, PartialDateSchema } from '../../shared/time.js';
 
 /**
@@ -287,5 +287,17 @@ export function packageStructureIssues(p: RulePackage): string[] {
   }
   for (const t of p.testingPolicies) if (!sourceIds.has(t.source.sourceId)) issues.push(`testing policy for ${t.family} cites unknown source`);
   if (p.reviewStatus === 'reviewed' && (!p.reviewedBy || !p.reviewedAt)) issues.push('a reviewed package must record its reviewer and review time');
+  // A reviewed package decides consequential questions, so every source it cites must be
+  // an official source that is neither stale nor retracted (06R03).
+  if (p.reviewStatus === 'reviewed') {
+    const cited = new Set<string>(p.testingPolicies.map((t) => t.source.sourceId));
+    const collect = (n: RuleNode): void => {
+      if (n.kind === 'predicate') cited.add(n.source.sourceId);
+      else if (n.kind === 'not') collect(n.child);
+      else n.children.forEach(collect);
+    };
+    collect(p.rules);
+    for (const s of p.sources) if (cited.has(s.id) && !canEstablishConsequentialClaim(s)) issues.push(`source ${s.id} (${s.sourceType}, ${s.reviewStatus}) cannot support a reviewed rule`);
+  }
   return issues;
 }

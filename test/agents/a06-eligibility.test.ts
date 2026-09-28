@@ -307,6 +307,15 @@ describe('Agent 06 — coverage, validation and safety', () => {
     expect(p.coverage.status).toBe('rule_package_not_reviewed');
   });
 
+  it('a reviewed rule package citing a retracted, stale or unofficial source is refused (06R03)', () => {
+    const withSource = (over: Partial<ReturnType<typeof source>>) => engineeringPackage({ sources: [{ ...source('src_program'), ...over }, source('src_central', 'Example University central admissions page', 'official_institution')] });
+    for (const over of [{ reviewStatus: 'retracted' as const }, { reviewStatus: 'stale' as const }, { sourceType: 'third_party_listing' as const }]) {
+      expect(() => setup([withSource(over)])).toThrow(/Invalid rule package/);
+    }
+    // A draft may still hold such a source while it waits for review; it never decides anything.
+    expect(() => setup([{ ...withSource({ reviewStatus: 'retracted' }), reviewStatus: 'draft' } as never])).not.toThrow();
+  });
+
   it('an unsupported credential is not given an eligibility decision (XT17)', async () => {
     const h = setup();
     h.seed([stated(h.student, 'education.qualification_system', { id: 'FR_BAC', label: 'French Baccalauréat' })]);

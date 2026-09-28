@@ -615,10 +615,15 @@ export class LeadCounselorAgent implements SpecialistAgent {
     const stored = o.answer as LeadPayload | null;
     if (stored?.question) payload.question = stored.question;
     const running = o.nodes.filter((n) => n.state === 'running').map(taskName);
+    // A partial result is finished but has open points, so it is not reported as simply done.
+    const done = o.nodes.filter((n) => n.state === 'completed').map(taskName);
+    const openPoints = o.nodes.filter((n) => n.state === 'partial').map(taskName);
     payload.request = o.studentWording;
     payload.headline = [
       `${o.status === 'completed' ? 'This request is complete' : o.status === 'partial' ? 'This request is finished for now, with some open points' : o.status === 'waiting_for_student' ? 'This request is waiting for your answer' : o.status === 'checkpointed' ? 'This request is paused at a checkpoint' : 'Your request is still active'}: “${o.studentWording.slice(0, 120)}”.`,
-      payload.completed.length > 0 ? `Done: ${payload.completed.join(', ')}.` : 'Nothing has finished yet.',
+      done.length > 0 ? `Done: ${done.join(', ')}.` : '',
+      openPoints.length > 0 ? `Done with open points: ${openPoints.join(', ')}.` : '',
+      payload.completed.length === 0 ? 'Nothing has finished yet.' : '',
       running.length > 0 ? `In progress: ${running.join(', ')}.` : '',
       payload.waiting.length > 0 ? `Waiting for your answer: ${payload.waiting.map((w) => w.task).join(', ')}.` : '',
       payload.remaining.length > 0 && running.length === 0 ? `Still to do: ${payload.remaining.join(', ')}.` : '',

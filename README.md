@@ -22,7 +22,7 @@ Requires Node.js 22.12 or later.
 
 ```bash
 npm install
-npm run check      # typecheck + the full test suite (291 tests, no network, no model)
+npm run check      # typecheck + the full test suite (no network, no model needed)
 npm run demo       # the spec's worked interaction, end to end, with real agents
 npm run build      # compiles the library to dist/
 ```

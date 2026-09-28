@@ -59,7 +59,7 @@ export interface Question {
 
 export interface LeadPayload {
   objectiveId: string | null;
-  action: 'request' | 'status' | 'cancel' | 'resume' | 'answer' | 'confirm_review' | 'review_updates' | 'explain';
+  action: 'request' | 'status' | 'cancel' | 'resume' | 'answer' | 'confirm_review' | 'review_updates';
   /** The student's wording of the request, kept recoverable. */
   request: string | null;
   status: 'completed' | 'partial' | 'needs_student_input' | 'cancelled' | 'checkpointed' | 'blocked';
@@ -89,7 +89,7 @@ const LabelSchema = z.enum(['required', 'recommended', 'optional', 'awaiting_con
 export const LeadPayloadSchema = z
   .object({
     objectiveId: z.string().nullable(),
-    action: z.enum(['request', 'status', 'cancel', 'resume', 'answer', 'confirm_review', 'review_updates', 'explain']),
+    action: z.enum(['request', 'status', 'cancel', 'resume', 'answer', 'confirm_review', 'review_updates']),
     request: z.string().nullable(),
     status: z.enum(['completed', 'partial', 'needs_student_input', 'cancelled', 'checkpointed', 'blocked']),
     headline: z.string().min(1),
