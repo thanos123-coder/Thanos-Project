@@ -348,6 +348,20 @@ describe('CounselorSystem — access and deletion', () => {
     expect((await h.ok('What do you know about my summer plans?')).accepted).toBe(true);
   });
 
+  it('a proposed action can be seen and decided only for its own student, and goes with the account', async () => {
+    const h = makeSystem();
+    const p = h.system.kernel.actions.propose({ kind: 'contact_organizer', destination: 'info@example.org', exactContent: 'Hello, I have a question.', consequence: 'Sends an email' }, { tenantId: TENANT, studentId: h.studentId, taskId: 'task_x', role: '09' });
+    const other: Actor = { id: 'acct_student_2', kind: 'student', tenantId: TENANT };
+    const otherStudent = h.system.createStudent({ tenantId: TENANT, ownerActorId: other.id });
+    expect(h.system.pendingActions(other, TENANT, h.studentId)).toEqual([]);
+    expect(() => h.system.approveAction(other, TENANT, otherStudent, p.id)).toThrow(/Unknown proposal/);
+    expect(() => h.system.rejectAction(other, TENANT, h.studentId, p.id)).toThrow(/Not authorized/);
+    expect(h.system.pendingActions(h.student, TENANT, h.studentId).map((r) => r.proposal.id)).toEqual([p.id]);
+    const out = await h.system.deleteAccount(h.student, TENANT, h.studentId);
+    expect(out.processorsNotified).toContain('external_action_proposals');
+    expect(h.system.kernel.actions.list(TENANT, h.studentId)).toEqual([]);
+  });
+
   it('deleting one fact through the system removes the results built from it', async () => {
     const h = makeSystem();
     h.system.kernel.rules.add(engineeringPackage({ rules: root([mathHL]) }));

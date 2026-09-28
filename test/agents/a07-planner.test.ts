@@ -241,7 +241,7 @@ describe('Agent 07 academic and testing planner', () => {
     expect(r.externalActions[0]).toMatchObject({ kind: 'register_for_test', authorizationState: 'proposed' });
     expect(r.externalActions[0]!.exactContent).toMatch(/2026-11-07.*\n.*October 23.*\n.*\$68/);
     expect(r.payload.externalRegistrationsMade).toBe(false);
-    expect(h.kernel.actions.list(h.studentId).every((a) => a.state === 'proposed')).toBe(true);
+    expect(h.kernel.actions.list(TENANT, h.studentId).every((a) => a.state === 'proposed')).toBe(true);
   });
 
   it('flags a weekly commitment on the test day and picks one test when either of two is accepted', async () => {

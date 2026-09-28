@@ -234,10 +234,33 @@ describe('external actions and human review', () => {
     const svc = new ExternalActionService(clock, new SequentialIdGenerator(), audit);
     const p = svc.propose({ kind: 'contact_organizer', destination: 'organizer@example.org', exactContent: 'Hello', consequence: 'Sends an email' }, { tenantId: 't', studentId: 's', taskId: 'task', role: '09' });
     expect(p.authorizationState).toBe('proposed');
-    expect(() => svc.approve(p.id, { id: 'agent', kind: 'agent', tenantId: 't', role: '01' }, true)).toThrow();
+    const mine = { tenantId: 't', studentId: 's', authorized: true };
+    expect(() => svc.approve(p.id, { id: 'agent', kind: 'agent', tenantId: 't', role: '01' }, mine)).toThrow();
     await expect(svc.execute(p.id)).rejects.toThrow(/approval/);
-    svc.approve(p.id, { id: 's', kind: 'student', tenantId: 't' }, true);
+    svc.approve(p.id, { id: 's', kind: 'student', tenantId: 't' }, mine);
     await expect(svc.execute(p.id)).rejects.toThrow(/No supported integration/);
+  });
+
+  it('a decision reaches only the named student’s proposals, and only from an authorized person', () => {
+    const svc = new ExternalActionService(clock, new SequentialIdGenerator(), new AuditLog(clock));
+    const p = svc.propose({ kind: 'send_message', destination: 'mentor', exactContent: 'Hello', consequence: 'Sends a message' }, { tenantId: 't', studentId: 's1', taskId: 'task', role: '05' });
+    const other = { id: 'acct_other', kind: 'student' as const, tenantId: 't' };
+    // Authorized for their own record (s2), but the proposal belongs to s1.
+    expect(() => svc.approve(p.id, other, { tenantId: 't', studentId: 's2', authorized: true })).toThrow(/Unknown proposal/);
+    expect(() => svc.reject(p.id, other, { tenantId: 't', studentId: 's2', authorized: true })).toThrow(/Unknown proposal/);
+    expect(() => svc.reject(p.id, other, { tenantId: 't', studentId: 's1', authorized: false })).toThrow(/Not authorized/);
+    expect(svc.list('t', 's1')[0]!.state).toBe('proposed');
+  });
+
+  it('deleting a claim the proposing task was served withdraws the proposal; account deletion removes all', () => {
+    const svc = new ExternalActionService(clock, new SequentialIdGenerator(), new AuditLog(clock));
+    const input = { kind: 'register_for_test' as const, destination: 'Testing organization', exactContent: 'Accommodations: extended time', consequence: 'A registration' };
+    svc.propose(input, { tenantId: 't', studentId: 's', taskId: 'a', role: '07', inputClaimIds: ['claim_accommodation'] });
+    svc.propose(input, { tenantId: 't', studentId: 's', taskId: 'b', role: '07', inputClaimIds: ['claim_other'] });
+    expect(svc.purgeByClaims('t', 's', ['claim_accommodation'])).toBe(1);
+    expect(svc.list('t', 's').map((r) => r.proposedByTask)).toEqual(['b']);
+    expect(svc.purgeByStudent('t', 's')).toBe(1);
+    expect(svc.list('t', 's')).toEqual([]);
   });
 
   it('an unstaffed review service returns an honest referral, never a queued case (01T14)', () => {

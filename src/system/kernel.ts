@@ -83,6 +83,7 @@ export class SystemKernel {
     this.review = new HumanReviewService(options.reviewStaffing ?? { staffed: false }, this.clock, this.ids, this.audit);
     this.model = options.model ?? new NullModelGateway();
     registerRecordTools(this.gateway, this.records);
+    this.records.registerDerivativeStore(this.actions);
     registerRuleTools(this.gateway, this.rules);
     this.registerActionTools();
     // Rule changes invalidate dependent findings through the record service.
@@ -247,7 +248,7 @@ export class SystemKernel {
           consequence: z.string().min(1),
         })
         .strict(),
-      handler: async (inv, args) => this.actions.propose(args, { tenantId: inv.tenantId, studentId: inv.studentId, taskId: inv.taskId, role: inv.role }),
+      handler: async (inv, args) => this.actions.propose(args, { tenantId: inv.tenantId, studentId: inv.studentId, taskId: inv.taskId, role: inv.role, inputClaimIds: [...inv.context.servedClaimIds] }),
     });
   }
 }

@@ -254,9 +254,10 @@ export class CounselorSystem {
     return this.documents.upload({ tenantId, studentId, uploader: actor, bytes, declaredMediaType: declared.mediaType ?? null, declaredDocumentType: declared.documentType ?? null });
   }
 
-  /** Proposed external actions waiting for this person's decision. */
-  pendingActions(tenantId: string, studentId: string): ExternalActionRecord[] {
-    return this.kernel.actions.list(studentId).filter((r) => r.tenantId === tenantId && r.state === 'proposed');
+  /** Proposed external actions waiting for a decision, visible to people who may see this student's plans. */
+  pendingActions(actor: Actor, tenantId: string, studentId: string): ExternalActionRecord[] {
+    if (!this.mayManagePlans(actor, tenantId, studentId, 'read')) return [];
+    return this.kernel.actions.list(tenantId, studentId).filter((r) => r.state === 'proposed');
   }
 
   /**
@@ -265,12 +266,15 @@ export class CounselorSystem {
    * anything by itself; execution needs a configured integration.
    */
   approveAction(actor: Actor, tenantId: string, studentId: string, proposalId: string): ExternalActionRecord {
-    const authorized = this.kernel.records.permissions.authorize({ actor, tenantId, studentId, category: 'plans_tasks', access: 'write', purpose: 'counseling' }).allowed;
-    return this.kernel.actions.approve(proposalId, actor, authorized);
+    return this.kernel.actions.approve(proposalId, actor, { tenantId, studentId, authorized: this.mayManagePlans(actor, tenantId, studentId, 'write') });
   }
 
-  rejectAction(actor: Actor, proposalId: string): ExternalActionRecord {
-    return this.kernel.actions.reject(proposalId, actor);
+  rejectAction(actor: Actor, tenantId: string, studentId: string, proposalId: string): ExternalActionRecord {
+    return this.kernel.actions.reject(proposalId, actor, { tenantId, studentId, authorized: this.mayManagePlans(actor, tenantId, studentId, 'write') });
+  }
+
+  private mayManagePlans(actor: Actor, tenantId: string, studentId: string, access: 'read' | 'write'): boolean {
+    return actor.kind !== 'agent' && this.kernel.records.permissions.authorize({ actor, tenantId, studentId, category: 'plans_tasks', access, purpose: 'counseling' }).allowed;
   }
 
   /** The same check the kernel makes before any task runs; nothing is stored for someone who fails it. */

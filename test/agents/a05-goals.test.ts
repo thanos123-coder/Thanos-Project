@@ -5,7 +5,7 @@ import { buildClaim } from '../../src/agents/a04-record-steward/claims.js';
 import { ScriptedModelGateway } from '../../src/model/scripted.js';
 import type { Actor } from '../../src/shared/permissions.js';
 import { LABOR_SOURCE, makeGoalsHarness } from '../helpers/goals.js';
-import { extracted, said, stated } from '../helpers/kernel.js';
+import { extracted, said, stated, TENANT } from '../helpers/kernel.js';
 
 type H = ReturnType<typeof makeGoalsHarness>;
 
@@ -211,7 +211,7 @@ describe('Agent 05 goals and major exploration advisor', () => {
     expect(r.externalActions[0]!.exactContent).toMatch(/What does a typical week look like/);
     expect(r.payload.experiments[0]!.externalContact).toEqual(expect.objectContaining({ needed: true, sent: false }));
     expect(r.payload.notices[0]!.message).toMatch(/Nothing has been sent/);
-    expect(h.kernel.actions.list(h.studentId).every((a) => a.state === 'proposed')).toBe(true);
+    expect(h.kernel.actions.list(TENANT, h.studentId).every((a) => a.state === 'proposed')).toBe(true);
   });
 
   it('05T15 a near-term subject decision separates reversible from less reversible parts', async () => {

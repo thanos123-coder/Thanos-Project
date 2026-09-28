@@ -33,7 +33,7 @@ This document explains how agents 01–09 are built and how they work together. 
 | Budgets, cancellation, task graph | `src/runtime/budget.ts`, `cancellation.ts`, `task-graph.ts` | Enforced effort limits, parent/child cancellation, dependency waves |
 | Result validation | `src/runtime/validation.ts`, `grounding.ts` | Contract checks before any result is accepted |
 | Event bus | `src/runtime/event-bus.ts` | At-least-once delivery, per-consumer dedup, retries, dead letters with an accountable owner |
-| External actions | `src/runtime/external-actions.ts` | Proposals, explicit approval, idempotent execution through adapters (none shipped) |
+| External actions | `src/runtime/external-actions.ts` | Proposals, explicit approval or rejection scoped to the proposal's own student, idempotent execution through adapters (none shipped) |
 | Human review | `src/runtime/human-review.ts` | A queue with a named owner when staffed; a referral when not |
 | Model gateway | `src/model/` | Structured, schema-validated model calls; a null gateway when no model is configured; a scripted gateway for tests |
 | Audit log | `src/runtime/audit.ts` | Privacy-conscious records of tool calls, denials, incidents and review requests (names and outcomes, never values) |
@@ -115,7 +115,7 @@ No role holds a tool that sends, pays, registers, enrolls or submits. `actions.p
   - a material change to a curated opportunity (`connectOpportunityCatalog`).
 
   Consumers see the stale state and recompute; nothing silently keeps an old answer.
-- **Deletion.** Deleting a claim, a document or the whole record (`deleteFact`, `deleteDocument`, `deleteAccount`) purges every artifact built from it. It also purges every registered derivative store: conversations, intake sessions, documents and the objective store, including cached answers. Each deletion is written to the deletion ledger, and processors are notified. A backup restore re-applies the ledger, so deleted content does not come back. Account deletion takes precedence over work in flight: the student's running tasks are cancelled, and all access ends before the stores are purged, so nothing still running can read or re-create deleted content.
+- **Deletion.** Deleting a claim, a document or the whole record (`deleteFact`, `deleteDocument`, `deleteAccount`) purges every artifact built from it. It also purges every registered derivative store: conversations, intake sessions, documents, the objective store (including cached answers), proposed external actions and client delivery keys. A proposal records the claims its task was served, so deleting any of them withdraws a proposal that may repeat their content. Each deletion is written to the deletion ledger, and processors are notified. A backup restore re-applies the ledger, so deleted content does not come back. Account deletion takes precedence over work in flight: the student's running tasks are cancelled, and all access ends before the stores are purged, so nothing still running can read or re-create deleted content.
 
 ## Events
 
@@ -169,6 +169,15 @@ A result that fails validation is not shown. Agent 01 names it as a gap.
   - Ranking is transparent: the features are listed and there is no sponsorship feature.
   - At most two results come from the same organizer.
   - An accessible alternative is always considered.
+
+## External actions
+
+`actions.propose` stores a proposal with the exact content, the destination and the consequence. It also records which task proposed it and which claims that task was served. Only a person can decide on a proposal:
+- `approveAction` and `rejectAction` require permission to manage the student's plans;
+- a decision names the student, and a proposal belonging to anyone else is reported as unknown;
+- agents can never approve.
+
+An approved proposal still needs an integration adapter to run, and this volume ships none. The app guides the person to complete the step themselves.
 
 ## Human review
 
