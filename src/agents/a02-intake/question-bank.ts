@@ -383,6 +383,7 @@ export const QUESTION_BANK: readonly QuestionTemplate[] = [
     effort: 2,
   },
   {
+    // 08R01: a broad inventory of how time is spent, including work and home responsibilities.
     id: 'experiences.overview',
     field: 'experience.identity',
     group: 'interests',

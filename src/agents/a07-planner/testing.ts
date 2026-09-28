@@ -210,6 +210,7 @@ export function organizationOf(f: TestFamily): string {
   return ORGANIZATION[f];
 }
 
+// 07R13: only the accommodation status is read (never diagnostic records); the app cannot approve accommodations.
 export function readAccommodation(view: RecordView, family: TestFamily): AttemptOption['accommodation']['status'] {
   const org = ORGANIZATION[family].toLowerCase();
   for (const id of view.entityIds('accommodation')) {

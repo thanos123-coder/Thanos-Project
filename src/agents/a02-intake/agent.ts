@@ -1041,6 +1041,7 @@ export class IntakeInterviewerAgent implements SpecialistAgent {
       invalidatedArtifacts: out.invalidated,
       sessionStatus: session.status,
     };
+    // 02R10: stop when the task has enough, the student stops, or a fact cannot be resolved now; a partial profile is normal.
     if (payload.enoughForObjective && payload.nextQuestion) payload.enoughForObjective = false;
     if (info.showReview || info.action === 'stop' || nextAction === 'review') payload.review = { items: reviewEntries, note: REVIEW_NOTE };
 

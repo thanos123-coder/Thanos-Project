@@ -256,6 +256,7 @@ export class EligibilityAgent implements SpecialistAgent {
     }
   }
 
+  // 06R11: concrete gaps go to planning (07), unsettled student facts to intake (02) or documents (03), policy ambiguity to source research or review.
   private handoffsFor(findings: AtomicFinding[], scope: EligibilityScope, categoryUnknown: boolean, rank: (fieldKey: string) => number = () => 1): Handoff[] {
     const out: Handoff[] = [];
     const unresolved = findings.filter((f) => f.mandatory && f.state !== 'met' && f.state !== 'not_applicable' && f.resolution);

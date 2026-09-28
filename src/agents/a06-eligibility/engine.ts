@@ -101,6 +101,7 @@ export interface TreeEvaluation {
 
 // ------------------------------------------------------------------ logic
 
+// 06R07: AND, OR, at-least and NOT combinations, with applicability evaluated first; an exception is a rule with conditions.
 export function combineAll(states: readonly RuleState[]): RuleState {
   const s = states.filter((x) => x !== 'not_applicable');
   if (s.length === 0) return 'not_applicable';

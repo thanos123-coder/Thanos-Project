@@ -325,6 +325,7 @@ function evalRequirement(r: Requirement, o: Opportunity, facts: StudentFacts, br
   }
 }
 
+// 09R06: complete eligibility with AND/OR logic: age at the organizer's reference date, graduation status, residence, citizenship, prerequisites, declarations and team rules.
 export function evaluateEligibility(o: Opportunity, facts: StudentFacts, brief: Brief, today: CalendarDate): { view: OptionEvaluation['eligibility']; unresolved: Unresolved[]; failures: HardFailure[]; claimIds: string[]; fieldKeys: string[] } {
   if (!o.eligibility.published) {
     return {
@@ -660,6 +661,7 @@ const SUPERVISION_TEXT: Record<Opportunity['value']['supervision'], string> = {
   unknown: 'Supervision not described',
 };
 
+// 09R09: value is judged from curriculum, supervision, actual work, feedback and outputs; credit vs noncredit and participation vs award are distinguished.
 export function valueSummary(o: Opportunity): ValueSummary {
   const v = o.value;
   const points = (v.activities.length > 0 ? 1 : 0) + (v.curriculum ? 1 : 0) + (v.supervision === 'qualified_staff' || v.supervision === 'organizer_vetted_mentor' ? 1 : 0) + (v.feedback === true ? 1 : 0) + (v.outputs.length > 0 ? 1 : 0);

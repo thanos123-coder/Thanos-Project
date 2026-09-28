@@ -264,6 +264,7 @@ function activeOn(e: EpisodeRecord | { period: DateInterval; lifecycle: Lifecycl
  * is a reason to ask about double counting or seasonal peaks, never a
  * judgment that something is untrue (08T05).
  */
+// 08R04: time is kept as the student's own ranges with their basis; overlapping totals prompt a neutral question, not a precise invented figure.
 export function consistencyChecks(experiences: readonly ExperienceRecord[], today: string): Array<Omit<Clarification, 'id'>> {
   const out: Array<Omit<Clarification, 'id'>> = [];
   const current = experiences.flatMap((x) => x.episodes.filter((e) => activeOn(e, today) && e.time).map((e) => ({ x, e })));

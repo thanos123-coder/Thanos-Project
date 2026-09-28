@@ -32,6 +32,7 @@ import { decideTests, organizationOf, policyMatrix, prepPlan, readAccommodation,
 const PurposeSchema = z.enum(['admission', 'scholarship', 'placement', 'credit', 'language_proficiency']);
 const TargetSchema = z.object({ eligibility: EligibilityScopeSchema, purposes: z.array(PurposeSchema).min(1).default(['admission']) }).strict();
 
+// 07R01: the request states the objective (targets, purposes, selected tests, terms); constraints come from the record.
 const PlanRequestSchema = z
   .object({
     targets: z.array(TargetSchema).min(1).max(8),
@@ -164,6 +165,7 @@ export class AcademicPlannerAgent implements SpecialistAgent {
     return readView(ctx, 'local', { entityTypes: ['student', 'course', 'school_offering', 'test_attempt', 'accommodation', 'commitment'] });
   }
 
+  // 07R02: planning uses Agent 06 findings with their rule versions; an unresolved or missing finding makes that branch conditional.
   private async loadTargets(ctx: TaskContext, req: PlanRequest, findings: readonly DerivedArtifact[]): Promise<Loaded> {
     const out: Loaded = { targets: [], needs: [], rows: [], ruleVersions: [], unresolved: [], handoffs: [] };
     for (const t of req.targets) {

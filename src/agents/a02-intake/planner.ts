@@ -62,6 +62,7 @@ function parseCatalog(field: string): { entity: string; attribute: string } {
 
 type FieldStatus = 'known' | 'absent' | 'declined' | 'unknown_to_student' | 'needs_confirmation_imported' | 'awaiting_review' | 'conflict';
 
+// 02R02: a current confirmed fact is not asked again; an uncertain import is shown for confirmation; a conflict is asked about specifically.
 function statusOf(f: FieldView | undefined): FieldStatus {
   if (!f || f.state === 'absent') return 'absent';
   if (f.state === 'conflict') return 'conflict';
@@ -127,6 +128,7 @@ export function planQuestions(input: { objective: Objective; mode: 'text' | 'voi
     }
     const base = { field: { entity, entityId: entity === 'student' ? 'self' : entityId === 'self' ? 'new' : entityId, attribute }, allowSkip: t.skippable, allowDontKnow: true, sensitivity: t.sensitivity, templateId: t.id, options: (t.options ?? []).map((o) => o.label) };
     // The current goal comes first: it decides which of the other questions matter (first intake layer).
+    // 02R03: an explicit, explainable heuristic (dependency, consequence, sensitivity, effort), not a claimed information measure.
     const scoreBase = (reason === 'required_for_objective' || reason === 'requested_by_specialist' ? 30 : 10) + (t.consequential ? 5 : 0) - (t.sensitivity === 'sensitive' ? 4 : 0) - t.effort + (t.id === 'goal.current_objective' ? 20 : 0);
     switch (status) {
       case 'known':

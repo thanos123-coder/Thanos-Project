@@ -182,6 +182,7 @@ export class GoalsExplorationAgent implements SpecialistAgent {
           return await this.explain(ctx, s);
         case 'respond_to_hypothesis':
           return await this.respond(ctx, s);
+        // 05R08: after an experiment the student's own reflection is recorded; completing an activity is not evidence of fit.
         case 'record_reflection':
           return await this.reflect(ctx, s);
         case 'record_assessment':
@@ -238,6 +239,7 @@ export class GoalsExplorationAgent implements SpecialistAgent {
     payload.attributedViews = gc.otherViews.map((v) => ({ holderLabel: v.holderLabel, text: v.text, claimId: v.claimId }));
     payload.studentPriorities = gc.evidence.filter((e) => e.kind === 'own_preference').map((e) => e.text).slice(0, 6);
     payload.experiments = chooseExperiments(hypotheses, k.experiments, gc, today);
+    // 05R01: the decision horizon (broad exploration, course choice, subject choice, narrowed comparison) sets the precision.
     payload.goalState = goalStateOf(gc, hypotheses);
     payload.questions = await this.questions(ctx, hypotheses, byKey);
     payload.uncertainty = hypotheses.length === 0 ? ['There are not enough examples yet to suggest specific fields; that is normal at this stage.'] : [...new Set(hypotheses.flatMap((h) => h.unknowns))].slice(0, 6);
@@ -269,6 +271,7 @@ export class GoalsExplorationAgent implements SpecialistAgent {
       entityIds.set(h.id, entityId);
       const existing = gc.hypotheses.find((x) => x.entityId === entityId);
       if (existing && stableStringify({ t: existing.text, e: [...existing.evidenceClaimIds].sort(), k: existing.subjectKeys }) === stableStringify({ t: value.text, e: [...supports].sort(), k: value.subjectKeys })) continue;
+      // 05R09: interpretations are proposed to Agent 04 as labelled, tentative claims with their evidence; the student can reject them.
       claims.push(buildClaim({ entity: 'hypothesis', entityId, attribute: 'statement', value, origin: 'model_interpretation', confirmation: 'unreviewed', lifecycle: 'current', evidence: [{ kind: 'derivation', method: 'goals.hypotheses_from_student_evidence', softwareVersion: 'a05_v1', inputClaimIds: supports }], actor: ctx.request.actor, viaRole: '05' }));
       ids.push(entityId);
     }
@@ -310,6 +313,7 @@ export class GoalsExplorationAgent implements SpecialistAgent {
       const withExample = hypotheses.find((h) => h.evidence.some((e) => e.direction === 'supports' && (e.kind === 'experience' || e.kind === 'reflection')));
       if (withExample) {
         const q = withExample.evidence.find((e) => e.direction === 'supports' && (e.kind === 'experience' || e.kind === 'reflection'))!.quote;
+        // 05R02: questions ask about concrete tasks and examples, never about personality labels.
         out.push({ text: `What part of “${q}” did you enjoy most?`, purpose: 'The specific part you enjoy says more than the activity’s name.' });
       } else if (hypotheses.length >= 2) {
         const a = byKey.get(hypotheses[0]!.subjectKeys[0]!)!;

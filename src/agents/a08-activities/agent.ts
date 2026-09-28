@@ -234,6 +234,7 @@ export class ActivitiesAssessorAgent implements SpecialistAgent {
   }
 
   /** Record one or more experiences from one turn in a single mutation. */
+  // 08R09: a faithful record is proposed to Agent 04 with evidence and open questions; the student can review and reject interpretations.
   private async recordMany(ctx: TaskContext, turnId: string, raws: readonly ExperienceInput[], tz: string | undefined, typedByStudent: boolean, extraNotices: Notice[], action: string, askDatesFor: ReadonlySet<number> = new Set()) {
     const t = await this.turn(ctx, turnId);
     const view = await readView(ctx, 'local', { entityTypes: ['experience', 'episode', 'award', 'research_output', 'student'] });
@@ -259,6 +260,7 @@ export class ActivitiesAssessorAgent implements SpecialistAgent {
       experienceIds.push(experienceId);
       const restrict = n.restrictToFamilyContext ? { restrictToCategory: 'family_context' } : {};
       const add = (entity: string, entityId: string, attribute: string, value: unknown, lifecycle: Lifecycle, quote?: string) => {
+        // 08R06: what the student learned is kept in their own words and is never generated.
         if (attribute === 'learning' && origin !== 'student_statement') return;
         claims.push(buildClaim({ entity, entityId, attribute, value, origin, confirmation, lifecycle, evidence: evidence(quote), actor, viaRole: '08', ...restrict }));
       };

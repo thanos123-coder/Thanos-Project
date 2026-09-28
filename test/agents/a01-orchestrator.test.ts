@@ -6,6 +6,7 @@ import { classifyRequest } from '../../src/agents/a01-orchestrator/intents.js';
 import { ObjectiveStore, registerTaskTools } from '../../src/agents/a01-orchestrator/objectives.js';
 import { makeResult, type SpecialistAgent } from '../../src/agents/common/specialist.js';
 import { NullModelGateway } from '../../src/model/gateway.js';
+import { ScriptedModelGateway } from '../../src/model/scripted.js';
 import type { TaskContext } from '../../src/runtime/tool-gateway.js';
 import { FixedClock } from '../../src/shared/clock.js';
 import { SequentialIdGenerator } from '../../src/shared/ids.js';
@@ -398,6 +399,22 @@ describe('Agent 01 — Lead counselor and orchestrator', () => {
     const r = await h.ok('Should I study economics or engineering? Also find me a summer activity.');
     expect(r.answer!.progress.map((p) => p.role)).toEqual(['05', '09']);
     expect(r.answer!.headline).toMatch(/^Fits now: Community Repair Project/);
+  });
+
+  it('uses a model only as a validated fallback: unquoted outcomes are dropped, specific claims in explanations are refused', async () => {
+    const model = new ScriptedModelGateway()
+      .on('counselor.classify_request', () => ({ output: { outcomes: [{ outcome: 'find_opportunities', quote: 'something hands-on after exams' }, { outcome: 'check_requirement', quote: 'words the student never wrote' }] } }))
+      .always('counselor.explain_concept', { explanation: 'Early action deadlines are usually on 1 November 2026 and cost $75.' });
+    const h = makeSystem({ model });
+    h.seed(amara(h.student));
+    addCommunityProject(h);
+    const r = await h.ok('I would love something hands-on after exams');
+    expect(r.answer!.progress.map((p) => p.role)).toEqual(['09']);
+    expect(model.callsFor('counselor.classify_request')).toHaveLength(1);
+    // The model prompt carried only the student's message, fenced as data: no record facts.
+    expect(model.allPromptText()).not.toMatch(/Athens|2010-05-10|150\.00/);
+    const e = await h.ok('What is early action?');
+    expect(e.answer!.notices.find((n) => n.code === 'general_information')!.message).not.toMatch(/November|\$75/);
   });
 
   it('turns "make my application perfect" into concrete choices without starting work', async () => {

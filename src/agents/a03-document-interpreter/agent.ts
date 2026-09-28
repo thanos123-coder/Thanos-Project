@@ -134,6 +134,7 @@ export class DocumentInterpreterAgent implements SpecialistAgent {
     const attachment = file.base64 && (meta.sniffed === 'pdf' || ['png', 'jpeg', 'gif', 'webp'].includes(meta.sniffed))
       ? { kind: meta.sniffed === 'pdf' ? ('pdf' as const) : ('image' as const), mediaType: (meta.sniffed === 'pdf' ? 'application/pdf' : `image/${meta.sniffed}`) as 'application/pdf', base64: file.base64, label: `${meta.id} v${meta.version}` }
       : null;
+    // 03R05: extraction is chosen per page: the text layer where it is reliable, visual transcription for scanned or image-only pages.
     if (layout.pagesNeedingTranscription.length > 0 && attachment && this.model.configured) {
       const v = await transcribeWithVision(ctx, this.model, attachment, layout.pagesNeedingTranscription);
       if (v.ok) {

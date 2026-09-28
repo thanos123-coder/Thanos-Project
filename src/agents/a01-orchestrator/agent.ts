@@ -457,6 +457,7 @@ export class LeadCounselorAgent implements SpecialistAgent {
     if (run.budgetStopped) payload.notices.push({ code: 'checkpoint', message: 'The effort budget for this request ran out. Finished work is saved; you can continue from here without repeating it.' });
     payload.headline = this.headline(payload);
     const objectiveStatus = payload.status === 'checkpointed' ? 'checkpointed' : payload.status === 'needs_student_input' ? 'waiting_for_student' : payload.status === 'cancelled' ? 'cancelled' : payload.status === 'completed' ? 'completed' : 'partial';
+    // 01R10: only task state is saved here; student facts change only through Agent 04, and external actions stay separate proposals.
     const update: Record<string, unknown> = { status: objectiveStatus, answer: payload, nodes, event: { kind: payload.status === 'checkpointed' ? 'checkpointed' : 'completed', detail: payload.headline.slice(0, 400) } };
     if (payload.question?.intakeSessionId) update['intakeSessionId'] = payload.question.intakeSessionId;
     await this.save(ctx, objectiveId, update);
@@ -616,7 +617,7 @@ export class LeadCounselorAgent implements SpecialistAgent {
     const running = o.nodes.filter((n) => n.state === 'running').map(taskName);
     payload.request = o.studentWording;
     payload.headline = [
-      `Your request is still active: “${o.studentWording.slice(0, 120)}”.`,
+      `${o.status === 'completed' ? 'This request is complete' : o.status === 'partial' ? 'This request is finished for now, with some open points' : o.status === 'waiting_for_student' ? 'This request is waiting for your answer' : o.status === 'checkpointed' ? 'This request is paused at a checkpoint' : 'Your request is still active'}: “${o.studentWording.slice(0, 120)}”.`,
       payload.completed.length > 0 ? `Done: ${payload.completed.join(', ')}.` : 'Nothing has finished yet.',
       running.length > 0 ? `In progress: ${running.join(', ')}.` : '',
       payload.waiting.length > 0 ? `Waiting for your answer: ${payload.waiting.map((w) => w.task).join(', ')}.` : '',

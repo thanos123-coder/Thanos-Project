@@ -154,6 +154,7 @@ const STATUS_WORDS: Array<{ status: GradeResultStatus; re: RegExp }> = [
   { status: 'final', re: /\b(final (results?|grades?|marks?)|results? awarded|achieved|final)\b/i },
 ];
 
+// 03R09: predicted, provisional, final, remarked, resit and transfer results stay distinct; repeated attempts stay separate records.
 function statusFrom(text: string): GradeResultStatus | null {
   for (const { status, re } of STATUS_WORDS) if (re.test(text)) return status;
   return null;
@@ -262,6 +263,7 @@ function scaleFromText(text: string): { scaleRef: string; basis: string } | null
 
 // ------------------------------------------------------------------ main
 
+// 03R07: source fields are captured exactly as printed (name, code, level, period, grade string, scale, credit, status).
 export function interpretDocument(pages: readonly LayoutPage[], ctx: InterpretContext): InterpretationResult {
   const concerns: Concern[] = [];
   const ambiguities: Ambiguity[] = [];
@@ -541,6 +543,7 @@ export function interpretDocument(pages: readonly LayoutPage[], ctx: InterpretCo
           if (reviewNote) obs.grade.reviewNote = reviewNote;
           if (!symbolOnly && scale) {
             const parsed = parseGrade({ original, scaleRef: scale.scaleRef, status, weighting: null }, REFERENCE_SCALES);
+            // 03R10: a grade is validated against its scale only when the scale is known; a printed value is never overwritten.
             if (!parsed.ok && parsed.reason === 'out_of_range') {
               obs.grade.reviewNote = `The value "${original}" does not fit the ${REFERENCE_SCALES[scale.scaleRef]!.name}.`;
               concerns.push({ kind: 'value_out_of_range', detail: `A grade (${original}) does not fit the stated scale.`, pages: [p.page] });
