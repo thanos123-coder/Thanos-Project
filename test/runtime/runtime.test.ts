@@ -10,9 +10,10 @@ import { HumanReviewService } from '../../src/runtime/human-review.js';
 import { TaskGraph } from '../../src/runtime/task-graph.js';
 import { TaskContext, ToolGateway } from '../../src/runtime/tool-gateway.js';
 import { detectInjectionSignals, fenceUntrusted } from '../../src/runtime/untrusted.js';
+import { ContractRegistry, validateResult } from '../../src/runtime/validation.js';
 import { FixedClock } from '../../src/shared/clock.js';
-import type { RequestEnvelope } from '../../src/shared/envelopes.js';
-import { AccessDeniedError, BudgetExhaustedError } from '../../src/shared/errors.js';
+import type { RequestEnvelope, ResultEnvelope } from '../../src/shared/envelopes.js';
+import { AccessDeniedError, BudgetExhaustedError, TaskCancelledError } from '../../src/shared/errors.js';
 import { SequentialIdGenerator } from '../../src/shared/ids.js';
 
 const clock = new FixedClock('2026-09-27T10:00:00Z');
@@ -267,5 +268,102 @@ describe('external actions and human review', () => {
     const svc = new HumanReviewService({ staffed: false }, clock, new SequentialIdGenerator(), new AuditLog(clock));
     const out = svc.request('t', 's', { question: 'Does the HL requirement apply to this program?', scope: 'Example University 2027', facts: [], sourceSections: [], competingInterpretations: [], consequenceOfDelay: 'none', deadline: null, requestedDecision: 'Which rule governs' });
     expect(out.kind).toBe('referral');
+  });
+});
+
+describe('each safeguard on its own', () => {
+  it('a foreign tenant alone, or a foreign student alone, is a scope violation', async () => {
+    const { ctx } = setup();
+    await expect(ctx().call('record.read_scoped', { tenantId: 'tenant_b', studentId: 'student_a' })).rejects.toMatchObject({ code: 'scope_violation' });
+    await expect(ctx().call('record.read_scoped', { tenantId: 'tenant_a', studentId: 'student_x' })).rejects.toMatchObject({ code: 'scope_violation' });
+  });
+
+  it('a tool result that returns after the task was cancelled is discarded', async () => {
+    const audit = new AuditLog(clock);
+    const gateway = new ToolGateway(audit, { isStillAuthorized: () => true });
+    let c!: TaskContext;
+    gateway.register({ name: 'research.search_public', description: '', kind: 'public_research', args: z.object({ query: z.string() }).strict(), handler: async () => (c.token.cancel('stopped'), ['late']) });
+    const req = request();
+    c = new TaskContext(req, new BudgetTracker(req.budget, clock), new CancellationToken(req.taskId), gateway, clock, new SequentialIdGenerator());
+    await expect(c.call('research.search_public', { query: 'x' })).rejects.toBeInstanceOf(TaskCancelledError);
+  });
+
+  it('cancelling a task cancels its children, never its parent', () => {
+    const parent = new CancellationToken('p');
+    const child = parent.child('c');
+    const grandchild = child.child('g');
+    const other = parent.child('o');
+    child.cancel('branch stopped');
+    expect([parent.isCancelled, other.isCancelled, grandchild.isCancelled]).toEqual([false, false, true]);
+    parent.cancel('all stopped');
+    expect(other.isCancelled).toBe(true);
+  });
+
+  it('a child can never spend what its parent has already used', () => {
+    const parent = new BudgetTracker({ maxToolCalls: 3, maxModelCalls: 1, maxRevisions: 1 }, clock);
+    const child = parent.child({ maxToolCalls: 3, maxModelCalls: 1, maxRevisions: 1 });
+    parent.consume('tool_calls', 2);
+    expect(child.canConsume('tool_calls', 2)).toBe(false);
+    expect(() => child.consume('tool_calls', 2)).toThrow(BudgetExhaustedError);
+    child.consume('tool_calls', 1);
+    expect(parent.snapshot().toolCalls).toBe(3);
+  });
+
+  it('a smaller amount is not grounded by a larger number that contains its digits', () => {
+    expect(ungroundedTokens('It costs €150.', { cost: '1500.00' }).map((t) => t.text)).toEqual(['€150']);
+    expect(ungroundedTokens('It costs €150.', { cost: '150.00' })).toEqual([]);
+  });
+});
+
+describe('result validation, check by check', () => {
+  const contracts = new ContractRegistry();
+  contracts.register({ id: 'x', role: '09', payload: z.object({ note: z.string() }).strict(), groundSummary: false });
+  const result = (over: Partial<ResultEnvelope> = {}): ResultEnvelope => ({
+    taskId: 'task_1',
+    role: '09',
+    status: 'completed',
+    summary: 'Done.',
+    payload: { note: 'ok' },
+    completionContract: 'x',
+    inputVersions: { recordVersion: 1, claimIds: [], ruleVersions: [], sourceVersions: [], modelVersions: [], permissionSnapshot: 'perm_1' },
+    sourceRefs: [],
+    uncertainties: [],
+    proposedMutations: [],
+    handoffs: [],
+    externalActions: [],
+    completionReason: 'done',
+    ...over,
+  });
+  const validate = (r: ResultEnvelope, served: { claims?: string[]; sources?: string[]; snapshot?: string } = {}) =>
+    validateResult(r, { request: request(), servedClaimIds: new Set(served.claims ?? []), servedSourceIds: new Set(served.sources ?? []), currentPermissionSnapshot: served.snapshot ?? 'perm_1', registry: contracts });
+
+  it('accepts a result that meets every check', () => {
+    expect(validate(result()).ok).toBe(true);
+  });
+
+  it('rejects a claim or source the task was never served', () => {
+    const r = result({ inputVersions: { ...result().inputVersions, claimIds: ['claim_other'] }, sourceRefs: ['src_other'] });
+    const v = validate(r);
+    expect(v.ok).toBe(false);
+    expect(!v.ok && v.issues).toEqual(expect.arrayContaining(['cites claim claim_other, which was not served to this task', 'cites source src_other, which was not served to this task']));
+    expect(validate(r, { claims: ['claim_other'], sources: ['src_other'] }).ok).toBe(true);
+  });
+
+  it('rejects an uncertainty too vague to act on', () => {
+    const v = validate(result({ uncertainties: [{ affects: 'field:deadline', description: 'May be inaccurate.', resolution: 'Check the official page.', consequence: 'changes_decision' }] }));
+    expect(!v.ok && v.issues.join()).toMatch(/too vague to act on/);
+  });
+
+  it('rejects a result computed from an older record version', () => {
+    const v = validate(result({ inputVersions: { ...result().inputVersions, recordVersion: 0 } }));
+    expect(!v.ok && v.issues.join()).toMatch(/older record version/);
+  });
+
+  it('rejects another task’s result, and one computed under permissions that changed', () => {
+    const other = validate(result({ taskId: 'task_2' }));
+    expect(other).toMatchObject({ ok: false, repairable: false });
+    const changed = validate(result(), { snapshot: 'perm_2' });
+    expect(changed).toMatchObject({ ok: false, repairable: false });
+    expect(!changed.ok && changed.issues.join()).toMatch(/permission snapshot changed/);
   });
 });
