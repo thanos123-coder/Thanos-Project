@@ -14,6 +14,7 @@ export { CounselorSystem, type CounselorMessage, type CounselorResponse, type Co
 export { SystemKernel, type InvocationOutcome, type KernelOptions, type TaskSpec } from './system/kernel.js';
 export { connectInstitutionClaims } from './system/institution-wiring.js';
 export { connectOpportunityCatalog } from './system/opportunity-wiring.js';
+export { connectScholarshipCatalog } from './system/scholarship-wiring.js';
 export { registerOrchestrationTools, ROLE_PURPOSES, type InvokeOutcome } from './system/orchestration-tools.js';
 
 export * as shared from './shared/index.js';
@@ -31,3 +32,4 @@ export * as activities from './agents/a08-activities/index.js';
 export * as opportunities from './agents/a09-opportunities/index.js';
 export * as officialResearch from './agents/a11-research/index.js';
 export * as affordability from './agents/a15-affordability/index.js';
+export * as scholarships from './agents/a16-scholarships/index.js';

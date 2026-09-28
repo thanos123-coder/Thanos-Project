@@ -427,6 +427,8 @@ const defs: FieldDefinition[] = [
   { entity: 'application', attribute: 'definition', schema: ApplicationDefinitionSchema, category: 'application_scope', conflictPolicy: 'owner_latest', consequential: true, label: 'application' },
   { entity: 'application', attribute: 'status', schema: z.enum(APPLICATION_STATES), category: 'application_scope', conflictPolicy: 'planning_latest_statement', consequential: true, label: 'application status' },
   { entity: 'application', attribute: 'outcome', schema: z.enum(APPLICATION_OUTCOMES), category: 'application_scope', conflictPolicy: 'evidence_reconcile', consequential: true, label: 'application decision' },
+  // The student's order of choices (a UCAS firm choice, a first-choice program); awards restricted to a first choice depend on it (16T16).
+  { entity: 'application', attribute: 'choice_rank', schema: z.object({ rank: z.number().int().min(1).max(20), label: z.enum(['first_choice', 'firm', 'insurance', 'other']).nullable() }).strict(), category: 'application_scope', conflictPolicy: 'owner_latest', consequential: true, label: 'choice order' },
   { entity: 'application_item', attribute: 'definition', schema: ApplicationItemSchema, category: 'plans_tasks', conflictPolicy: 'planning_latest_statement', consequential: true, label: 'application item' },
 
   // ---- Funding (Agents 15 and 16) -----------------------------------------

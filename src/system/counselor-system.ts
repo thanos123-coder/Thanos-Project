@@ -26,6 +26,9 @@ import { InstitutionRegistry } from '../agents/a11-research/entities.js';
 import { registerInstitutionTools, type OfficialSearchProvider } from '../agents/a11-research/tools.js';
 import { AffordabilityPlannerAgent } from '../agents/a15-affordability/agent.js';
 import { registerFinanceTools, type ExchangeRateProvider } from '../agents/a15-affordability/tools.js';
+import { ScholarshipAdvisorAgent } from '../agents/a16-scholarships/agent.js';
+import { ScholarshipCatalog } from '../agents/a16-scholarships/catalog.js';
+import { registerScholarshipTools } from '../agents/a16-scholarships/tools.js';
 import type { ModelGateway } from '../model/gateway.js';
 import type { ExternalActionRecord } from '../runtime/external-actions.js';
 import type { ReviewStaffing } from '../runtime/human-review.js';
@@ -36,6 +39,7 @@ import type { Actor } from '../shared/permissions.js';
 import { SystemKernel } from './kernel.js';
 import { connectInstitutionClaims } from './institution-wiring.js';
 import { connectOpportunityCatalog } from './opportunity-wiring.js';
+import { connectScholarshipCatalog } from './scholarship-wiring.js';
 import { registerOrchestrationTools } from './orchestration-tools.js';
 
 /**
@@ -97,6 +101,8 @@ export class CounselorSystem {
   readonly institutions: InstitutionRegistry;
   /** Versioned, anchored official claims shared by every role that needs them. */
   readonly institutionClaims: InstitutionClaimStore;
+  /** The maintained scholarship catalog, with provider trust kept separate from eligibility. */
+  readonly scholarships: ScholarshipCatalog;
   readonly objectives: ObjectiveStore;
   private readonly deliveries = new Map<string, string>();
 
@@ -138,6 +144,10 @@ export class CounselorSystem {
     connectInstitutionClaims(k, this.institutionClaims);
     registerFinanceTools(k.gateway, options.exchangeRates);
 
+    this.scholarships = new ScholarshipCatalog(() => k.clock.nowIso());
+    registerScholarshipTools(k.gateway, this.scholarships);
+    connectScholarshipCatalog(k, this.scholarships);
+
     this.objectives = new ObjectiveStore(k.clock, k.ids, (taskId, reason) => k.cancel(taskId, reason));
     registerTaskTools(k.gateway, this.objectives);
     k.records.registerDerivativeStore(this.objectives);
@@ -170,6 +180,7 @@ export class CounselorSystem {
     k.registerSpecialist(new OpportunityScoutAgent(model));
     k.registerSpecialist(new OfficialResearchAgent(model));
     k.registerSpecialist(new AffordabilityPlannerAgent(model));
+    k.registerSpecialist(new ScholarshipAdvisorAgent(model));
   }
 
   /** Create a student record owned by the student's own account. */
