@@ -172,6 +172,8 @@ interface Built {
   fit: string | null;
   programAccess: 'with_admission' | 'separate_competitive' | 'unknown';
   artifacts: string[];
+  deadlineUnresolved: string | null;
+  cashNote: string | null;
 }
 
 const latest = (xs: readonly DerivedArtifact[], scopeKey: string) => xs.filter((x) => x.scopeKey === scopeKey && (x.status === 'current' || x.status === 'stale')).sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))[0];
@@ -223,13 +225,17 @@ export class PortfolioStrategistAgent implements SpecialistAgent {
 
   private async build(ctx: TaskContext, o: z.infer<typeof PlanOptionSchema>, cycle: string, arts: { afford: DerivedArtifact[]; assess: DerivedArtifact[]; fit: DerivedArtifact[] }, sources: Set<string>): Promise<Built> {
     const resolution = await ctx.call<Resolution>('institutions.read', { op: 'resolve', institution: o.institution, campus: o.campus, program: o.program });
-    const b: Built = { opt: o, resolution, name: o.program ? `${o.program} at ${o.institution}` : o.institution, claims: [], rule: null, deadline: null, prompts: [], selection: 'not_assessed', affordability: 'not_calculated', fit: null, programAccess: 'unknown', artifacts: [] };
+    const b: Built = { opt: o, resolution, name: o.program ? `${o.program} at ${o.institution}` : o.institution, claims: [], rule: null, deadline: null, prompts: [], selection: 'not_assessed', affordability: 'not_calculated', fit: null, programAccess: 'unknown', artifacts: [], deadlineUnresolved: null, cashNote: null };
     if (resolution.status !== 'resolved') return b;
     b.name = resolution.program ? `${resolution.program.name} at ${resolution.institution.name}` : resolution.institution.name;
     const read = await ctx.call<ReadClaimsResult>('institutions.read', { op: 'claims', entityId: resolution.entity.id, predicates: ['round_rule', 'application_deadline', 'writing_prompt', 'program_access_route'], cycle, includeHistorical: false });
     b.claims = read.claims.filter((c) => c.status !== 'superseded' && c.status !== 'historical');
     b.rule = b.claims.find((c) => c.predicate === 'round_rule' && (c.qualifier === o.round || (c.value as RoundRuleValue).round === o.round)) ?? null;
-    b.deadline = b.claims.find((c) => c.predicate === 'application_deadline' && c.qualifier === o.round) ?? null;
+    const deadlineClaim = b.claims.find((c) => c.predicate === 'application_deadline' && c.qualifier === o.round) ?? null;
+    // A conflicted or unverified date is not an official deadline; the decision stays unresolved (XT07).
+    b.deadline = deadlineClaim && deadlineClaim.status === 'verified' ? deadlineClaim : null;
+    b.deadlineUnresolved = deadlineClaim && deadlineClaim.status !== 'verified' ? deadlineClaim.status : null;
+    if (deadlineClaim) sources.add(claimRef(deadlineClaim.claimId));
     b.prompts = b.claims.filter((c) => c.predicate === 'writing_prompt');
     const access = b.claims.find((c) => c.predicate === 'program_access_route');
     const route = access ? (access.value as { route: string }).route : resolution.program?.attributes.accessRoute ?? null;
@@ -238,7 +244,13 @@ export class PortfolioStrategistAgent implements SpecialistAgent {
     for (const c of [b.rule, b.deadline, access, ...b.prompts]) if (c) sources.add(claimRef(c.claimId));
     const af = latest(arts.afford, o.optionRef);
     if (af) {
-      b.affordability = af.status === 'stale' ? 'unknown' : (af.payload as { state: string }).state;
+      const v = af.payload as { state: string; cashShortfall?: { amount: string; on: string; coveredOn: string | null } | null; currency?: string };
+      b.affordability = af.status === 'stale' ? 'unknown' : v.state;
+      // Enough over the year but short when the first bills are due is not unconditional affordability (XT16).
+      if (b.affordability === 'supported' && v.cashShortfall) {
+        b.affordability = 'cash_timing_gap';
+        b.cashNote = `Affordable over the year, but ${v.cashShortfall.amount} ${v.currency ?? ''} is due on ${v.cashShortfall.on} before the funding arrives${v.cashShortfall.coveredOn ? ` on ${v.cashShortfall.coveredOn}` : ''}.`.replace(/\s+/g, ' ');
+      }
       b.artifacts.push(artifactRef(af.id));
     }
     const as = latest(arts.assess, o.optionRef);
@@ -342,6 +354,7 @@ export class PortfolioStrategistAgent implements SpecialistAgent {
       const acceptable = b.opt.studentWouldAttend !== false && !rejected.has(b.opt.optionRef);
       if (!acceptable) notes.push(b.opt.studentWouldAttend === false ? 'You said you would not attend, so it is not counted as an acceptable outcome.' : `You set this aside: ${rejected.get(b.opt.optionRef)}.`);
       if (b.programAccess === 'separate_competitive') notes.push('Admission does not secure the intended program: entry is a later competitive selection.');
+      if (b.cashNote) notes.push(`${b.cashNote} The upfront cash needs a plan before this counts as affordable.`);
       let readiness: PortfolioPayload['options'][number]['bindingReadiness'] = null;
       if (binding) {
         // A binding round needs current terms, confirmed affordability and a genuine first choice (14T03, 14T04).
@@ -373,6 +386,7 @@ export class PortfolioStrategistAgent implements SpecialistAgent {
         fee: b.opt.applicationFee,
         notes,
       });
+      if (b.deadlineUnresolved === 'conflicted') p.notices.push({ code: 'deadline_conflict', message: `Official sources disagree about the ${b.opt.round.replace(/_/g, ' ')} deadline for ${b.name}, so no date is treated as the deadline until that is resolved. You can set your own earlier target meanwhile; it is not the institution’s requirement.` });
       if (!b.deadline && b.resolution.status === 'resolved') p.questions.push({ code: `deadline_${b.opt.optionRef}`, question: `The ${b.opt.round.replace(/_/g, ' ')} deadline for ${b.name} is not verified yet; it has been sent for research.`, for: 'student' });
     }
 
@@ -386,6 +400,7 @@ export class PortfolioStrategistAgent implements SpecialistAgent {
     if (acceptable.length > 0 && acceptable.every((o) => o.selection === 'highly_uncertain_selection' || o.selection === 'selection_evidence_insufficient' || o.selection === 'not_assessed')) gaps.push({ code: 'all_selection_uncertain', message: 'Every option you would attend depends on uncertain or unassessed selection.' });
     if (acceptable.some((o) => o.programAccess === 'separate_competitive') && !acceptable.some((o) => o.programAccess === 'with_admission')) gaps.push({ code: 'program_access_uncertain', message: 'Every option needs a later competitive selection into your intended program.' });
     for (const o of p.options.filter((x) => !x.acceptable && x.resolved)) gaps.push({ code: 'not_an_outcome', message: `${o.name} is not counted: ${o.notes[0]}` });
+    for (const o of acceptable.filter((x) => x.affordability === 'cash_timing_gap')) gaps.push({ code: 'cash_timing', message: `${o.name} is covered over the year but not when the first payments are due, so it is not yet a confirmed affordable path.` });
 
     // Tasks and schedule, working back from official deadlines.
     const tasks: Task[] = [];
@@ -534,9 +549,14 @@ export class PortfolioStrategistAgent implements SpecialistAgent {
     const prior = previous.filter((x) => x.scopeKey === `plan_${s.cycle}`).sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))[0];
     p.version = ((prior?.payload as { version?: number } | undefined)?.version ?? 0) + 1;
     if (prior) {
-      const before = prior.payload as { options?: Array<{ optionRef: string; affordability: string; selection: string }>; confirmedAffordablePath?: boolean };
+      const before = prior.payload as { options?: Array<{ optionRef: string; affordability: string; selection: string; deadline?: string | null }>; confirmedAffordablePath?: boolean };
       for (const o of p.options) {
         const b = before.options?.find((x) => x.optionRef === o.optionRef);
+        // An official date that changed: the rule, the tasks it moved and the decision now needed (XT02).
+        if (b && b.deadline !== undefined && b.deadline !== o.deadline.official) {
+          const moved = p.tasks.filter((t) => t.optionRefs.includes(o.optionRef)).map((t) => t.taskId);
+          p.changes.push(`${o.name}: the official ${o.round.replace(/_/g, ' ')} deadline changed from ${b.deadline ?? 'unverified'} to ${o.deadline.official ?? 'unverified'}; ${moved.length} task${moved.length === 1 ? '' : 's'} moved (${moved.join(', ')}).`);
+        }
         if (b && b.affordability !== o.affordability) p.changes.push(`${o.name}: affordability ${b.affordability.replace(/_/g, ' ')} → ${o.affordability.replace(/_/g, ' ')}.`);
         if (b && b.selection !== o.selection) p.changes.push(`${o.name}: admissions assessment ${b.selection.replace(/_/g, ' ')} → ${o.selection.replace(/_/g, ' ')}.`);
       }
@@ -555,7 +575,7 @@ export class PortfolioStrategistAgent implements SpecialistAgent {
       studentId: ctx.request.studentId,
       kind: 'portfolio_plan',
       scopeKey: `plan_${s.cycle}`,
-      payload: { version: p.version, status: p.status, optionRefs: p.options.map((o) => o.optionRef), options: p.options.map((o) => ({ optionRef: o.optionRef, affordability: o.affordability, selection: o.selection, round: o.round })), confirmedAffordablePath: p.coverage.confirmedAffordablePath, nextDecision: p.nextDecision },
+      payload: { version: p.version, status: p.status, optionRefs: p.options.map((o) => o.optionRef), options: p.options.map((o) => ({ optionRef: o.optionRef, affordability: o.affordability, selection: o.selection, round: o.round, deadline: o.deadline.official })), confirmedAffordablePath: p.coverage.confirmedAffordablePath, nextDecision: p.nextDecision },
       inputClaimIds: view.view.fields.filter((f) => f.current && ['option_decision', 'scholarship_application'].includes(f.field.entity)).map((f) => f.current!.claimId),
       inputFieldKeys: ['option_decision:*.definition', 'scholarship_application:*.status', 'student:self.constraints.weekly_hours_available'],
       sourceIds: invalidationRefs,

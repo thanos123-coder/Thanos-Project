@@ -608,7 +608,8 @@ export class AffordabilityPlannerAgent implements SpecialistAgent {
         studentId: ctx.request.studentId,
         kind: 'affordability_scenario',
         scopeKey: b.result.optionRef,
-        payload: { optionRef: b.result.optionRef, state: base.state, currency: base.currency, netEducationalCost: base.totals.netEducationalCost, gapBeforeFinancing: base.totals.gapBeforeFinancing, assumptions: base.assumptions, conditions: base.conditions },
+        // The upfront cash position travels with the state, so a plan never reads "affordable" when money arrives after bills are due (XT16).
+        payload: { optionRef: b.result.optionRef, state: base.state, currency: base.currency, netEducationalCost: base.totals.netEducationalCost, gapBeforeFinancing: base.totals.gapBeforeFinancing, assumptions: base.assumptions, conditions: base.conditions, cashShortfall: b.result.cashFlow?.upfrontShortfall ?? null },
         inputClaimIds: b.recordClaimIds,
         inputFieldKeys: ['attendance_budget:*.definition', 'funding_award:*.definition', 'aid_eligibility:*.status', 'fee_status:*.assessment'],
         sourceIds: b.sourceRefs,
