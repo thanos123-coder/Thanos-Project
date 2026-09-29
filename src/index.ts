@@ -17,6 +17,7 @@ export { connectModelRegistry } from './system/model-wiring.js';
 export { connectOpportunityCatalog } from './system/opportunity-wiring.js';
 export { connectScholarshipCatalog } from './system/scholarship-wiring.js';
 export { connectStoryBank } from './system/story-wiring.js';
+export { connectDraftRegistry } from './system/draft-wiring.js';
 export { registerOrchestrationTools, ROLE_PURPOSES, type InvokeOutcome } from './system/orchestration-tools.js';
 
 export * as shared from './shared/index.js';
@@ -40,3 +41,4 @@ export * as portfolio from './agents/a14-portfolio/index.js';
 export * as affordability from './agents/a15-affordability/index.js';
 export * as scholarships from './agents/a16-scholarships/index.js';
 export * as stories from './agents/a17-stories/index.js';
+export * as narrative from './agents/a18-narrative/index.js';

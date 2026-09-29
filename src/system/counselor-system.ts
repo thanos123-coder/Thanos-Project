@@ -37,6 +37,8 @@ import { ScholarshipCatalog } from '../agents/a16-scholarships/catalog.js';
 import { registerScholarshipTools } from '../agents/a16-scholarships/tools.js';
 import { StoryInterviewerAgent } from '../agents/a17-stories/agent.js';
 import { registerStoryTools, StoryBank } from '../agents/a17-stories/bank.js';
+import { NarrativeCoordinatorAgent } from '../agents/a18-narrative/agent.js';
+import { DraftRegistry, registerDraftTools } from '../agents/a18-narrative/drafts.js';
 import type { ModelGateway } from '../model/gateway.js';
 import type { ExternalActionRecord } from '../runtime/external-actions.js';
 import type { ReviewStaffing } from '../runtime/human-review.js';
@@ -50,6 +52,7 @@ import { connectModelRegistry } from './model-wiring.js';
 import { connectOpportunityCatalog } from './opportunity-wiring.js';
 import { connectScholarshipCatalog } from './scholarship-wiring.js';
 import { connectStoryBank } from './story-wiring.js';
+import { connectDraftRegistry } from './draft-wiring.js';
 import { registerOrchestrationTools } from './orchestration-tools.js';
 
 /**
@@ -119,6 +122,8 @@ export class CounselorSystem {
   readonly notebook: ProjectNotebook;
   /** Private exploration notes and sessions from essay brainstorming, under the story-bank permission. */
   readonly stories: StoryBank;
+  /** The student's versioned drafts with destinations, declared provenance and assistance history. */
+  readonly drafts: DraftRegistry;
   readonly objectives: ObjectiveStore;
   private readonly deliveries = new Map<string, string>();
 
@@ -176,6 +181,10 @@ export class CounselorSystem {
     registerStoryTools(k.gateway, this.stories, k.records.permissions);
     connectStoryBank(k, this.stories);
 
+    this.drafts = new DraftRegistry(() => k.clock.nowIso());
+    registerDraftTools(k.gateway, this.drafts, k.records.permissions);
+    connectDraftRegistry(k, this.drafts);
+
     this.objectives = new ObjectiveStore(k.clock, k.ids, (taskId, reason) => k.cancel(taskId, reason));
     registerTaskTools(k.gateway, this.objectives);
     k.records.registerDerivativeStore(this.objectives);
@@ -214,6 +223,7 @@ export class CounselorSystem {
     k.registerSpecialist(new AffordabilityPlannerAgent(model));
     k.registerSpecialist(new ScholarshipAdvisorAgent(model));
     k.registerSpecialist(new StoryInterviewerAgent(model));
+    k.registerSpecialist(new NarrativeCoordinatorAgent(model));
   }
 
   /** Create a student record owned by the student's own account. */
