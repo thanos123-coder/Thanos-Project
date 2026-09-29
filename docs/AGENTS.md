@@ -1,5 +1,7 @@
 # The nine agents
 
+Agents 10–18 are described in [AGENTS-V2.md](AGENTS-V2.md).
+
 A reference for each role: what it does, how it is called, what its result guarantees, which tools it holds and how it uses a model. The requirement-by-requirement mapping is in [TRACEABILITY.md](TRACEABILITY.md), and the shared machinery is in [ARCHITECTURE.md](ARCHITECTURE.md).
 
 Every agent implements `SpecialistAgent { role, contracts, handle(ctx) }` (`src/agents/common/specialist.ts`). It receives a `TaskContext` and returns a result envelope, which the kernel validates against the agent's contract before anyone sees it. Agents 02–09 are normally started by Agent 01 through `specialist.invoke`. Each can also be run directly through the kernel, which is how their own test suites drive them.

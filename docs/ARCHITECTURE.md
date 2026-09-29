@@ -186,7 +186,33 @@ An approved proposal still needs an integration adapter to run, and this volume 
 - **Staffed** (a named queue owner is configured): the case is queued, and the answer states the response expectation that was configured.
 - **Not staffed:** the student gets a referral, meaning the question to take to a school counselor or admissions office and what to bring. The system never implies that someone has accepted a case.
 
-## Adding agents 10–36
+## Volume two: agents 10–18
+
+The second nine roles reuse the same kernel, gateway, record service and validation. They add shared stores, each behind its own tool, each purged on account deletion where it holds student data, and each wired into invalidation:
+
+| Store | Tool | Holds | Invalidation |
+|---|---|---|---|
+| Institution registry and claim store (`a11-research/entities.ts`, `claims.ts`) | `institutions.read`, `institutions.write` | Institutions, campuses, programs and platforms. Versioned, anchored claims (deadlines, round rules, costs, prompts, statistics, access routes) with conflicts linked | A new claim version marks every result citing `iclaim:<id>` stale for every student (`system/institution-wiring.ts`) |
+| Scholarship catalog (`a16-scholarships/catalog.ts`) | `scholarships.read`, `scholarships.write` | Curated awards with rules, stages and trust status; leads kept apart until reviewed | A material change marks results citing `scholarship:<id>` stale (`system/scholarship-wiring.ts`) |
+| Numeric model registry (`a13-uncertainty/models.ts`) | `models.read_registry` | Reviewed model cards; a withdrawn model stops being served | Withdrawal invalidates results using `model:<id>@<v>` (`system/model-wiring.ts`) |
+| Assistance policy registry (`policy/assistance.ts`) | `policy.check_operation` | Reviewed, operation-specific policies per destination and cycle. The app's own no-ghostwriting default applies first, and a shared artifact uses the intersection | A new reviewed version invalidates results governed by the old one |
+| Project notebook (`a10-projects/notebook.ts`) | `projects.notebook` | Evidence entries. Entries with other people's private details are restricted and never returned to agents | Purged on account deletion |
+| Story bank (`a17-stories/bank.ts`) | `story.bank`, `story.read_permitted` | Exploration sessions and story entries under the `story_bank` permission. Only "possible writing material" is readable for writing work | A correction, exclusion or use change marks results citing `story:<id>` stale (`system/story-wiring.ts`) |
+| Draft registry (`a18-narrative/drafts.ts`) | `drafts.registry` | Versioned drafts with destinations, declared provenance, assistance history (carried to copies) and the student's decisions about findings | A new version or destination change marks results citing `draft:<id>` stale (`system/draft-wiring.ts`) |
+
+Derived results can also cite other results as `artifact:<id>`. When a cited result goes stale, the one built on it goes stale too. For example:
+
+- the affordability scenario feeds the portfolio plan;
+- the portfolio plan feeds its approval;
+- the story summary feeds the narrative review.
+
+A plan therefore never outlives the calculation it used.
+
+Money is exact decimal arithmetic. Dates and deadlines keep their official time and zone and are converted to the student's zone in code. Round rules, dependency graphs, schedules, length counts, repetition spans and policy decisions are all deterministic. The only model call in volume two is Agent 11 locating claims in a page, and its output must quote the page verbatim.
+
+Agent 01 plans nodes for these roles from nine outcomes, or from structured `context` (`cycle`, `options`, `specialistScopes`). It orders the application plan after the fit, uncertainty and affordability results it integrates. The cross-agent behaviour is tested end to end in `test/system/cross-agent-v2.test.ts` through `test/helpers/v2.ts`.
+
+## Adding agents 19–36
 
 The later roles plug in the same way:
 
@@ -196,4 +222,4 @@ The later roles plug in the same way:
 4. give it a purpose in `ROLE_PURPOSE`;
 5. register it in `CounselorSystem`.
 
-Agent 01 already routes requests that belong to later roles (essays, interviews, financial aid, timelines and so on) to typed handoffs (`laterRolesFrom`). Its planner is where a new role's nodes would be added.
+Agent 01 still routes requests that belong to later roles (draft feedback, interviews, recommendations, application forms, offers) to typed handoffs (`laterRolesFrom`). Its planner is where a new role's nodes would be added. Volume two already records the interfaces those roles need: the operation-level assistance policy for Agent 22, and the voice-delivery intent that Agent 17 prepares for Agent 26.

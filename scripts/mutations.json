@@ -798,6 +798,396 @@
    "find": "  if (cmp === 'incomparable') return 'unknown';",
    "replace": "  if (cmp === 'incomparable') return false;",
    "tests": []
+  },
+  {
+   "id": "10a",
+   "safeguard": "schedule never places more than a week holds",
+   "file": "src/agents/a10-projects/schedule.ts",
+   "find": "const take = Math.min(left[week - 1]!, need);",
+   "replace": "const take = need;",
+   "tests": [
+    "test/agents/a10-projects.test.ts"
+   ]
+  },
+  {
+   "id": "10b",
+   "safeguard": "work waiting for an approval is blocked",
+   "file": "src/agents/a10-projects/schedule.ts",
+   "find": "if (!a || (a.status !== 'granted' && a.status !== 'not_needed')) reasons.push(",
+   "replace": "if (false) reasons.push(",
+   "tests": [
+    "test/agents/a10-projects.test.ts"
+   ]
+  },
+  {
+   "id": "10c",
+   "safeguard": "dependency cycles are detected",
+   "file": "src/agents/a10-projects/schedule.ts",
+   "find": "if (state.get(d) === 'visiting') {",
+   "replace": "if (false) {",
+   "tests": [
+    "test/agents/a10-projects.test.ts"
+   ]
+  },
+  {
+   "id": "10d",
+   "safeguard": "a fabricated activity is declined",
+   "file": "src/agents/a10-projects/agent.ts",
+   "find": "if (s.request && requestsFabrication(s.request)) {",
+   "replace": "if (false) {",
+   "tests": [
+    "test/agents/a10-projects.test.ts"
+   ]
+  },
+  {
+   "id": "10e",
+   "safeguard": "submitted is never recorded as published",
+   "file": "src/agents/a10-projects/checks.ts",
+   "find": "if (claimed === 'published' && evidence !== 'publication_link') {",
+   "replace": "if (false) {",
+   "tests": [
+    "test/agents/a10-projects.test.ts"
+   ]
+  },
+  {
+   "id": "10f",
+   "safeguard": "visits are not relabelled as people helped",
+   "file": "src/agents/a10-projects/checks.ts",
+   "find": "if (statedAs && IMPACT_WORDS.test(statedAs) && EXPOSURE_KINDS.has(m.kind)) {",
+   "replace": "if (false) {",
+   "tests": [
+    "test/agents/a10-projects.test.ts"
+   ]
+  },
+  {
+   "id": "10g",
+   "safeguard": "notebook entries with private details are restricted",
+   "file": "src/agents/a10-projects/notebook.ts",
+   "find": "access: found.found ? 'restricted' : 'normal'",
+   "replace": "access: 'normal'",
+   "tests": [
+    "test/agents/a10-projects.test.ts"
+   ]
+  },
+  {
+   "id": "10h",
+   "safeguard": "reflections reach essay help only with permission",
+   "file": "src/agents/a10-projects/agent.ts",
+   "find": "if (permission?.state === 'possible_writing_material') handoffs.push(",
+   "replace": "if (true) handoffs.push(",
+   "tests": [
+    "test/agents/a10-projects.test.ts"
+   ]
+  },
+  {
+   "id": "10i",
+   "safeguard": "hours are not used when tracking is declined",
+   "file": "src/agents/a10-projects/agent.ts",
+   "find": "const hours = tracking === 'none' ? null : r.actualHours;",
+   "replace": "const hours = r.actualHours;",
+   "tests": [
+    "test/agents/a10-projects.test.ts"
+   ]
+  },
+  {
+   "id": "11a",
+   "safeguard": "an anchor quote must occur in the retrieved passage",
+   "file": "src/agents/a11-research/claims.ts",
+   "find": "if (!normalizeSpace(passageText).includes(normalizeSpace(c.anchor.quote))) issues.push(",
+   "replace": "if (false) issues.push(",
+   "tests": [
+    "test/agents/a11-research.test.ts"
+   ]
+  },
+  {
+   "id": "11b",
+   "safeguard": "a model extraction is never stored as verified",
+   "file": "src/agents/a11-research/claims.ts",
+   "find": "if (c.status === 'verified' && c.extraction === 'model') issues.push(",
+   "replace": "if (false) issues.push(",
+   "tests": [
+    "test/agents/a11-research.test.ts"
+   ]
+  },
+  {
+   "id": "11c",
+   "safeguard": "binding decisions need evidence from the last 72 hours",
+   "file": "src/agents/a11-research/claims.ts",
+   "find": "return Date.parse(nowIso) - Date.parse(claim.retrievedAt) <= 72 * 3600 * 1000;",
+   "replace": "return true;",
+   "tests": [
+    "test/agents/a11-research.test.ts"
+   ]
+  },
+  {
+   "id": "12a",
+   "safeguard": "an unresearched option gets no evidence-free matches",
+   "file": "src/agents/a12-fit/fit.ts",
+   "find": "if (c.entityId === null) return unknown(",
+   "replace": "if (false) return unknown(",
+   "tests": [
+    "test/agents/a12-fit.test.ts"
+   ]
+  },
+  {
+   "id": "13a",
+   "safeguard": "a low admit rate is never called plausible",
+   "file": "src/agents/a13-uncertainty/agent.ts",
+   "find": "if (value < PLAUSIBLE_MIN_RATE) {",
+   "replace": "if (false) {",
+   "tests": [
+    "test/agents/a13-uncertainty.test.ts"
+   ]
+  },
+  {
+   "id": "14a",
+   "safeguard": "a public-institution exception needs a public institution",
+   "file": "src/agents/a14-portfolio/rounds.ts",
+   "find": "if (ex.condition === 'public_institution' && b.control === 'public') {",
+   "replace": "if (ex.condition === 'public_institution') {",
+   "tests": [
+    "test/agents/a14-portfolio.test.ts"
+   ]
+  },
+  {
+   "id": "14b",
+   "safeguard": "a scholarship exception needs a verified award requiring that round",
+   "file": "src/agents/a14-portfolio/agent.ts",
+   "find": "const ok = !!sch && sch.trust.status === 'verified_provider' && !!req && req.institutionRef === b.resolution.institution.id && req.round === b.opt.round;",
+   "replace": "const ok = !!sch;",
+   "tests": [
+    "test/agents/a14-portfolio.test.ts"
+   ]
+  },
+  {
+   "id": "14c",
+   "safeguard": "a round conflict blocks the plan",
+   "file": "src/agents/a14-portfolio/agent.ts",
+   "find": "const blocked = rc.conflicts.length > 0 || choiceLimit.length > 0;",
+   "replace": "const blocked = false;",
+   "tests": [
+    "test/agents/a14-portfolio.test.ts"
+   ]
+  },
+  {
+   "id": "14d",
+   "safeguard": "received needs a portal receipt",
+   "file": "src/agents/a14-portfolio/agent.ts",
+   "find": "const receipt = fromDocument && s.evidence.kind === 'portal_receipt';",
+   "replace": "const receipt = true;",
+   "tests": [
+    "test/agents/a14-portfolio.test.ts"
+   ]
+  },
+  {
+   "id": "14e",
+   "safeguard": "an option the student would not attend is not an outcome",
+   "file": "src/agents/a14-portfolio/agent.ts",
+   "find": "const acceptable = b.opt.studentWouldAttend !== false && !rejected.has(b.opt.optionRef);",
+   "replace": "const acceptable = true;",
+   "tests": [
+    "test/agents/a14-portfolio.test.ts"
+   ]
+  },
+  {
+   "id": "14f",
+   "safeguard": "a cash timing gap is not unconditional affordability",
+   "file": "src/agents/a14-portfolio/agent.ts",
+   "find": "if (b.affordability === 'supported' && v.cashShortfall) {",
+   "replace": "if (false) {",
+   "tests": [
+    "test/system/cross-agent-v2.test.ts"
+   ]
+  },
+  {
+   "id": "14g",
+   "safeguard": "a conflicted deadline is not the official date",
+   "file": "src/agents/a14-portfolio/agent.ts",
+   "find": "b.deadline = deadlineClaim && deadlineClaim.status === 'verified' ? deadlineClaim : null;",
+   "replace": "b.deadline = deadlineClaim;",
+   "tests": [
+    "test/system/cross-agent-v2.test.ts"
+   ]
+  },
+  {
+   "id": "15a",
+   "safeguard": "an unclassified award is not counted as a grant",
+   "file": "src/agents/a15-affordability/ledger.ts",
+   "find": "if (!GIFT_KINDS.has(item.kind)) return { ...zero, status: 'unclassified'",
+   "replace": "if (false) return { ...zero, status: 'unclassified'",
+   "tests": [
+    "test/agents/a15-affordability.test.ts"
+   ]
+  },
+  {
+   "id": "15b",
+   "safeguard": "affordability results carry the upfront cash shortfall",
+   "file": "src/agents/a15-affordability/agent.ts",
+   "find": "cashShortfall: b.result.cashFlow?.upfrontShortfall ?? null",
+   "replace": "cashShortfall: null",
+   "tests": [
+    "test/system/cross-agent-v2.test.ts"
+   ]
+  },
+  {
+   "id": "16a",
+   "safeguard": "an unverified small provider is not called suspicious",
+   "file": "src/agents/a16-scholarships/catalog.ts",
+   "find": "return { status: 'unresolved', signals, missing, message: 'This opportunity has not been verified yet.",
+   "replace": "return { status: 'suspicious', signals, missing, message: 'This opportunity has not been verified yet.",
+   "tests": [
+    "test/agents/a16-scholarships.test.ts"
+   ]
+  },
+  {
+   "id": "16b",
+   "safeguard": "sensitive eligibility facts are asked about, not assumed",
+   "file": "src/agents/a16-scholarships/rules.ts",
+   "find": "const sensitive = SENSITIVE_KINDS.has(l.kind) || l.params.sensitive === true;",
+   "replace": "const sensitive = false;",
+   "tests": [
+    "test/agents/a16-scholarships.test.ts"
+   ]
+  },
+  {
+   "id": "17a",
+   "safeguard": "a voice fact whose negation is uncertain is held for confirmation",
+   "file": "src/agents/a17-stories/agent.ts",
+   "find": "const ambiguities = turn.modality === 'voice' ? criticalAmbiguities(turn.segments) : [];",
+   "replace": "const ambiguities: ReturnType<typeof criticalAmbiguities> = [];",
+   "tests": [
+    "test/agents/a17-stories.test.ts"
+   ]
+  },
+  {
+   "id": "17b",
+   "safeguard": "inferred emotions and traits are never stored",
+   "file": "src/agents/a17-stories/agent.ts",
+   "find": "if ((INFERRED_KINDS as readonly string[]).includes(n.kind)) {",
+   "replace": "if (false) {",
+   "tests": [
+    "test/agents/a17-stories.test.ts"
+   ]
+  },
+  {
+   "id": "17c",
+   "safeguard": "only permitted stories are readable for writing work",
+   "file": "src/agents/a17-stories/bank.ts",
+   "find": "return this.list(tenantId, studentId).filter((e) => e.privacy === 'possible_writing_material');",
+   "replace": "return this.list(tenantId, studentId);",
+   "tests": [
+    "test/agents/a17-stories.test.ts"
+   ]
+  },
+  {
+   "id": "17d",
+   "safeguard": "story notes need the story-bank permission",
+   "file": "src/agents/a17-stories/bank.ts",
+   "find": "if (!d.allowed) throw new AccessDeniedError('not_found_or_denied', 'Not found or not permitted');",
+   "replace": "if (false) throw new Error();",
+   "tests": [
+    "test/agents/a17-stories.test.ts"
+   ]
+  },
+  {
+   "id": "17e",
+   "safeguard": "recording never resumes silently after a reconnect",
+   "file": "src/agents/a17-stories/agent.ts",
+   "find": "case 'reconnect':\n        session.recording = s.startRecording ? 'on' : 'off';",
+   "replace": "case 'reconnect':\n        session.recording = 'on';",
+   "tests": [
+    "test/agents/a17-stories.test.ts"
+   ]
+  },
+  {
+   "id": "17f",
+   "safeguard": "leading questions are rejected by the contract",
+   "file": "src/agents/a17-stories/agent.ts",
+   "find": "if (LEADING.test(p.question.text)) issues.push(",
+   "replace": "if (false) issues.push(",
+   "tests": [
+    "test/agents/a17-stories.test.ts"
+   ]
+  },
+  {
+   "id": "18a",
+   "safeguard": "each operation is checked for the exact destinations",
+   "file": "src/agents/a18-narrative/agent.ts",
+   "find": "if (d.decision === 'allowed') for (const a of g.drafts) allowedFor.set(",
+   "replace": "for (const a of g.drafts) allowedFor.set(",
+   "tests": [
+    "test/agents/a18-narrative.test.ts"
+   ]
+  },
+  {
+   "id": "18b",
+   "safeguard": "repetition is compared only within one application",
+   "file": "src/agents/a18-narrative/agent.ts",
+   "find": "for (const a of reading) if (a.applicationId) byApp.set(a.applicationId, [...(byApp.get(a.applicationId) ?? []), a]);",
+   "replace": "for (const a of reading) byApp.set('all', [...(byApp.get('all') ?? []), a]);",
+   "tests": [
+    "test/agents/a18-narrative.test.ts"
+   ]
+  },
+  {
+   "id": "18c",
+   "safeguard": "a shared background is distinguished from a repeated response",
+   "file": "src/agents/a18-narrative/agent.ts",
+   "find": "const distinct = dx >= 0.5 && dy >= 0.5;",
+   "replace": "const distinct = false;",
+   "tests": [
+    "test/agents/a18-narrative.test.ts"
+   ]
+  },
+  {
+   "id": "18d",
+   "safeguard": "dismissed findings are not raised again",
+   "file": "src/agents/a18-narrative/agent.ts",
+   "find": "if (d && (d.disposition === 'dismiss' || d.disposition === 'keep')) return;",
+   "replace": "if (false) return;",
+   "tests": [
+    "test/agents/a18-narrative.test.ts"
+   ]
+  },
+  {
+   "id": "18e",
+   "safeguard": "a copy carries its source assistance history",
+   "file": "src/agents/a18-narrative/drafts.ts",
+   "find": "inherited = src.assistance.map((a) => ({ ...a, inheritedFrom: a.inheritedFrom ?? src.artifactId }));",
+   "replace": "inherited = [];",
+   "tests": [
+    "test/agents/a18-narrative.test.ts"
+   ]
+  },
+  {
+   "id": "18f",
+   "safeguard": "an optional response is never called required",
+   "file": "src/agents/a18-narrative/agent.ts",
+   "find": "for (const m of p.manifest.filter((x) => x.required && !app.has(x.promptId))) {",
+   "replace": "for (const m of p.manifest.filter((x) => !app.has(x.promptId))) {",
+   "tests": [
+    "test/agents/a18-narrative.test.ts"
+   ]
+  },
+  {
+   "id": "01v2a",
+   "safeguard": "a writing request says the essay is never written for the student",
+   "file": "src/agents/a01-orchestrator/agent.ts",
+   "find": "const author = p.notices.find((n) => n.code === 'student_is_author');",
+   "replace": "const author = undefined as { message: string } | undefined;",
+   "tests": [
+    "test/agents/a01-orchestrator.test.ts"
+   ]
+  },
+  {
+   "id": "01v2b",
+   "safeguard": "the application plan waits for the results it integrates",
+   "file": "src/agents/a01-orchestrator/planner.ts",
+   "find": "[...before, ...inputs], reasons, ANY_ACCEPTED));",
+   "replace": "[...before], reasons, ANY_ACCEPTED));",
+   "tests": [
+    "test/system/cross-agent-v2.test.ts"
+   ]
   }
  ]
 }

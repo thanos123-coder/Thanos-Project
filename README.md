@@ -1,6 +1,6 @@
-# AI College Counselor: agents 01–09
+# AI College Counselor: agents 01–18
 
-The first nine specialist agents of the AI College Counselor, and the system that runs them together. They are built to the *Agents 01–09 Deep Specification* and the whole-app blueprint. They are written in TypeScript and designed to sit behind both a mobile app and a website.
+The first eighteen specialist agents of the AI College Counselor, and the system that runs them together. Agents 01–09 are built to the *Agents 01–09 Deep Specification* and the whole-app blueprint; Agents 10–18 to the *Agents 10–18 Deep Specification*. They are written in TypeScript and designed to sit behind both a mobile app and a website.
 
 | Role | Agent | What it does | Contract |
 |---|---|---|---|
@@ -13,8 +13,17 @@ The first nine specialist agents of the AI College Counselor, and the system tha
 | 07 | Academic and testing planner | Plans courses and tests from findings and real constraints, with dependencies, costs and alternatives | `academic_plan_v1` |
 | 08 | Activities and experience assessor | Records what the student actually did and learned, without inflation or a "worth" score | `experience_record_v1` |
 | 09 | Opportunity research scout | Finds opportunities a student can really access, with complete costs, current cycles and honest no-result answers | `opportunity_dossier_v1` |
+| 10 | Project mentor and workload planner | A genuine student-owned project at a sustainable pace: milestones, evidence, a schedule within real time, an honest completion record | `project_plan_v1` |
+| 11 | Official college and program researcher | Scoped, anchored claims from official sources, with dates, versions and unresolved conflicts | `evidence_packet_v1` |
+| 12 | College and program fit matcher | An explainable shortlist from the student's own priorities, with tradeoffs and missing information | `fit_shortlist_v1` |
+| 13 | Admissions uncertainty advisor | How selective an option is, with definitions, and never invented personal odds | `admissions_uncertainty_v1` |
+| 14 | Application portfolio and round strategist | A versioned, affordable, feasible plan with valid round combinations, coverage gaps and a real schedule | `portfolio_plan_v1` |
+| 15 | Affordability and financial aid planner | Exact cost scenarios, gift aid separate from loans and work, award reconciliation and cash timing | `affordability_ledger_v1` |
+| 16 | Scholarship eligibility and matching advisor | Verified awards with the deciding eligibility reasons, dependencies, trust status and next steps | `scholarship_matches_v1` |
+| 17 | Personal essay brainstorming interviewer | A student-approved story bank built through one question at a time, in text or voice; no essay text | `story_session_v1` |
+| 18 | Narrative portfolio coordinator | A policy-permitted look across responses: lengths, required fields, unanswered asks, anchored repetition, facts that disagree | `narrative_review_v1` |
 
-Agents 10–36 are not part of this volume. Where the specification hands work to them (essays, interviews, financial aid, timelines, human coordination), the agents return typed handoffs and say plainly that the service is not available yet.
+Agents 19–36 are not part of these volumes. Where the specifications hand work to them (draft feedback, interviews, recommendations, application forms, offers), the agents return typed handoffs and say plainly that the service is not available yet. Nothing in the first eighteen writes an essay for the student.
 
 ## Quick start
 
@@ -24,6 +33,7 @@ Requires Node.js 22.12 or later.
 npm install
 npm run check      # typecheck + the full test suite (no network, no model needed)
 npm run demo       # the spec's worked interaction, end to end, with real agents
+npm run demo:v2    # volume two: a round conflict, a repaired plan, an essay request turned into brainstorming
 npm run build      # compiles the library to dist/
 ```
 
@@ -57,7 +67,7 @@ await counselor.updates(actor, tenantId, studentId);                            
 await counselor.deleteAccount(actor, tenantId, studentId);                      // stops running work, then purges everything
 ```
 
-The system exposes these entry points: `ask`, `reply`, `confirm`, `status`, `cancel`, `resume`, `updates`, `uploadDocument`, `deleteDocument`, `deleteFact`, `deleteAccount`, `pendingActions`, `approveAction` and `rejectAction`. A message from someone who may not act for the student is refused before anything is stored. Lower-level access to every agent module is available through the namespaces exported from the package root (`leadCounselor`, `intake`, `documents`, `record`, `goals`, `eligibility`, `planner`, `activities`, `opportunities`, `shared`, `runtime`, `model`).
+The system exposes these entry points: `ask`, `reply`, `confirm`, `status`, `cancel`, `resume`, `updates`, `uploadDocument`, `deleteDocument`, `deleteFact`, `deleteAccount`, `pendingActions`, `approveAction` and `rejectAction`. A message from someone who may not act for the student is refused before anything is stored. Lower-level access to every agent module is available through the namespaces exported from the package root (`leadCounselor`, `intake`, `documents`, `record`, `goals`, `eligibility`, `planner`, `activities`, `opportunities`, `projects`, `officialResearch`, `fit`, `admissionsUncertainty`, `portfolio`, `affordability`, `scholarships`, `stories`, `narrative`, `shared`, `runtime`, `model`). The shared stores the second nine use (institution claims, scholarship catalog, model registry, assistance policies, project notebook, story bank and draft registry) are properties of `CounselorSystem`, so a deployment can load reviewed content into them.
 
 ## What is enforced in code, not left to a prompt
 
@@ -70,13 +80,27 @@ The system exposes these entry points: `ask`, `reply`, `confirm`, `status`, `can
 - **Change propagation.** A correction, a new rule version or a changed opportunity marks every dependent result stale. Deleting a document, fact or record purges every result and cached answer built from it.
 - **Honest limits.** Unsupported coverage (for example graduate admissions) is stated rather than guessed. An unstaffed human review becomes a referral the student can take to a counselor, never a pretend escalation. No-result searches say what was searched and offer real alternatives.
 
-The architecture is described in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), each agent in [docs/AGENTS.md](docs/AGENTS.md), and the mapping of all 103 requirements and 164 acceptance cases to code and tests in [docs/TRACEABILITY.md](docs/TRACEABILITY.md).
+- **Authorship.** Operation-specific assistance policies decide what help is allowed for each destination; the app's own boundary forbids essay text, outlines and translation of submission text everywhere. Output checks catch structure that works as an outline whatever it is labelled, and assistance history travels with copied material.
+
+The architecture is described in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), each agent in [docs/AGENTS.md](docs/AGENTS.md) and [docs/AGENTS-V2.md](docs/AGENTS-V2.md). The mapping of all 103 requirements and 164 acceptance cases of volume one to code and tests is in [docs/TRACEABILITY.md](docs/TRACEABILITY.md), and the 180 acceptance cases of volume two in [docs/TRACEABILITY-V2.md](docs/TRACEABILITY-V2.md).
 
 ## How it is verified
 
-- **Acceptance cases.** Every acceptance case in the specification (144 role cases and the 20 cross-agent cases) has a test named after it. `test/docs/traceability.test.ts` fails if a requirement loses its citation in the code or a case loses its test.
-- **End to end.** The cross-agent suite and the demo run the real agents together through `CounselorSystem`, with deterministic time, IDs and research providers.
-- **Mutation check.** `npm run mutation` disables 87 safeguards one at a time and runs the tests that should notice. These cover permission checks, scope checks, validation rules, budgets, cancellation, deletion, PDF active-content detection, time zones, money and grades. Each must make at least one test fail. One case is marked equivalent (it cannot change behaviour), with the reason recorded in `scripts/mutations.json`. A case whose code has moved is reported as stale so the list stays current. The full run takes several minutes.
+- **Acceptance cases.** Every acceptance case in both specifications has a test named after it: 144 role cases and 20 cross-agent cases in volume one, 162 role cases and 18 cross-agent cases in volume two. `test/docs/traceability.test.ts` fails if a requirement loses its citation in the code or a case loses its test.
+- **End to end.** Both cross-agent suites and both demos run the real agents together through `CounselorSystem`, with deterministic time, IDs and research providers.
+- **Mutation check.** `npm run mutation` disables 126 safeguards one at a time and runs the tests that should notice. These cover permission checks, scope checks, validation rules, budgets, cancellation, deletion, PDF active-content detection, time zones, money and grades, and in volume two:
+  - round-rule exceptions;
+  - schedule capacity;
+  - receipts;
+  - cash timing;
+  - award classification;
+  - story retrieval and negation holds;
+  - recording after a reconnect;
+  - per-destination policy gates;
+  - repetition scope;
+  - inherited assistance history.
+
+  Each must make at least one test fail. One case is marked equivalent (it cannot change behaviour), with the reason recorded in `scripts/mutations.json`. A case whose code has moved is reported as stale so the list stays current. The full run takes several minutes.
 
 ## Models
 
@@ -88,7 +112,8 @@ Every agent works without a model. The deterministic path covers every consequen
 - drafting discriminating questions;
 - reading public listing pages;
 - classifying an unusual request;
-- giving a general concept explanation.
+- giving a general concept explanation;
+- locating claims on an official page, where the rules did not cover the predicate (Agent 11; the quote must occur verbatim and the claim stays provisional until reviewed).
 
 Each output must match a schema and, where it claims something, quote the student's or the document's exact words. Untrusted content (documents, web pages, student text) is always fenced as data. Check your provider's data-use terms before telling students how their data is handled.
 
@@ -100,27 +125,28 @@ This package holds the agents and their contracts. Some decisions and services b
 - **Identity.** Map your authenticated accounts to `Actor` (student, supporter, school counselor and so on). Grants are created by the student, or by a school administrator under a school-contract basis.
 - **Public research providers.** Supply a `SearchProvider` and `FetchProvider`. The fetcher must also refuse private and loopback addresses at connection time.
 - **Document security.** Supply a malware scanner.
-- **Reviewed content.** Rule packages and opportunity-catalog entries need qualified review before they are used. The code refuses unreviewed rule packages and unverified sources, but the review workflow itself belongs to your team.
+- **Reviewed content.** Rule packages, opportunity-catalog entries, official college claims, scholarship records, numeric model cards and assistance policies need qualified review before they are used. The code refuses unreviewed rule packages and unverified sources, but the review workflow itself belongs to your team.
 - **Human review staffing.** Configure staffing only when a named team really answers the queue.
 - **Launch decisions.** Markets, languages, age model, retention and external-action integrations are decisions the specification lists under "Decisions to finalize before launch".
 
-All institutions, programs, opportunities, people, dates and amounts in the tests, fixtures and demo are fictional.
+All institutions, programs, opportunities, people, dates and amounts in the tests, fixtures and demos are fictional.
 
 ## Project layout
 
 ```
 src/
-  agents/a01-orchestrator … a09-opportunities   one module per role (agent, contracts, deterministic logic)
+  agents/a01-orchestrator … a18-narrative       one module per role (agent, contracts, deterministic logic)
   agents/common                                  specialist contract, student-facts accessors
+  policy/                                        operation-specific assistance policies and outline detection
   runtime/                                       tool gateway, budgets, cancellation, task graph, events, validation, grounding, human review, external actions
   model/                                         model gateway, Anthropic adapter, scripted test gateway
   shared/                                        typed contracts: claims, evidence, time, money, grades, tests, scope, permissions, envelopes, events
   system/                                        kernel, CounselorSystem, orchestration tools, catalog wiring
 test/
   agents/        one suite per agent (its acceptance cases and more)
-  system/        the cross-agent acceptance suite (XT01–XT20), kernel safeguards, access and deletion
+  system/        the cross-agent suites (volume one XT01–XT20, volume two XT01–XT18), kernel safeguards, access and deletion
   docs/          keeps the traceability matrix in step with the code
-examples/demo.ts
+examples/        demo.ts (volume one), demo-v2.ts (volume two)
 scripts/         mutation check (mutation-check.mjs, mutations.json)
-docs/            ARCHITECTURE.md, AGENTS.md, TRACEABILITY.md
+docs/            ARCHITECTURE.md, AGENTS.md, AGENTS-V2.md, TRACEABILITY.md, TRACEABILITY-V2.md
 ```

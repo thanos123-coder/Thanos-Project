@@ -181,6 +181,10 @@ describe('Agent 17 — personal essay brainstorming interviewer', () => {
     const a = await h.answer(s.payload.sessionId!, 'I worked at the bakery counter on weekends.');
     const storyId = a.payload.story!.storyId;
     const map = h.kernel.records.putDerived({ ...h.ui, viaRole: '18' }, { tenantId: TENANT, studentId: h.studentId, kind: 'narrative_map', scopeKey: 'map_1', payload: {}, inputClaimIds: [], sourceIds: [storyRef(storyId)], recordVersion: h.kernel.records.recordVersion(TENANT, h.studentId)! });
+    // A new story is private: nothing is available for writing work until the student allows it.
+    expect(h.bank.permitted(TENANT, h.studentId)).toEqual([]);
+    await h.ok({ action: 'set_use', storyId, state: 'discuss_only' });
+    expect(h.bank.permitted(TENANT, h.studentId)).toEqual([]);
     await h.ok({ action: 'set_use', storyId, state: 'possible_writing_material' });
     expect(h.bank.permitted(TENANT, h.studentId).map((e) => e.storyId)).toEqual([storyId]);
     const r = await h.ok({ action: 'set_use', storyId, state: 'do_not_use' });

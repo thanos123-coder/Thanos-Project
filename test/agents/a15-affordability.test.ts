@@ -283,6 +283,15 @@ describe('Agent 15 — Affordability and financial aid planner', () => {
     expect(b.conditions.join(' ')).toMatch(/an estimate, not a confirmed commitment/);
   });
 
+  it('15T13: an award recorded without a known kind is not counted as a grant', async () => {
+    const h = worked();
+    h.funding('mystery', { name: 'Aldermere Opportunity Award', kind: 'other', amount: USD('3000.00'), optionRef: 'aldermere' });
+    const r = await h.compare();
+    const b = base(r.payload.options[0]!);
+    expect(b.totals.giftAid).toBe('25000.00');
+    expect(b.years[0]!.gifts.find((g) => g.fundingId === 'mystery')).toMatchObject({ status: 'unclassified', applied: '0.00' });
+  });
+
   it('15T13: an ambiguous award line is sent back for confirmation, not assumed to be a grant', async () => {
     const h = worked();
     const r = await h.run({ action: 'review_award_letter', option: h.option(), lines: [{ label: 'Aldermere Grant', amount: USD('20000.00') }, { label: 'Aldermere Award', amount: USD('8000.00') }] });

@@ -248,7 +248,7 @@ describe('Agent 10 — project mentor and workload planner', () => {
     const h = makeProjectHarness();
     await h.plan({ tracking: 'none', approve: true });
     h.clock.set('2026-10-05T10:00:00Z');
-    const c = await h.ok({ action: 'check_in', projectId: 'club_page', reports: [{ milestoneId: 'm1', status: 'done' }, { milestoneId: 'm2', status: 'in_progress', actualHours: { low: 9, high: 9 } }] });
+    const c = await h.ok({ action: 'check_in', projectId: 'club_page', reports: [{ milestoneId: 'm1', status: 'done', actualHours: { low: 9, high: 9 } }, { milestoneId: 'm2', status: 'in_progress', actualHours: { low: 9, high: 9 } }] });
     expect(c.payload.tracking).toBe('none');
     expect(c.payload.status).toBe('approved');
     expect(c.payload.reminders).toBe('on');
