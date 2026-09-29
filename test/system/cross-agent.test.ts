@@ -219,8 +219,10 @@ describe('Cross-agent acceptance suite', () => {
   it('XT13: asking for an essay after an activity review produces no invented essay', async () => {
     const h = makeSystem();
     const r = await h.ok('Now write my college essay about my robotics club for me.');
-    expect(r.answer!.laterRoles.map((l) => l.toRole)).toEqual(['17']);
-    expect(r.answer!.sections).toEqual([]);
+    expect(r.answer!.laterRoles).toEqual([]);
+    expect(r.answer!.progress.map((p) => p.role)).toEqual(['17']);
+    expect(r.answer!.headline).toMatch(/never writes the essay for you/);
+    expect(JSON.stringify(r.answer)).not.toMatch(/In conclusion|Dear admissions/i);
     expect(r.answer!.headline.length).toBeLessThan(400);
   });
 

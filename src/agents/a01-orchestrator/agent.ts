@@ -191,7 +191,7 @@ export class LeadCounselorAgent implements SpecialistAgent {
     payload.request = s.text;
     payload.priorities.push(...urgentPriorities(await this.deadlines(ctx), today));
 
-    const plan = planRequest({ text: s.text, classification: cls, context: s.context, conversationId: s.conversationId, turnId: s.turnId, modality: s.modality });
+    const plan = planRequest({ text: s.text, classification: cls, context: s.context, conversationId: s.conversationId, turnId: s.turnId, modality: s.modality, entryCycle: view.studentValue<string>('application.entry_cycle') ?? null });
     payload.coverage.push(...plan.coverage);
     payload.notices.push(...plan.notices);
     for (const l of cls.laterRoutes) {
@@ -492,8 +492,12 @@ export class LeadCounselorAgent implements SpecialistAgent {
     }
     for (const n of waiting) {
       if (!n.result) continue;
-      const own = (n.result.payload as { questions?: Array<{ question: string; why: string }> }).questions?.[0];
-      if (own) return { text: own.question, whyNeeded: own.why, blockedTasks, nextRole: 'student', intakeSessionId: null, options: [], reviewItems: [] };
+      const p = n.result.payload as { questions?: Array<{ question: string; why?: string }>; question?: { text: string } | null; choices?: string[]; sessionId?: string | null; exploration?: { questions: string[] } | null };
+      // The essay interviewer asks one question at a time within its own session; the student continues there.
+      if (n.role === '17' && p.question?.text) return { text: p.question.text, whyNeeded: 'One question at a time; you can skip it, switch to speaking, or stop whenever you like.', blockedTasks, nextRole: 'student', intakeSessionId: null, options: p.choices ?? [], reviewItems: [], specialistSession: p.sessionId ? { role: '17', sessionId: p.sessionId } : null };
+      if (n.role === '10' && p.exploration?.questions[0]) return { text: p.exploration.questions[0], whyNeeded: 'A small project starts from what you want to learn.', blockedTasks, nextRole: 'student', intakeSessionId: null, options: [], reviewItems: [] };
+      const own = p.questions?.[0];
+      if (own) return { text: own.question, whyNeeded: own.why ?? 'Your answer decides the next step.', blockedTasks, nextRole: 'student', intakeSessionId: null, options: [], reviewItems: [] };
       const u = n.result.uncertainties.find((x) => /\?\s*$/.test(x.resolution));
       if (u) return { text: u.resolution, whyNeeded: u.description, blockedTasks, nextRole: 'student', intakeSessionId: null, options: [], reviewItems: [] };
     }
@@ -503,9 +507,12 @@ export class LeadCounselorAgent implements SpecialistAgent {
   private headline(p: LeadPayload): string {
     const parts: string[] = [];
     if (p.priorities[0]?.reasons.includes('deadline_dependency')) parts.push(p.priorities[0].text);
+    // Authorship comes first whenever the student asked for writing.
+    const author = p.notices.find((n) => n.code === 'student_is_author');
+    if (author) parts.push(author.message);
     if (p.status === 'cancelled') parts.push('Stopped as you asked. Work that finished before that is kept.');
     // The useful result first, from validated specialist summaries: concrete findings and options before open-ended exploration.
-    const order: Record<string, number> = { '09': 0, '06': 1, '07': 2, '04': 3, '08': 4, '03': 5, '05': 6 };
+    const order: Record<string, number> = { '09': 0, '06': 1, '07': 2, '04': 3, '08': 4, '03': 5, '05': 6, '14': 7, '15': 8, '12': 9, '13': 10, '11': 11, '16': 12, '18': 13, '10': 14 };
     const useful = p.sections.filter((s) => s.role !== '02' && (s.status === 'completed' || s.status === 'partial' || s.status === 'needs_source')).sort((a, b) => (order[a.role] ?? 9) - (order[b.role] ?? 9));
     for (const s of useful.slice(0, 2)) parts.push(firstSentence(s.summary));
     const scope = p.conflicts.find((c) => c.kind === 'scope');

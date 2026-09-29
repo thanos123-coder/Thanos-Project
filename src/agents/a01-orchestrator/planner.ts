@@ -36,8 +36,14 @@ export const RequestContextSchema = z
     studentSelectedTests: z.array(TestFamilySchema).max(6).default([]),
     terms: z.array(z.string().min(1)).max(12).default([]),
     timezone: z.string().refine(isValidTimezone).optional(),
+    /** The entry cycle for college work (e.g. "2027"); the record's planned entry is used when absent. */
+    cycle: z.string().regex(/^\d{4}$/).optional(),
+    /** Colleges or programs the student selected, with a round where they have chosen one. */
+    options: z.array(z.object({ optionRef: z.string().min(1).max(200), institution: z.string().min(1).max(200), campus: z.string().max(200).nullable().default(null), program: z.string().max(200).nullable().default(null), round: z.string().regex(/^[a-z0-9_]+$/).nullable().default(null) }).strict()).max(10).default([]),
+    /** Fully specified requests for the college, funding and writing specialists, built by the interface; each specialist validates its own scope. */
+    specialistScopes: z.partialRecord(z.enum(['10', '11', '12', '13', '14', '15', '16', '17', '18']), z.record(z.string(), z.unknown())).default({}),
     /** Outcomes chosen explicitly in the interface; they replace text classification. */
-    outcomes: z.array(z.enum(['correct_fact', 'interpret_document', 'collect_information', 'explore_goals', 'check_requirement', 'plan_academics', 'assess_experiences', 'find_opportunities'])).max(8).default([]),
+    outcomes: z.array(z.enum(['correct_fact', 'interpret_document', 'collect_information', 'explore_goals', 'check_requirement', 'plan_academics', 'assess_experiences', 'find_opportunities', 'mentor_project', 'research_college', 'match_fit', 'assess_admissions', 'plan_applications', 'plan_finances', 'find_scholarships', 'brainstorm_essay', 'review_writing'])).max(12).default([]),
   })
   .strict();
 export type RequestContext = z.infer<typeof RequestContextSchema>;
@@ -50,6 +56,8 @@ export interface PlanInput {
   conversationId: string | null;
   turnId: string | null;
   modality: 'text' | 'voice';
+  /** The planned entry cycle from the record, if the student has stated one. */
+  entryCycle?: string | null;
 }
 
 export interface PlanOutput {
@@ -152,6 +160,7 @@ export function planRequest(input: PlanInput): PlanOutput {
     if (request['purpose'] === undefined && input.text.trim().length > 0) request['purpose'] = input.text.slice(0, 400);
     nodes.push(node('opportunities', '09', 'opportunity_research', 'opportunity_dossier_v1', { action: 'shortlist', request }, [...upstream], ['requested_by_student']));
   }
+  planVolumeTwo(input, outcomes, upstream, nodes, questions, notices);
   if (outcomes.has('collect_information') && nodes.length === 0) {
     const scope: Record<string, unknown> = { action: 'start', objective: 'onboarding', mode: input.modality };
     if (input.conversationId) scope['conversationId'] = input.conversationId;
@@ -159,6 +168,86 @@ export function planRequest(input: PlanInput): PlanOutput {
     nodes.push(node('intake', '02', 'intake', 'intake_turn_v1', scope, [], ['requested_by_student']));
   }
   return { nodes, questions, coverage, notices };
+}
+
+const WRITING_REQUEST = /\b(write|draft|compose|generate)\b[^.?!]{0,40}\b(essays?|personal statement|statement|paragraph|opening|draft)\b|\bcan you (just )?write\b/i;
+
+/** The subject the student named ("an essay about robotics"), used only as the first thing to explore. */
+function essayInterest(text: string): string | null {
+  const m = /\babout (?:my |the |a |an )?([a-z][a-z' -]{1,40}?)(?=[.?!,;]|$| for | and | so )/i.exec(text);
+  return m ? m[1]!.trim() : null;
+}
+
+/**
+ * Nodes for the college, funding and writing specialists (volume two). Each
+ * gets a scope it can validate; when a detail only the student can give is
+ * missing (the entry year, which colleges), the student is asked rather than
+ * the scope guessed. The application plan runs after the fit, uncertainty
+ * and affordability results it integrates.
+ */
+function planVolumeTwo(input: PlanInput, outcomes: ReadonlySet<Outcome>, upstream: readonly string[], nodes: NodeRecord[], questions: PlanOutput['questions'], notices: PlanOutput['notices']): void {
+  const ctx = input.context;
+  const cycle = ctx.cycle ?? (input.entryCycle ? /\d{4}/.exec(input.entryCycle)?.[0] : undefined) ?? null;
+  const scoped = (role: keyof typeof ctx.specialistScopes) => ctx.specialistScopes[role];
+  const ask = (text: string, whyNeeded: string) => {
+    if (!questions.some((q) => q.text === text)) questions.push({ text, whyNeeded });
+  };
+  const needCycle = () => ask('Which entry year are you applying for?', 'College rules, costs, rounds and awards are specific to one entry cycle.');
+  const needOptions = () => ask('Which colleges or programs should I look at?', 'This is worked out for specific colleges and programs, not in general.');
+  const opt = (o: RequestContext['options'][number]) => ({ optionRef: o.optionRef, institution: o.institution, campus: o.campus, program: o.program });
+  const reasons: TaskReason[] = ['requested_by_student'];
+  const before = [...upstream];
+  const inputs: string[] = [];
+
+  if (outcomes.has('mentor_project')) nodes.push(node('project', '10', 'project_mentoring', 'project_plan_v1', scoped('10') ?? { action: 'explore', interest: null, request: input.text.slice(0, 1500) }, before, reasons));
+  if (outcomes.has('research_college')) {
+    const o = ctx.options[0];
+    const scope = scoped('11') ?? (o && cycle ? { action: 'research', institution: o.institution, campus: o.campus, program: o.program, cycle, decision: 'explore', question: input.text.slice(0, 600) } : null);
+    if (scope) nodes.push(node('college_research', '11', 'college_research', 'evidence_packet_v1', scope, before, reasons, ANY_ACCEPTED));
+    else if (!o) ask('Which college and program should I look up?', 'Official information is specific to one institution, campus and program.');
+    else needCycle();
+  }
+  if (outcomes.has('match_fit')) {
+    const scope = scoped('12') ?? (cycle ? { action: 'match', cycle } : null);
+    if (scope) {
+      nodes.push(node('fit', '12', 'fit_matching', 'fit_shortlist_v1', scope, before, reasons, ANY_ACCEPTED));
+      inputs.push('fit');
+    } else needCycle();
+  }
+  if (outcomes.has('assess_admissions')) {
+    const scope = scoped('13') ?? (ctx.options.length > 0 && cycle ? { action: 'assess', options: ctx.options.slice(0, 8).map((o) => ({ ...opt(o), cycle })) } : null);
+    if (scope) {
+      nodes.push(node('uncertainty', '13', 'admissions_context', 'admissions_uncertainty_v1', scope, before, reasons, ANY_ACCEPTED));
+      inputs.push('uncertainty');
+    } else if (ctx.options.length === 0) needOptions();
+    else needCycle();
+  }
+  if (outcomes.has('plan_finances')) {
+    const scope = scoped('15') ?? (ctx.options.length > 0 && cycle ? { action: 'compare', options: ctx.options.slice(0, 6).map((o) => ({ ...opt(o), cycle })) } : null);
+    if (scope) {
+      nodes.push(node('affordability', '15', 'financial_planning', 'affordability_ledger_v1', scope, before, reasons, ANY_ACCEPTED));
+      inputs.push('affordability');
+    } else if (ctx.options.length === 0) needOptions();
+    else needCycle();
+  }
+  if (outcomes.has('find_scholarships')) {
+    const scope = scoped('16') ?? (cycle ? { action: 'shortlist', cycle } : null);
+    if (scope) nodes.push(node('scholarships', '16', 'scholarship_matching', 'scholarship_matches_v1', scope, before, reasons, ANY_ACCEPTED));
+    else needCycle();
+  }
+  if (outcomes.has('plan_applications')) {
+    const withRounds = ctx.options.filter((o) => o.round);
+    const scope = scoped('14') ?? (withRounds.length > 0 && cycle ? { action: 'plan', cycle, options: withRounds.map((o) => ({ ...opt(o), round: o.round })) } : null);
+    if (scope) nodes.push(node('portfolio', '14', 'application_strategy', 'portfolio_plan_v1', scope, [...before, ...inputs], reasons, ANY_ACCEPTED));
+    else if (withRounds.length === 0) ask('Which colleges, and which application rounds, are you considering?', 'Round rules are checked across the whole set of applications.');
+    else needCycle();
+  }
+  if (outcomes.has('brainstorm_essay')) {
+    if (WRITING_REQUEST.test(input.text)) notices.push({ code: 'student_is_author', message: 'Essay help here never writes the essay for you: it needs to be yours. A short brainstorming session has started instead, to help you find your own material.' });
+    const interest = essayInterest(input.text);
+    nodes.push(node('essay_exploration', '17', 'essay_exploration', 'story_session_v1', scoped('17') ?? { action: 'start', interest, mode: input.modality, conversationId: input.conversationId ?? 'conv_story' }, before, reasons));
+  }
+  if (outcomes.has('review_writing')) nodes.push(node('writing_review', '18', 'narrative_review', 'narrative_review_v1', scoped('18') ?? { action: 'review', applicationId: null }, before, reasons, ANY_ACCEPTED));
 }
 
 /** A follow-up intake node for consequential facts the specialists could not settle (01R04, worked interaction). */

@@ -428,13 +428,16 @@ describe('Agent 01 — Lead counselor and orchestrator', () => {
     expect(r.answer!.progress).toEqual([]);
   });
 
-  it('routes requests beyond this volume honestly (essay brainstorming) without producing an essay', async () => {
+  it('answers an essay-writing request with a brainstorming session, never an essay', async () => {
     const h = makeSystem();
     const r = await h.ok('Can you write my personal statement about robotics?');
-    expect(r.answer!.laterRoles.map((l) => l.toRole)).toEqual(['17']);
+    expect(r.answer!.laterRoles).toEqual([]);
     expect(r.answer!.headline).toMatch(/never writes the essay for you/);
-    expect(r.answer!.progress).toEqual([]);
-    expect(h.system.objectives.get(TENANT, h.studentId, h.student.id, r.objectiveId!).outcomes).toEqual(['route_beyond']);
+    expect(r.answer!.progress.map((p) => p.role)).toEqual(['17']);
+    expect(r.answer!.question!.text).toBe('You mentioned “robotics”. Can you think of one particular moment connected to that?');
+    expect(r.answer!.question!.specialistSession).toMatchObject({ role: '17' });
+    expect(JSON.stringify(r.answer)).not.toMatch(/Dear|In conclusion|my passion for robotics began/i);
+    expect(h.system.objectives.get(TENANT, h.studentId, h.student.id, r.objectiveId!).outcomes).toEqual(['brainstorm_essay']);
   });
 
   it('lists background changes as a reviewable update instead of interrupting', async () => {

@@ -43,11 +43,22 @@ const RULES: ReadonlyArray<{ outcome: Outcome; re: RegExp }> = [
   { outcome: 'explore_goals', re: /\b(majors?|what (should|could|do) i (study|major)|which (field|subject|degree)|choose between|decide between|(economics|engineering|medicine|biology|design|law|psychology|computer science|physics|chemistry|mathematics|history|art) or (economics|engineering|medicine|biology|design|law|psychology|computer science|physics|chemistry|mathematics|history|art)\b(?!\s+(activit|program|course|camp|workshop|competition|opportunit|internship|club))|not sure what (to|i want)|careers?|what to study|explore (subjects|fields|majors|options)|help me (choose|decide|figure out) (a |my |what )?(major|subject|field|what to study))\b/i },
   { outcome: 'assess_experiences', re: /\b(my (activities|experiences|clubs|job|volunteering|extracurriculars?|part-time job)|what counts as|does (my|this) (job|activity|club) count|activity list|extracurriculars?)\b/i },
   { outcome: 'find_opportunities', re: /\b(summer|internships?|volunteer(ing)?|competitions?|olympiads?|camps?|workshops?|(online|free|local|youth|pre-college|enrichment|weekend) (programs?|programmes?|courses?|classes)|opportunit(y|ies)|something to do (this|over|during))\b/i },
+  // Volume two outcomes. Each is narrow; the specialist asks for whatever structured detail it still needs.
+  { outcome: 'mentor_project', re: /\b(my project|a project|project (plan|idea)|start (a|my) project|passion project|side project|research project|build (a|an|my) (app|website|tool|game|robot))\b/i },
+  { outcome: 'research_college', re: /\b(deadlines? (for|at)|when (is|are) (the )?(application )?deadlines?|official (requirements|deadlines?|information) (for|at)|look up (the )?(requirements|deadlines?|costs?) (for|at))\b/i },
+  { outcome: 'match_fit', re: /\b(which (colleges|universities|schools) should|college list|where should i apply|best (colleges|universities) for|(good|best) fit for me|colleges? that fits?)\b/i },
+  { outcome: 'assess_admissions', re: /\b(my chances|chances? of (getting in|admission|being admitted)|odds of|how (hard|selective|competitive) is it to get in|acceptance rate|admit rate|likely to get in|reach school|safety school|target school)\b/i },
+  { outcome: 'plan_applications', re: /\b(early (decision|action)|restrictive early|which round|application (plan|strategy|timeline)|how many (colleges|schools|universities) should i apply|apply early|application portfolio)\b/i },
+  { outcome: 'plan_finances', re: /\b(financial aid|fafsa|css profile|afford (college|university|it|to go)|tuition (costs?|fees)|how much (will|would|does) (it|college|university) cost|net price|cost of attendance|aid (offer|letter|package)|award letter)\b/i },
+  { outcome: 'find_scholarships', re: /\bscholarships?\b/i },
+  { outcome: 'brainstorm_essay', re: /\b(essays?|personal statement|supplement(al)? (essays?|questions?)|what (should|could) i write about|topic for my (essay|statement))\b/i },
+  { outcome: 'review_writing', re: /\b(repeat(ing)? myself|repetition|across my (essays|responses|answers|applications)|(word|character) (count|limit)s?|my (essays|responses) together|consistent across)\b/i },
   { outcome: 'collect_information', re: /\b(get started|start over|tell you about (me|myself)|set up my profile|onboarding|let'?s begin)\b/i },
   { outcome: 'guarantee_request', re: /\b(guarantee[ds]?|make sure i get in|100 ?%|promise (me )?(that )?i('| wi)ll get|get me in|definitely get in|surely get in)\b/i },
   { outcome: 'concrete_objective_needed', re: /\b(make (my|the) application perfect|perfect application|help (me )?with everything|do everything|fix my application|help me get into)\b/i },
 ];
 
+const VOLUME_TWO: readonly Outcome[] = ['mentor_project', 'research_college', 'match_fit', 'assess_admissions', 'plan_applications', 'plan_finances', 'find_scholarships', 'brainstorm_essay', 'review_writing'];
 const EXPLAIN = /^\s*(what (is|are|does)|what'?s (a|an|the)|how does|explain|what'?s the difference)\b/i;
 const STATUS = /\b(how long (will|does|is)|status|where are (we|you) (at|with)|what'?s (happening|the progress)|are you (still )?(working|done)|progress so far|is it (done|ready))\b/i;
 const CANCEL = /\b(stop|cancel|never ?mind|forget (it|that)|don'?t (bother|search|look))\b/i;
@@ -55,11 +66,7 @@ const GRADUATE = /\b(master'?s|masters|mba|ph\.?\s?d|doctorate|doctoral|graduate
 
 const LATER: ReadonlyArray<{ toRole: AnyRoleId; topic: string; re: RegExp; text: string }> = [
   { toRole: '21', topic: 'essay review', re: /\b(review|feedback on|grade|check) (my )?(essay|personal statement|supplement)\b/i, text: 'Feedback on a draft essay is handled by the essay review service, which keeps your authorship and each institution’s AI policy in force.' },
-  { toRole: '17', topic: 'essay brainstorming', re: /\b(essay|personal statement|supplement(al)? (essay|question))\b/i, text: 'Essay brainstorming is handled by the essay interviewer, which helps you find your own material and never writes the essay for you.' },
   { toRole: '29', topic: 'interview practice', re: /\b(mock interview|interview practice|practice (an |my )?interview|admissions interview)\b/i, text: 'Interview practice is a separate, explicitly chosen mode; intake questions are never turned into a scored interview.' },
-  { toRole: '16', topic: 'scholarships', re: /\bscholarships?\b/i, text: 'Scholarship matching is handled by the scholarship advisor, which keeps award conditions and uncertainty visible.' },
-  { toRole: '15', topic: 'financial aid', re: /\b(financial aid|fafsa|css profile|afford (college|university)|tuition (cost|fees))\b/i, text: 'Costs and financial aid for university are handled by the affordability planner.' },
-  { toRole: '12', topic: 'college list', re: /\b(which (colleges|universities|schools) should|college list|where should i apply|best (colleges|universities) for)\b/i, text: 'Building a college list is handled by the fit matcher, using official program research.' },
   { toRole: '24', topic: 'recommendations', re: /\brecommendation letters?\b|\breferences? from (my )?teachers?\b/i, text: 'Recommendation letters are coordinated by the recommendation service.' },
   { toRole: '31', topic: 'application forms', re: /\b(common app|ucas form|fill (in|out) (my|the) application|application form)\b/i, text: 'Filling in application forms is handled by the application assembler, which only uses confirmed facts.' },
   { toRole: '33', topic: 'offers', re: /\b(compare (my )?offers|which offer|i got (in|accepted)|accept (an|the) offer)\b/i, text: 'Comparing offers is handled by the offer comparison advisor.' },
@@ -76,17 +83,18 @@ function cancelBranchFor(text: string): RoleId | 'all' {
 export function classifyRequest(text: string, explicit: readonly Outcome[] = []): Classification {
   const t = text.trim();
   const laterRoutes: LaterRoute[] = [];
-  const seenRoles = new Set<string>();
-  for (const l of LATER) {
-    if (l.re.test(t) && !(l.toRole === '17' && seenRoles.has('21'))) {
-      laterRoutes.push({ toRole: l.toRole, topic: l.topic, text: l.text });
-      seenRoles.add(l.toRole);
-    }
-  }
+  for (const l of LATER) if (l.re.test(t)) laterRoutes.push({ toRole: l.toRole, topic: l.topic, text: l.text });
   const outcomes = new Set<Outcome>(explicit);
   if (explicit.length === 0) for (const r of RULES) if (r.re.test(t)) outcomes.add(r.outcome);
   // A scholarship for a summer program is still opportunity research, not university aid.
-  if (outcomes.has('find_opportunities')) for (let i = laterRoutes.length - 1; i >= 0; i -= 1) if (laterRoutes[i]!.toRole === '15' || laterRoutes[i]!.toRole === '16') laterRoutes.splice(i, 1);
+  if (outcomes.has('find_opportunities')) {
+    outcomes.delete('find_scholarships');
+    outcomes.delete('plan_finances');
+  }
+  // Feedback on a draft belongs to a later essay review service, and looking across drafts to the coordinator: neither is brainstorming.
+  if (laterRoutes.some((l) => l.toRole === '21') || outcomes.has('review_writing')) outcomes.delete('brainstorm_essay');
+  // "What is early action?" asks for an explanation, not for a plan; "what are my chances" is about the student.
+  if (explicit.length === 0 && EXPLAIN.test(t) && !/\b(i|my|me|mine)\b/i.test(t)) for (const o of VOLUME_TWO) outcomes.delete(o);
   if (laterRoutes.length > 0) outcomes.add('route_beyond');
   if (outcomes.size === 0 && EXPLAIN.test(t)) outcomes.add('explain_concept');
   const onlyControl = outcomes.size === 0 || (outcomes.size === 1 && outcomes.has('concrete_objective_needed'));

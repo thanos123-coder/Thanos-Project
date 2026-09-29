@@ -55,6 +55,8 @@ export interface Question {
   options: string[];
   /** Recorded answers the student is asked to approve before they are used (intake review step). */
   reviewItems: Array<{ claimId: string; statement: string }>;
+  /** A specialist session the answer continues in (the essay interviewer's own session). */
+  specialistSession?: { role: '17'; sessionId: string } | null;
 }
 
 export interface LeadPayload {
@@ -95,7 +97,7 @@ export const LeadPayloadSchema = z
     headline: z.string().min(1),
     sections: z.array(z.object({ nodeId: z.string(), role: z.string(), title: z.string(), status: z.string(), label: LabelSchema, summary: z.string(), taskId: z.string(), recordVersion: z.number() }).strict()),
     priorities: z.array(z.object({ text: z.string(), reasons: z.array(z.string()), label: LabelSchema, dueDate: z.string().nullable(), ref: z.string().nullable() }).strict()),
-    question: z.object({ text: z.string().min(1), whyNeeded: z.string(), blockedTasks: z.array(z.string()), nextRole: z.enum(['02', 'student']), intakeSessionId: z.string().nullable(), options: z.array(z.string()), reviewItems: z.array(z.object({ claimId: z.string(), statement: z.string() }).strict()) }).strict().nullable(),
+    question: z.object({ text: z.string().min(1), whyNeeded: z.string(), blockedTasks: z.array(z.string()), nextRole: z.enum(['02', 'student']), intakeSessionId: z.string().nullable(), options: z.array(z.string()), reviewItems: z.array(z.object({ claimId: z.string(), statement: z.string() }).strict()), specialistSession: z.object({ role: z.literal('17'), sessionId: z.string() }).strict().nullable().optional() }).strict().nullable(),
     otherQuestions: z.array(z.string()),
     completed: z.array(z.string()),
     waiting: z.array(z.object({ task: z.string(), reason: z.string() }).strict()),
@@ -129,6 +131,15 @@ const TASK_NAMES: Record<string, string> = {
   opportunity_research: 'the opportunity search',
   intake: 'getting to know your situation',
   fill_gaps: 'a question about a missing detail',
+  project_mentoring: 'your project',
+  college_research: 'official college information',
+  fit_matching: 'your college list',
+  admissions_context: 'how selective it is',
+  application_strategy: 'your application plan',
+  financial_planning: 'costs and funding',
+  scholarship_matching: 'the scholarship search',
+  essay_exploration: 'finding your essay material',
+  narrative_review: 'looking across your application writing',
 };
 
 export function taskName(n: Pick<NodeRecord, 'objective'>): string {
