@@ -231,6 +231,25 @@ export const AidTimingValueSchema = z
   })
   .strict();
 
+/** A change to how applicants are selected, which can make earlier years' statistics a poor comparison (13T13). */
+export const SelectionPolicyChangeValueSchema = z
+  .object({
+    effectiveCycle: z.string().regex(/^\d{4}$/),
+    description: z.string().min(1).max(400),
+    affectsComparability: z.boolean(),
+    text: z.string().min(1).max(800),
+  })
+  .strict();
+
+/** An open or guaranteed admission route with its stated conditions: the only basis for calling an option "safe" (13 "Qualitative assessment contract"). */
+export const AdmissionGuaranteeValueSchema = z
+  .object({
+    route: z.enum(['open_admission', 'guaranteed_admission']),
+    conditions: z.array(z.string().min(1).max(300)).max(10),
+    text: z.string().min(1).max(800),
+  })
+  .strict();
+
 export const PROGRAM_ATTRIBUTES = ['setting', 'city_size', 'teaching_format', 'subject_flexibility', 'support_service', 'language_of_instruction', 'duration_years', 'undergraduate_research', 'accreditation', 'housing_guarantee'] as const;
 
 export const ProgramAttributeValueSchema = z
@@ -277,6 +296,8 @@ export const PREDICATES = {
   scholarship_program_restriction: { family: 'scholarship_rule', schema: ScholarshipRestrictionValueSchema, office: 'scholarship_office' },
   nomination_limit: { family: 'scholarship_rule', schema: NominationValueSchema, office: 'scholarship_office' },
   program_attribute: { family: 'attribute', schema: ProgramAttributeValueSchema, office: 'department' },
+  selection_policy_change: { family: 'requirement', schema: SelectionPolicyChangeValueSchema, office: 'admissions' },
+  admission_guarantee: { family: 'access', schema: AdmissionGuaranteeValueSchema, office: 'admissions' },
 } as const satisfies Record<string, { family: string; schema: z.ZodType; office: (typeof OFFICES)[number] }>;
 
 export type Predicate = keyof typeof PREDICATES;

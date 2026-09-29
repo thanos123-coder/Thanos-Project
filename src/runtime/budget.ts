@@ -154,7 +154,8 @@ export const DEFAULT_ROLE_BUDGETS: Readonly<Record<string, BudgetLimits>> = {
   '10': { maxToolCalls: 12, maxModelCalls: 2, maxRevisions: 1 },
   '11': { maxToolCalls: 40, maxModelCalls: 6, maxRevisions: 1 },
   '12': { maxToolCalls: 16, maxModelCalls: 1, maxRevisions: 1 },
-  '13': { maxToolCalls: 10, maxModelCalls: 1, maxRevisions: 1 },
+  // Up to 8 options: resolve, claims and one stored assessment each, plus shared reads.
+  '13': { maxToolCalls: 32, maxModelCalls: 1, maxRevisions: 1 },
   '14': { maxToolCalls: 24, maxModelCalls: 1, maxRevisions: 1 },
   '15': { maxToolCalls: 14, maxModelCalls: 1, maxRevisions: 1 },
   '16': { maxToolCalls: 30, maxModelCalls: 3, maxRevisions: 1 },

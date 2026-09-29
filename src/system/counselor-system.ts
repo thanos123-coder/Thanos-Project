@@ -22,6 +22,8 @@ import type { ResearchProviders } from '../agents/a09-opportunities/research.js'
 import { registerOpportunityTools } from '../agents/a09-opportunities/tools.js';
 import { OfficialResearchAgent } from '../agents/a11-research/agent.js';
 import { FitMatcherAgent } from '../agents/a12-fit/agent.js';
+import { UncertaintyAdvisorAgent } from '../agents/a13-uncertainty/agent.js';
+import { NumericModelRegistry, registerModelTools } from '../agents/a13-uncertainty/models.js';
 import { InstitutionClaimStore } from '../agents/a11-research/claims.js';
 import { InstitutionRegistry } from '../agents/a11-research/entities.js';
 import { registerInstitutionTools, type OfficialSearchProvider } from '../agents/a11-research/tools.js';
@@ -39,6 +41,7 @@ import type { IdGenerator } from '../shared/ids.js';
 import type { Actor } from '../shared/permissions.js';
 import { SystemKernel } from './kernel.js';
 import { connectInstitutionClaims } from './institution-wiring.js';
+import { connectModelRegistry } from './model-wiring.js';
 import { connectOpportunityCatalog } from './opportunity-wiring.js';
 import { connectScholarshipCatalog } from './scholarship-wiring.js';
 import { registerOrchestrationTools } from './orchestration-tools.js';
@@ -102,6 +105,8 @@ export class CounselorSystem {
   readonly institutions: InstitutionRegistry;
   /** Versioned, anchored official claims shared by every role that needs them. */
   readonly institutionClaims: InstitutionClaimStore;
+  /** Governed numerical admissions models; empty in the qualitative release. */
+  readonly models: NumericModelRegistry;
   /** The maintained scholarship catalog, with provider trust kept separate from eligibility. */
   readonly scholarships: ScholarshipCatalog;
   readonly objectives: ObjectiveStore;
@@ -145,6 +150,10 @@ export class CounselorSystem {
     connectInstitutionClaims(k, this.institutionClaims);
     registerFinanceTools(k.gateway, options.exchangeRates);
 
+    this.models = new NumericModelRegistry();
+    registerModelTools(k.gateway, this.models);
+    connectModelRegistry(k, this.models);
+
     this.scholarships = new ScholarshipCatalog(() => k.clock.nowIso());
     registerScholarshipTools(k.gateway, this.scholarships);
     connectScholarshipCatalog(k, this.scholarships);
@@ -181,6 +190,7 @@ export class CounselorSystem {
     k.registerSpecialist(new OpportunityScoutAgent(model));
     k.registerSpecialist(new OfficialResearchAgent(model));
     k.registerSpecialist(new FitMatcherAgent(model));
+    k.registerSpecialist(new UncertaintyAdvisorAgent(model));
     k.registerSpecialist(new AffordabilityPlannerAgent(model));
     k.registerSpecialist(new ScholarshipAdvisorAgent(model));
   }
