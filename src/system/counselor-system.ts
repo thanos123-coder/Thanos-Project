@@ -35,6 +35,8 @@ import { registerFinanceTools, type ExchangeRateProvider } from '../agents/a15-a
 import { ScholarshipAdvisorAgent } from '../agents/a16-scholarships/agent.js';
 import { ScholarshipCatalog } from '../agents/a16-scholarships/catalog.js';
 import { registerScholarshipTools } from '../agents/a16-scholarships/tools.js';
+import { StoryInterviewerAgent } from '../agents/a17-stories/agent.js';
+import { registerStoryTools, StoryBank } from '../agents/a17-stories/bank.js';
 import type { ModelGateway } from '../model/gateway.js';
 import type { ExternalActionRecord } from '../runtime/external-actions.js';
 import type { ReviewStaffing } from '../runtime/human-review.js';
@@ -47,6 +49,7 @@ import { connectInstitutionClaims } from './institution-wiring.js';
 import { connectModelRegistry } from './model-wiring.js';
 import { connectOpportunityCatalog } from './opportunity-wiring.js';
 import { connectScholarshipCatalog } from './scholarship-wiring.js';
+import { connectStoryBank } from './story-wiring.js';
 import { registerOrchestrationTools } from './orchestration-tools.js';
 
 /**
@@ -114,6 +117,8 @@ export class CounselorSystem {
   readonly scholarships: ScholarshipCatalog;
   /** The students' project evidence notebooks; entries with other people's private details are restricted. */
   readonly notebook: ProjectNotebook;
+  /** Private exploration notes and sessions from essay brainstorming, under the story-bank permission. */
+  readonly stories: StoryBank;
   readonly objectives: ObjectiveStore;
   private readonly deliveries = new Map<string, string>();
 
@@ -167,6 +172,10 @@ export class CounselorSystem {
     registerProjectTools(k.gateway, this.notebook);
     k.records.registerDerivativeStore(this.notebook.asDerivativeStore());
 
+    this.stories = new StoryBank(() => k.clock.nowIso());
+    registerStoryTools(k.gateway, this.stories, k.records.permissions);
+    connectStoryBank(k, this.stories);
+
     this.objectives = new ObjectiveStore(k.clock, k.ids, (taskId, reason) => k.cancel(taskId, reason));
     registerTaskTools(k.gateway, this.objectives);
     k.records.registerDerivativeStore(this.objectives);
@@ -204,6 +213,7 @@ export class CounselorSystem {
     k.registerSpecialist(new PortfolioStrategistAgent(model));
     k.registerSpecialist(new AffordabilityPlannerAgent(model));
     k.registerSpecialist(new ScholarshipAdvisorAgent(model));
+    k.registerSpecialist(new StoryInterviewerAgent(model));
   }
 
   /** Create a student record owned by the student's own account. */

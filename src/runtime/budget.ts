@@ -160,6 +160,6 @@ export const DEFAULT_ROLE_BUDGETS: Readonly<Record<string, BudgetLimits>> = {
   '14': { maxToolCalls: 44, maxModelCalls: 1, maxRevisions: 1 },
   '15': { maxToolCalls: 14, maxModelCalls: 1, maxRevisions: 1 },
   '16': { maxToolCalls: 30, maxModelCalls: 3, maxRevisions: 1 },
-  '17': { maxToolCalls: 14, maxModelCalls: 3, maxRevisions: 1 },
+  '17': { maxToolCalls: 20, maxModelCalls: 3, maxRevisions: 1 },
   '18': { maxToolCalls: 14, maxModelCalls: 2, maxRevisions: 1 },
 };
