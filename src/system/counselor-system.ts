@@ -24,6 +24,8 @@ import { OfficialResearchAgent } from '../agents/a11-research/agent.js';
 import { FitMatcherAgent } from '../agents/a12-fit/agent.js';
 import { UncertaintyAdvisorAgent } from '../agents/a13-uncertainty/agent.js';
 import { PortfolioStrategistAgent } from '../agents/a14-portfolio/agent.js';
+import { ProjectMentorAgent } from '../agents/a10-projects/agent.js';
+import { ProjectNotebook, registerProjectTools } from '../agents/a10-projects/notebook.js';
 import { NumericModelRegistry, registerModelTools } from '../agents/a13-uncertainty/models.js';
 import { InstitutionClaimStore } from '../agents/a11-research/claims.js';
 import { InstitutionRegistry } from '../agents/a11-research/entities.js';
@@ -110,6 +112,8 @@ export class CounselorSystem {
   readonly models: NumericModelRegistry;
   /** The maintained scholarship catalog, with provider trust kept separate from eligibility. */
   readonly scholarships: ScholarshipCatalog;
+  /** The students' project evidence notebooks; entries with other people's private details are restricted. */
+  readonly notebook: ProjectNotebook;
   readonly objectives: ObjectiveStore;
   private readonly deliveries = new Map<string, string>();
 
@@ -159,6 +163,10 @@ export class CounselorSystem {
     registerScholarshipTools(k.gateway, this.scholarships);
     connectScholarshipCatalog(k, this.scholarships);
 
+    this.notebook = new ProjectNotebook(() => k.clock.nowIso());
+    registerProjectTools(k.gateway, this.notebook);
+    k.records.registerDerivativeStore(this.notebook.asDerivativeStore());
+
     this.objectives = new ObjectiveStore(k.clock, k.ids, (taskId, reason) => k.cancel(taskId, reason));
     registerTaskTools(k.gateway, this.objectives);
     k.records.registerDerivativeStore(this.objectives);
@@ -189,6 +197,7 @@ export class CounselorSystem {
     k.registerSpecialist(new AcademicPlannerAgent());
     k.registerSpecialist(new ActivitiesAssessorAgent(model));
     k.registerSpecialist(new OpportunityScoutAgent(model));
+    k.registerSpecialist(new ProjectMentorAgent(model));
     k.registerSpecialist(new OfficialResearchAgent(model));
     k.registerSpecialist(new FitMatcherAgent(model));
     k.registerSpecialist(new UncertaintyAdvisorAgent(model));

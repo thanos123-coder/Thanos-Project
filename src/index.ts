@@ -31,6 +31,7 @@ export * as eligibility from './agents/a06-eligibility/index.js';
 export * as planner from './agents/a07-planner/index.js';
 export * as activities from './agents/a08-activities/index.js';
 export * as opportunities from './agents/a09-opportunities/index.js';
+export * as projects from './agents/a10-projects/index.js';
 export * as officialResearch from './agents/a11-research/index.js';
 export * as fit from './agents/a12-fit/index.js';
 export * as admissionsUncertainty from './agents/a13-uncertainty/index.js';
