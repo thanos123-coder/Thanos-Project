@@ -113,8 +113,9 @@ export function registerInstitutionTools(gateway: ToolGateway, registry: Institu
       if (args.predicates) q.predicates = args.predicates;
       const claims = store.query(q);
       for (const c of claims) inv.context.servedSourceIds.add(claimRef(c.claimId));
-      const institution = lineage.find((e) => e.kind === 'institution')!;
-      return { claims, lineage, coverage: registry.coverageFor(institution.id) ?? null, pages: registry.pagesFor(args.entityId) };
+      // An application platform is its own top-level owner (its choice limits and shared prompts).
+      const owner = lineage.find((e) => e.kind === 'institution' || e.kind === 'platform')!;
+      return { claims, lineage, coverage: registry.coverageFor(owner.id) ?? null, pages: registry.pagesFor(args.entityId) };
     },
   });
 

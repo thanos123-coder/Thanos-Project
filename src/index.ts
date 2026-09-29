@@ -34,5 +34,6 @@ export * as opportunities from './agents/a09-opportunities/index.js';
 export * as officialResearch from './agents/a11-research/index.js';
 export * as fit from './agents/a12-fit/index.js';
 export * as admissionsUncertainty from './agents/a13-uncertainty/index.js';
+export * as portfolio from './agents/a14-portfolio/index.js';
 export * as affordability from './agents/a15-affordability/index.js';
 export * as scholarships from './agents/a16-scholarships/index.js';

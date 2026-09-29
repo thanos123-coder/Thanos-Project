@@ -107,6 +107,8 @@ export const ScholarshipInputSchema = z
     selectionCriteria: z.array(z.string().min(1).max(300)).default([]),
     stages: z.array(StageSchema).min(1),
     exclusiveWith: z.array(z.object({ scholarshipId: Id, text: z.string().min(1), sourceRef: z.string().min(1) }).strict()).default([]),
+    /** Consideration requires applying for admission in this round (e.g. early_action); a round-rule exception may cite it (14T02). */
+    requiresAdmissionRound: z.object({ institutionRef: z.string().min(1), round: z.string().regex(/^[a-z0-9_]+$/), sourceRef: z.string().min(1) }).strict().nullable().default(null),
     topics: z.array(z.string().regex(/^[a-z_]+$/)).default([]),
     trust: z.object({ status: z.enum(TRUST_STATUSES), evidence: z.array(z.string()).default([]), checkedAt: z.string().min(1) }).strict(),
   })
