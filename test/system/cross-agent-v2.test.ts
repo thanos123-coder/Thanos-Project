@@ -311,3 +311,38 @@ describe('Volume two cross-agent acceptance suite', () => {
     expect((plans[0]!.payload as { done: string[] }).done).toEqual([]);
   });
 });
+
+describe('The lead counselor routes to the volume-two specialists', () => {
+  it('asks for the entry year before a scholarship search, then runs it', async () => {
+    const h = makeV2();
+    const q = await h.counsel('Can you help me find scholarships for college?');
+    expect(q.answer!.question!.text).toBe('Which entry year are you applying for?');
+    expect(q.answer!.progress).toEqual([]);
+    h.award(BEACON_SCHOLARS);
+    const r = await h.counsel('Can you help me find scholarships for college?', { context: { cycle: '2027' } });
+    expect(r.answer!.progress.map((p) => p.role)).toEqual(['16']);
+  });
+
+  it('runs the admissions context before the application plan that integrates it', async () => {
+    const h = makeV2();
+    h.regular('ashby_c');
+    h.deadline('ashby_c', 'regular', '2027-01-15');
+    const r = await h.counsel('What are my chances at Ashby, and can you help with my application plan?', { context: { cycle: '2027', options: [{ optionRef: 'ashby', institution: 'Ashby College', round: 'regular' }] } });
+    expect(r.answer!.progress.map((p) => p.role)).toEqual(['13', '14']);
+    const nodes = h.system.objectives.get(TENANT, h.studentId, h.student.id, r.objectiveId!).nodes;
+    expect(nodes.find((n) => n.role === '14')!.dependsOn).toEqual(['uncertainty']);
+    expect(JSON.stringify(r.answer)).not.toMatch(/\b\d{1,3}\s?% (chance|likely)/i);
+  });
+
+  it('starts a small project conversation and a cross-response review from plain requests', async () => {
+    const h = makeV2();
+    const p = await h.counsel('I want to start a project and build an app for my chess club.');
+    expect(p.answer!.progress.map((x) => x.role)).toEqual(['10']);
+    expect(p.answer!.question!.text).toBe('What would you like to learn or be able to do?');
+    policies(h);
+    await h.ok('18', { action: 'register_draft', draft: { artifactId: 'e1', title: 'Essay one', applicationId: null, cycle: '2027', destinations: [BROOKFIELD], fieldId: 'essay', text: 'I rebuilt the robot arm after it broke at the regional meet.', declaredProvenance: 'student_written' } });
+    const r = await h.counsel('Am I repeating myself across my essays?');
+    expect(r.answer!.progress.map((x) => x.role)).toEqual(['18']);
+    expect(JSON.stringify(r.answer)).not.toMatch(/theme|brand/i);
+  });
+});

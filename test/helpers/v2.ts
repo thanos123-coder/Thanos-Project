@@ -93,5 +93,7 @@ export function makeV2(opts: { now?: string } = {}) {
     if (extra.segments) t.segments = extra.segments;
     return system.conversations.append(TENANT, h.studentId, t);
   };
-  return { ...h, registry, official, deadline, regular, cost, workedCosts, outsidePolicy, funding, budget, stated, award, run, ok, artifacts, history, say };
+  /** A message to the lead counselor, as the app sends it. */
+  const counsel = h.ok;
+  return { ...h, counsel, registry, official, deadline, regular, cost, workedCosts, outsidePolicy, funding, budget, stated, award, run, ok, artifacts, history, say };
 }
