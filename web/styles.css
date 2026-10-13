@@ -1530,12 +1530,12 @@ body:not([data-view="home"]) .preview-badge { display: none; }
   .essays { grid-template-columns: 220px minmax(0, 1fr) 344px; }
   .paper { padding: 36px 40px 44px; }
   .tab { padding: 0 12px; }
+  .dc-long { display: none; }
 }
 
 @media (max-width: 1120px) {
   .topbar-inner { grid-template-columns: auto 1fr auto; }
   .tabs { justify-self: center; }
-  .dc-long { display: none; }
   .hero { grid-template-columns: minmax(0, 1fr); gap: 32px; padding-block: 40px 24px; }
   .hero-visual { max-width: 520px; }
   .features { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -1558,6 +1558,16 @@ body:not([data-view="home"]) .preview-badge { display: none; }
   .live-side { display: grid; grid-template-columns: 1fr 1fr; }
 }
 
+/* Top bar: below these widths the wordmark, labelled tabs and actions no longer fit side by side */
+@media (max-width: 1060px) {
+  .tab { padding: 0 9px; }
+}
+
+@media (max-width: 1020px) {
+  .tab span { display: none; }
+  .tab { padding: 0 12px; }
+}
+
 @media (max-width: 900px) {
   /* Timeline becomes a vertical list */
   .tl-canvas { height: auto; display: flex; flex-direction: column; margin: 0; padding-left: 24px; }
@@ -1570,8 +1580,6 @@ body:not([data-view="home"]) .preview-badge { display: none; }
   .tl-today { position: relative; left: auto; top: auto; width: auto; height: auto; margin: 0 0 6px -24px; background: none; }
   .tl-today::before { display: none; }
   .tl-today span { position: static; transform: none; display: inline-block; }
-  .tab span { display: none; }
-  .tab { padding: 0 12px; }
   .ch-layout { grid-template-columns: minmax(0, 1fr); }
   .uni-detail { position: static; }
   .factor { grid-template-columns: 110px 110px minmax(0, 1fr); }
@@ -1691,6 +1699,15 @@ body:not([data-view="home"]) .preview-badge { display: none; }
   .fc-deadline { bottom: 4%; }
   .field-row { grid-template-columns: minmax(0, 1fr); }
   .scan-list { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Narrow phones: drop the theme button (the page still follows the system theme), then the "AI" tag */
+@media (max-width: 380px) {
+  #theme-toggle { display: none; }
+}
+
+@media (max-width: 340px) {
+  .topbar .brand-ai { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {

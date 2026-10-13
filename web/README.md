@@ -24,7 +24,7 @@ Open `web/index.html` in a browser. No build step and no install are needed; the
 
 ## Design notes
 
-- **Name.** The product is "UpChance AI"; in running copy the assistant is simply "UpChance". The mark is an ivy tile with an open arched gate whose keystone is a marigold four-point star rising out of the gap.
+- **Name.** The product is "UpChance AI"; in running copy the assistant is simply "UpChance". The mark is an arched university gate on an ivy tile, with a marigold four-point star rising out of the gap where the keystone would be.
 - **Palette.** Ivy green as the brand color, marigold for highlights and deadlines. Reach, target and likely use their own colors so they never compete with the brand.
 - **Type.** Newsreader for headings and essay text, Geist for the interface, Geist Mono for numbers and counters.
 - **Responsive.** Works from phone width up. Below 760px the tabs move to a bottom bar and the chat list becomes a slide-out panel.
