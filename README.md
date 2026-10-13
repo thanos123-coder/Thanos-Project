@@ -147,6 +147,7 @@ test/
   system/        the cross-agent suites (volume one XT01–XT20, volume two XT01–XT18), kernel safeguards, access and deletion
   docs/          keeps the traceability matrix in step with the code
 examples/        demo.ts (volume one), demo-v2.ts (volume two)
+web/             website UI prototype (design only, sample data): open web/index.html
 scripts/         mutation check (mutation-check.mjs, mutations.json)
 docs/            ARCHITECTURE.md, AGENTS.md, AGENTS-V2.md, TRACEABILITY.md, TRACEABILITY-V2.md
 ```

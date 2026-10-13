@@ -1,0 +1,1027 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Alma College Counselor</title>
+<meta name="description" content="Alma, an AI college counselor: chat, activity log, admission chances, essay grader and mock interviews.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..600&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<!-- icons:start -->
+<!-- Icons: Lucide (ISC license, lucide.dev) -->
+<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></symbol>
+<symbol id="i-arrow-up" viewBox="0 0 24 24"><path d="m5 12 7-7 7 7" /><path d="M12 19V5" /></symbol>
+<symbol id="i-arrow-up-down" viewBox="0 0 24 24"><path d="m21 16-4 4-4-4" /><path d="M17 20V4" /><path d="m3 8 4-4 4 4" /><path d="M7 4v16" /></symbol>
+<symbol id="i-audio-lines" viewBox="0 0 24 24"><path d="M2 10v3" /><path d="M6 6v11" /><path d="M10 3v18" /><path d="M14 8v7" /><path d="M18 5v13" /><path d="M22 10v3" /></symbol>
+<symbol id="i-award" viewBox="0 0 24 24"><path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526" /><circle cx="12" cy="8" r="6" /></symbol>
+<symbol id="i-bell" viewBox="0 0 24 24"><path d="M10.268 21a2 2 0 0 0 3.464 0" /><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326" /></symbol>
+<symbol id="i-bold" viewBox="0 0 24 24"><path d="M6 12h9a4 4 0 0 1 0 8H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h7a4 4 0 0 1 0 8" /></symbol>
+<symbol id="i-calendar-clock" viewBox="0 0 24 24"><path d="M16 14v2.2l1.6 1" /><path d="M16 2v3" /><path d="M21 7.338V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h2.338" /><path d="M3 9h5.859" /><path d="M8 2v3" /><circle cx="16" cy="16" r="6" /></symbol>
+<symbol id="i-calendar-days" viewBox="0 0 24 24"><path d="M8 2v3" /><path d="M16 2v3" /><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M3 9h18" /><path d="M8 13h.01" /><path d="M12 13h.01" /><path d="M16 13h.01" /><path d="M8 17h.01" /><path d="M12 17h.01" /><path d="M16 17h.01" /></symbol>
+<symbol id="i-chart-line" viewBox="0 0 24 24"><path d="M3 3v16a2 2 0 0 0 2 2h16" /><path d="m19 9-5 5-4-4-3 3" /></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5" /></symbol>
+<symbol id="i-check-check" viewBox="0 0 24 24"><path d="M18 6 7 17l-5-5" /><path d="m22 10-7.5 7.5L13 16" /></symbol>
+<symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" /></symbol>
+<symbol id="i-circle-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><path d="m16 9-5.5 5.5L8 12" /></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></symbol>
+<symbol id="i-coffee" viewBox="0 0 24 24"><path d="M10 2v2" /><path d="M14 2v2" /><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1" /><path d="M6 2v2" /></symbol>
+<symbol id="i-copy" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></symbol>
+<symbol id="i-cpu" viewBox="0 0 24 24"><path d="M12 20v2" /><path d="M12 2v2" /><path d="M17 20v2" /><path d="M17 2v2" /><path d="M2 12h2" /><path d="M2 17h2" /><path d="M2 7h2" /><path d="M20 12h2" /><path d="M20 17h2" /><path d="M20 7h2" /><path d="M7 20v2" /><path d="M7 2v2" /><rect x="4" y="4" width="16" height="16" rx="2" /><rect x="8" y="8" width="8" height="8" rx="1" /></symbol>
+<symbol id="i-download" viewBox="0 0 24 24"><path d="M12 15V3" /><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><path d="m7 10 5 5 5-5" /></symbol>
+<symbol id="i-ellipsis" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /><circle cx="5" cy="12" r="1" /></symbol>
+<symbol id="i-file-pen-line" viewBox="0 0 24 24"><path d="M14.364 13.634a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506l4.013-4.009a1 1 0 0 0-3.004-3.004z" /><path d="M14.487 7.858A1 1 0 0 1 14 7V2" /><path d="M20 19.645V20a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l2.516 2.516" /><path d="M8 18h1" /></symbol>
+<symbol id="i-file-text" viewBox="0 0 24 24"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z" /><path d="M14 2v5a1 1 0 0 0 1 1h5" /><path d="M10 9H8" /><path d="M16 13H8" /><path d="M16 17H8" /></symbol>
+<symbol id="i-flask-conical" viewBox="0 0 24 24"><path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2" /><path d="M6.453 15h11.094" /><path d="M8.5 2h7" /></symbol>
+<symbol id="i-gauge" viewBox="0 0 24 24"><path d="m12 14 4-4" /><path d="M3.34 19a10 10 0 1 1 17.32 0" /></symbol>
+<symbol id="i-git-compare" viewBox="0 0 24 24"><circle cx="18" cy="18" r="3" /><circle cx="6" cy="6" r="3" /><path d="M13 6h3a2 2 0 0 1 2 2v7" /><path d="M11 18H8a2 2 0 0 1-2-2V9" /></symbol>
+<symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" /><path d="M2 12h20" /></symbol>
+<symbol id="i-graduation-cap" viewBox="0 0 24 24"><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z" /><path d="M22 10v6" /><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5" /></symbol>
+<symbol id="i-grip-vertical" viewBox="0 0 24 24"><circle cx="9" cy="12" r="1" /><circle cx="9" cy="5" r="1" /><circle cx="9" cy="19" r="1" /><circle cx="15" cy="12" r="1" /><circle cx="15" cy="5" r="1" /><circle cx="15" cy="19" r="1" /></symbol>
+<symbol id="i-heart-handshake" viewBox="0 0 24 24"><path d="M19.414 14.414C21 12.828 22 11.5 22 9.5a5.5 5.5 0 0 0-9.591-3.676.6.6 0 0 1-.818.001A5.5 5.5 0 0 0 2 9.5c0 2.3 1.5 4 3 5.5l5.535 5.362a2 2 0 0 0 2.879.052 2.12 2.12 0 0 0-.004-3 2.124 2.124 0 1 0 3-3 2.124 2.124 0 0 0 3.004 0 2 2 0 0 0 0-2.828l-1.881-1.882a2.41 2.41 0 0 0-3.409 0l-1.71 1.71a2 2 0 0 1-2.828 0 2 2 0 0 1 0-2.828l2.823-2.762" /></symbol>
+<symbol id="i-history" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /><path d="M12 7v5l4 2" /></symbol>
+<symbol id="i-house" viewBox="0 0 24 24"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" /><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /></symbol>
+<symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4" /><path d="M12 8h.01" /></symbol>
+<symbol id="i-italic" viewBox="0 0 24 24"><line x1="19" x2="10" y1="4" y2="4" /><line x1="14" x2="5" y1="20" y2="20" /><line x1="15" x2="9" y1="4" y2="20" /></symbol>
+<symbol id="i-landmark" viewBox="0 0 24 24"><path d="M10 18v-7" /><path d="M11.119 2.205a2 2 0 0 1 1.762 0l7.84 3.846A.5.5 0 0 1 20.5 7h-17a.5.5 0 0 1-.22-.949z" /><path d="M14 18v-7" /><path d="M18 18v-7" /><path d="M3 22h18" /><path d="M6 18v-7" /></symbol>
+<symbol id="i-lightbulb" viewBox="0 0 24 24"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" /><path d="M9 18h6" /><path d="M10 22h4" /></symbol>
+<symbol id="i-list-checks" viewBox="0 0 24 24"><path d="M13 5h8" /><path d="M13 12h8" /><path d="M13 19h8" /><path d="m3 17 2 2 4-4" /><path d="m3 7 2 2 4-4" /></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></symbol>
+<symbol id="i-map-pin" viewBox="0 0 24 24"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0" /><circle cx="12" cy="10" r="3" /></symbol>
+<symbol id="i-medal" viewBox="0 0 24 24"><path d="M7.21 15 2.66 7.14a2 2 0 0 1 .13-2.2L4.4 2.8A2 2 0 0 1 6 2h12a2 2 0 0 1 1.6.8l1.6 2.14a2 2 0 0 1 .14 2.2L16.79 15" /><path d="M11 12 5.12 2.2" /><path d="m13 12 5.88-9.8" /><path d="M8 7h8" /><circle cx="12" cy="17" r="5" /><path d="M12 18v-2h-.5" /></symbol>
+<symbol id="i-message-circle" viewBox="0 0 24 24"><path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719" /></symbol>
+<symbol id="i-message-square-text" viewBox="0 0 24 24"><path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z" /><path d="M7 11h10" /><path d="M7 15h6" /><path d="M7 7h8" /></symbol>
+<symbol id="i-mic" viewBox="0 0 24 24"><path d="M12 19v3" /><path d="M19 10v2a7 7 0 0 1-14 0v-2" /><rect x="9" y="2" width="6" height="13" rx="3" /></symbol>
+<symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401" /></symbol>
+<symbol id="i-music" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13" /><circle cx="6" cy="18" r="3" /><circle cx="18" cy="16" r="3" /></symbol>
+<symbol id="i-panel-left" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2" /><path d="M9 3v18" /></symbol>
+<symbol id="i-pause" viewBox="0 0 24 24"><rect x="14" y="3" width="5" height="18" rx="1" /><rect x="5" y="3" width="5" height="18" rx="1" /></symbol>
+<symbol id="i-pen-line" viewBox="0 0 24 24"><path d="M13 21h8" /><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" /></symbol>
+<symbol id="i-pencil" viewBox="0 0 24 24"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" /><path d="m15 5 4 4" /></symbol>
+<symbol id="i-phone-off" viewBox="0 0 24 24"><path d="M10.1 13.9a14 14 0 0 0 3.732 2.668 1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2 18 18 0 0 1-12.728-5.272" /><path d="M22 2 2 22" /><path d="M4.76 13.582A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 .244.473" /></symbol>
+<symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 17v5" /><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z" /></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14" /><path d="M12 5v14" /></symbol>
+<symbol id="i-redo-2" viewBox="0 0 24 24"><path d="m15 14 5-5-5-5" /><path d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5A5.5 5.5 0 0 0 9.5 20H13" /></symbol>
+<symbol id="i-refresh-cw" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" /><path d="M21 3v5h-5" /><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" /><path d="M8 16H3v5" /></symbol>
+<symbol id="i-repeat" viewBox="0 0 24 24"><path d="m17 2 4 4-4 4" /><path d="M3 11v-1a4 4 0 0 1 4-4h14" /><path d="m7 22-4-4 4-4" /><path d="M21 13v1a4 4 0 0 1-4 4H3" /></symbol>
+<symbol id="i-scale" viewBox="0 0 24 24"><path d="M12 3v18" /><path d="m19 8 3 8a5 5 0 0 1-6 0zV7" /><path d="M3 7h1a17 17 0 0 0 8-2 17 17 0 0 0 8 2h1" /><path d="m5 8 3 8a5 5 0 0 1-6 0zV7" /><path d="M7 21h10" /></symbol>
+<symbol id="i-scan-search" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2" /><path d="M17 3h2a2 2 0 0 1 2 2v2" /><path d="M21 17v2a2 2 0 0 1-2 2h-2" /><path d="M7 21H5a2 2 0 0 1-2-2v-2" /><circle cx="12" cy="12" r="3" /><path d="m16 16-1.9-1.9" /></symbol>
+<symbol id="i-scan-text" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2" /><path d="M17 3h2a2 2 0 0 1 2 2v2" /><path d="M21 17v2a2 2 0 0 1-2 2h-2" /><path d="M7 21H5a2 2 0 0 1-2-2v-2" /><path d="M7 8h8" /><path d="M7 12h10" /><path d="M7 16h6" /></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><path d="m21 21-4.34-4.34" /><circle cx="11" cy="11" r="8" /></symbol>
+<symbol id="i-share" viewBox="0 0 24 24"><path d="M12 2v13" /><path d="m16 6-4-4-4 4" /><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" /></symbol>
+<symbol id="i-shield-check" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" /><path d="m9 12 2 2 4-4" /></symbol>
+<symbol id="i-sliders-horizontal" viewBox="0 0 24 24"><path d="M10 5H3" /><path d="M12 19H3" /><path d="M14 3v4" /><path d="M16 17v4" /><path d="M21 12h-9" /><path d="M21 19h-5" /><path d="M21 5h-7" /><path d="M8 10v4" /><path d="M8 12H3" /></symbol>
+<symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z" /><path d="M20 2v4" /><path d="M22 4h-4" /><circle cx="4" cy="20" r="2" /></symbol>
+<symbol id="i-spell-check" viewBox="0 0 24 24"><path d="m20 15-5.5 5.5L12 18" /><path d="m4 16 6-12 5.115 10.23" /><path d="M6 12h8" /></symbol>
+<symbol id="i-square-pen" viewBox="0 0 24 24"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z" /></symbol>
+<symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" /></symbol>
+<symbol id="i-thumbs-down" viewBox="0 0 24 24"><path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22a3.13 3.13 0 0 1-3-3.88Z" /><path d="M17 14V2" /></symbol>
+<symbol id="i-thumbs-up" viewBox="0 0 24 24"><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z" /><path d="M7 10v12" /></symbol>
+<symbol id="i-timer" viewBox="0 0 24 24"><line x1="10" x2="14" y1="2" y2="2" /><line x1="12" x2="15" y1="14" y2="11" /><circle cx="12" cy="14" r="8" /></symbol>
+<symbol id="i-trash-2" viewBox="0 0 24 24"><path d="M10 11v6" /><path d="M14 11v6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /><path d="M3 6h18" /><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></symbol>
+<symbol id="i-trending-up" viewBox="0 0 24 24"><path d="M16 7h6v6" /><path d="m22 7-8.5 8.5-5-5L2 17" /></symbol>
+<symbol id="i-triangle-alert" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" /><path d="M12 9v4" /><path d="M12 17h.01" /></symbol>
+<symbol id="i-trophy" viewBox="0 0 24 24"><path d="M10 14.66V17a1 1 0 0 1-1 1 2 2 0 0 0-2 2v2" /><path d="M14 14.66V17a1 1 0 0 0 1 1 2 2 0 0 1 2 2v2" /><path d="M17.916 10H19.5A2.5 2.5 0 0 0 22 7.5V5a1 1 0 0 0-1-1h-3" /><path d="M4 22h16" /><path d="M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z" /><path d="M6.084 10H4.5A2.5 2.5 0 0 1 2 7.5V5a1 1 0 0 1 1-1h3" /></symbol>
+<symbol id="i-type" viewBox="0 0 24 24"><path d="M12 4v16" /><path d="M4 7V5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2" /><path d="M9 20h6" /></symbol>
+<symbol id="i-underline" viewBox="0 0 24 24"><path d="M6 4v6a6 6 0 0 0 12 0V4" /><line x1="4" x2="20" y1="20" y2="20" /></symbol>
+<symbol id="i-undo-2" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5" /><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11" /></symbol>
+<symbol id="i-user-round" viewBox="0 0 24 24"><circle cx="12" cy="8" r="5" /><path d="M20 21a8 8 0 0 0-16 0" /></symbol>
+<symbol id="i-video" viewBox="0 0 24 24"><path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5" /><rect x="2" y="6" width="14" height="12" rx="2" /></symbol>
+<symbol id="i-video-off" viewBox="0 0 24 24"><path d="M10.66 6H14a2 2 0 0 1 2 2v2.5l5.248-3.062A.5.5 0 0 1 22 7.87v8.196" /><path d="M16 16a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h2" /><path d="m2 2 20 20" /></symbol>
+<symbol id="i-waves" viewBox="0 0 24 24"><path d="M2 12q2.5 2 5 0t5 0 5 0 5 0" /><path d="M2 19q2.5 2 5 0t5 0 5 0 5 0" /><path d="M2 5q2.5 2 5 0t5 0 5 0 5 0" /></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></symbol>
+</svg>
+<!-- icons:end -->
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="#home" aria-label="Alma home">
+      <svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="lm-bg" width="32" height="32" rx="9"/><path class="lm-arch" d="M10.5 25V15.5a5.5 5.5 0 0 1 11 0V25"/><circle class="lm-star" cx="16" cy="16.2" r="2.1"/></svg>
+      <span class="brand-name">Alma</span>
+    </a>
+
+    <nav class="tabs" id="tabs" aria-label="Sections">
+      <span class="tabs-indicator" aria-hidden="true"></span>
+      <a class="tab" href="#home" data-view="home"><svg class="i"><use href="#i-house"/></svg><span>Home</span></a>
+      <a class="tab" href="#chat" data-view="chat"><svg class="i"><use href="#i-message-circle"/></svg><span>Chat</span></a>
+      <a class="tab" href="#activities" data-view="activities"><svg class="i"><use href="#i-list-checks"/></svg><span>Activities</span></a>
+      <a class="tab" href="#chances" data-view="chances"><svg class="i"><use href="#i-gauge"/></svg><span>Chances</span></a>
+      <a class="tab" href="#essays" data-view="essays"><svg class="i"><use href="#i-file-pen-line"/></svg><span>Essays</span></a>
+      <a class="tab" href="#interview" data-view="interview"><svg class="i"><use href="#i-mic"/></svg><span>Interview</span></a>
+    </nav>
+
+    <div class="topbar-actions">
+      <a class="deadline-chip" href="#chances" title="Cambridge UCAS deadline: October 15, 18:00 UK time">
+        <svg class="i"><use href="#i-clock"/></svg><span class="dc-long">Cambridge deadline</span><b>2 days</b>
+      </a>
+      <button class="icon-btn" id="theme-toggle" type="button" aria-label="Switch theme">
+        <svg class="i i-sun"><use href="#i-sun"/></svg><svg class="i i-moon"><use href="#i-moon"/></svg>
+      </button>
+      <button class="icon-btn has-dot" type="button" aria-label="Notifications, 3 new"><svg class="i"><use href="#i-bell"/></svg></button>
+      <button class="avatar" type="button" aria-label="Account: Sofia Marin">SM</button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- ===================================================== HOME -->
+<section class="view" id="view-home" data-view="home" aria-label="Home">
+  <div class="home-hero">
+    <div class="hero">
+      <div class="hero-copy">
+        <a class="eyebrow-chip" href="#chances"><span class="live-dot" aria-hidden="true"></span>The 2026–27 application season is open<svg class="i"><use href="#i-arrow-right"/></svg></a>
+        <h1 class="hero-title">A college counselor who knows your <em>whole story.</em></h1>
+        <p class="hero-lead">Alma is an AI college counselor. It learns your grades, activities and goals, then helps you build your university list, see your chances, improve your essays and practice for interviews.</p>
+        <div class="hero-ctas">
+          <a class="btn btn-primary btn-lg" href="#activities">Start your profile<svg class="i"><use href="#i-arrow-right"/></svg></a>
+          <a class="btn btn-secondary btn-lg" href="#chat"><svg class="i"><use href="#i-message-circle"/></svg>Ask Alma a question</a>
+        </div>
+        <ul class="hero-facts">
+          <li><svg class="i"><use href="#i-timer"/></svg>10-minute setup</li>
+          <li><svg class="i"><use href="#i-graduation-cap"/></svg>IB, A-Levels, AP and national curricula</li>
+          <li><svg class="i"><use href="#i-shield-check"/></svg>Delete your data any time</li>
+        </ul>
+      </div>
+
+      <div class="hero-visual" aria-hidden="true">
+        <div class="hv">
+          <div class="gate"><span class="gate-class"><small>Applying for</small>the Class of 2031</span></div>
+
+          <div class="float-card fc-score">
+            <span class="fc-ico"><svg class="i"><use href="#i-graduation-cap"/></svg></span>
+            <span class="num">41</span>
+            <span class="lbl">/ 45 IB<br>predicted</span>
+          </div>
+
+          <div class="float-card fc-chance">
+            <div class="fc-row">
+              <span class="crest" style="--c:#003E74;--ci:#fff">IC</span>
+              <div><div class="fc-name">Imperial College London</div><div class="fc-meta">Physics MSci · UCAS</div></div>
+            </div>
+            <div class="fc-range"><span class="big">38–50%</span><span class="pill pill-target">Target</span></div>
+            <div class="range-track"><span style="left:38%;width:12%"></span></div>
+            <div class="fc-foot"><svg class="i"><use href="#i-trending-up"/></svg>Biggest lever: Physics HL from 6 to 7</div>
+          </div>
+
+          <div class="float-card fc-chat">
+            <div class="fc-who"><svg class="logo-mark" viewBox="0 0 32 32"><rect class="lm-bg" width="32" height="32" rx="9"/><path class="lm-arch" d="M10.5 25V15.5a5.5 5.5 0 0 1 11 0V25"/><circle class="lm-star" cx="16" cy="16.2" r="2.1"/></svg>Alma</div>
+            <p>Your list has 3 reaches and 4 likelies. Want two smaller campuses with strong physics?</p>
+            <div class="fc-replies"><span>Yes, show me</span><span>Maybe later</span></div>
+          </div>
+
+          <div class="float-card fc-essay">
+            <div class="fc-doc-head"><span>Personal statement</span><span class="mono">421 / 650</span></div>
+            <p class="fc-doc">…and my code read <mark class="m-strong">the silence as calm water.</mark> <mark class="m-ai">This experience taught me that perseverance is key.</mark></p>
+            <div class="fc-tags"><span class="fc-tag" style="--sw:var(--likely)">Strong moment</span><span class="fc-tag" style="--sw:var(--marigold)">Reads as AI-like</span></div>
+          </div>
+
+          <div class="float-card fc-deadline">
+            <span class="fc-ico"><svg class="i"><use href="#i-clock"/></svg></span>
+            <span>Cambridge deadline in <b>2 days</b></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Season timeline -->
+  <section class="home-section" aria-labelledby="season-title">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">Your season at a glance</p>
+        <h2 class="section-title" id="season-title">Every deadline, planned backward.</h2>
+      </div>
+      <p class="section-sub">Alma tracks the deadlines for every university on your list and tells you what to do this week to meet them.</p>
+    </div>
+    <div class="card timeline">
+      <!-- Axis runs Oct 1, 2026 to May 15, 2027 (226 days). Positions are day offsets / 226. -->
+      <div class="tl-canvas">
+        <div class="tl-axis" aria-hidden="true">
+          <span class="tl-elapsed" style="width:5.3%"></span>
+          <span class="tl-decisions" style="left:73%;width:7.5%"></span>
+          <span class="tl-month first" style="--x:0%">Oct</span>
+          <span class="tl-month" style="--x:13.7%">Nov</span>
+          <span class="tl-month" style="--x:27%">Dec</span>
+          <span class="tl-month" style="--x:40.7%">Jan</span>
+          <span class="tl-month" style="--x:54.4%">Feb</span>
+          <span class="tl-month" style="--x:66.8%">Mar</span>
+          <span class="tl-month" style="--x:80.5%">Apr</span>
+          <span class="tl-month" style="--x:93.8%">May</span>
+        </div>
+
+        <span class="tl-today" style="--x:5.3%"><span>Today · Oct 13</span></span>
+
+        <div class="tl-item up" style="--x:6.2%;--dot:var(--marigold)"><div class="tl-date"><i></i>Oct 15</div><div class="tl-what">UCAS deadline for Oxford, Cambridge and medicine</div></div>
+        <div class="tl-item down" style="--x:13.7%;--dot:var(--reach)"><div class="tl-date"><i></i>Nov 1</div><div class="tl-what">Early Action and Early Decision at most US colleges</div></div>
+        <div class="tl-item up" style="--x:26.5%"><div class="tl-date"><i></i>Nov 30</div><div class="tl-what">University of California applications</div></div>
+        <div class="tl-item down" style="--x:40.7%"><div class="tl-date"><i></i>Jan 1–15</div><div class="tl-what">US Regular Decision, Canada (OUAC)</div></div>
+        <div class="tl-item up" style="--x:46.5%"><div class="tl-date"><i></i>Jan 14</div><div class="tl-what">UCAS deadline for most UK courses</div></div>
+        <div class="tl-item down" style="--x:73%;--dot:var(--likely)"><div class="tl-date"><i></i>Mid-Mar to Apr</div><div class="tl-what">Most decisions arrive</div></div>
+        <div class="tl-item up end" style="--x:93.8%;--dot:var(--ivy)"><div class="tl-date"><i></i>May 1</div><div class="tl-what">US National Decision Day</div></div>
+      </div>
+      <div class="tl-note">
+        <svg class="i"><use href="#i-sparkles"/></svg>
+        On your list, 3 applications are due by November 1.
+        <a href="#chances">See your plan<svg class="i i-sm"><use href="#i-arrow-right"/></svg></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="home-section" aria-labelledby="features-title">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">What's inside</p>
+        <h2 class="section-title" id="features-title">One counselor for the whole application.</h2>
+      </div>
+      <p class="section-sub">Each tab covers one part of applying. Alma connects them, so advice in one place uses what you've done in the others.</p>
+    </div>
+
+    <div class="features">
+      <a class="feature wide" href="#chat">
+        <div class="feature-top"><span class="feature-tag"><svg class="i"><use href="#i-message-circle"/></svg>Chat</span><span class="feature-go"><svg class="i"><use href="#i-arrow-right"/></svg></span></div>
+        <h3>Ask anything, any time.</h3>
+        <p>Lists, majors, deadlines, financial aid. Alma answers with your profile in mind and shows what it used.</p>
+        <div class="feature-preview"><div class="fp-inner">
+          <div class="fp-msg me">Should I apply to Stanford early too?</div>
+          <div class="fp-msg alma">Not this year. Stanford's Restrictive Early Action would rule out MIT Early Action, and MIT's early round suits you better.</div>
+          <div class="fp-compose"><span>Ask a follow-up…</span><span class="fp-send"><svg class="i"><use href="#i-arrow-up"/></svg></span></div>
+        </div></div>
+      </a>
+
+      <a class="feature wide" href="#chances">
+        <div class="feature-top"><span class="feature-tag"><svg class="i"><use href="#i-gauge"/></svg>Chances</span><span class="feature-go"><svg class="i"><use href="#i-arrow-right"/></svg></span></div>
+        <h3>Chances, with reasons.</h3>
+        <p>A realistic range for every university on your list, what's behind it, and what would move it.</p>
+        <div class="feature-preview"><div class="fp-inner">
+          <div class="fp-uni"><span class="crest sm" style="--c:#A31F34">MIT</span><span class="nm">Massachusetts Institute of Technology</span><span class="rg">7–11%</span><div class="range-track"><span style="left:7%;width:4%;background:var(--reach)"></span></div></div>
+          <div class="fp-uni"><span class="crest sm" style="--c:#003E74">IC</span><span class="nm">Imperial College London</span><span class="rg">38–50%</span><div class="range-track"><span style="left:38%;width:12%;background:var(--target)"></span></div></div>
+          <div class="fp-uni"><span class="crest sm" style="--c:#041E42">E</span><span class="nm">University of Edinburgh</span><span class="rg">75–86%</span><div class="range-track"><span style="left:75%;width:11%;background:var(--likely)"></span></div></div>
+        </div></div>
+      </a>
+
+      <a class="feature" href="#activities">
+        <div class="feature-top"><span class="feature-tag"><svg class="i"><use href="#i-list-checks"/></svg>Activities</span><span class="feature-go"><svg class="i"><use href="#i-arrow-right"/></svg></span></div>
+        <h3>One record of everything you've done.</h3>
+        <p>Grades, activities and awards, ready for the Common App or UCAS.</p>
+        <div class="feature-preview"><div class="fp-inner">
+          <div class="fp-act"><span class="fp-act-ico"><svg class="i"><use href="#i-waves"/></svg></span><div><b>Founder · TideLine</b><p>Built a text-alert service that warns 2,400 residents of my grandmother's town when the river rises fast, using open sensor data.</p></div></div>
+          <div class="fp-count"><span class="bar"><span></span></span><span class="mono">129 / 150</span></div>
+        </div></div>
+      </a>
+
+      <a class="feature" href="#essays">
+        <div class="feature-top"><span class="feature-tag"><svg class="i"><use href="#i-file-pen-line"/></svg>Essay grader</span><span class="feature-go"><svg class="i"><use href="#i-arrow-right"/></svg></span></div>
+        <h3>Check your essay before anyone reads it.</h3>
+        <p>Grammar, clarity, AI-like phrasing and what a reader will remember.</p>
+        <div class="feature-preview"><div class="fp-inner">
+          <p class="fp-essay">By morning, <mark class="m-g">their</mark> was a brown line across every door. <mark class="m-a">Technology plays a pivotal role in resilience.</mark> <mark class="m-c">due to the fact that</mark></p>
+          <div class="fp-legend"><span style="--sw:var(--danger)">Grammar</span><span style="--sw:var(--marigold)">AI-like</span><span style="--sw:var(--info)">Clarity</span></div>
+        </div></div>
+      </a>
+
+      <a class="feature" href="#interview">
+        <div class="feature-top"><span class="feature-tag"><svg class="i"><use href="#i-mic"/></svg>Mock interview</span><span class="feature-go"><svg class="i"><use href="#i-arrow-right"/></svg></span></div>
+        <h3>Practice until it feels easy.</h3>
+        <p>Alumni, Oxbridge and scholarship-style interviews, with feedback on every answer.</p>
+        <div class="feature-preview"><div class="fp-room">
+          <span class="fp-orb"></span>
+          <p class="fp-q"><small>Question 3 of 8</small>Why does a cup of tea cool quickly at first, then slowly?</p>
+        </div></div>
+      </a>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section class="home-section" aria-labelledby="how-title">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">How it works</p>
+        <h2 class="section-title" id="how-title">From first question to final decision.</h2>
+      </div>
+    </div>
+    <ol class="steps">
+      <li class="step">
+        <span class="step-num">1</span>
+        <h3>Tell Alma about you</h3>
+        <p>A short conversation about your grades, interests, budget and where you'd like to study.</p>
+        <span class="step-meta"><svg class="i"><use href="#i-timer"/></svg>About 10 minutes</span>
+      </li>
+      <li class="step">
+        <span class="step-num">2</span>
+        <h3>Get your plan</h3>
+        <p>A balanced university list, your chances at each, and every deadline in one calendar.</p>
+        <span class="step-meta"><svg class="i"><use href="#i-calendar-days"/></svg>Updated as you go</span>
+      </li>
+      <li class="step">
+        <span class="step-num">3</span>
+        <h3>Apply with confidence</h3>
+        <p>Write essays with feedback, rehearse interviews, and know what to do each week.</p>
+        <span class="step-meta"><svg class="i"><use href="#i-circle-check"/></svg>Until you choose your offer</span>
+      </li>
+    </ol>
+  </section>
+
+  <!-- Principles -->
+  <section class="home-section" aria-labelledby="principles-title">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">Our principles</p>
+        <h2 class="section-title" id="principles-title">How Alma gives advice.</h2>
+      </div>
+    </div>
+    <div class="principles">
+      <div class="principle"><span class="principle-ico"><svg class="i"><use href="#i-pen-line"/></svg></span><h3>Your essays stay yours</h3><p>Alma comments, asks questions and checks your writing. It won't write essays for you, because readers want to hear you.</p></div>
+      <div class="principle"><span class="principle-ico"><svg class="i"><use href="#i-gauge"/></svg></span><h3>Chances come with reasons</h3><p>Every estimate is a range, with the factors behind it and what would change it.</p></div>
+      <div class="principle"><span class="principle-ico"><svg class="i"><use href="#i-shield-check"/></svg></span><h3>You control your data</h3><p>See everything Alma knows about you. Correct it or delete it whenever you want.</p></div>
+      <div class="principle"><span class="principle-ico"><svg class="i"><use href="#i-globe"/></svg></span><h3>Every curriculum counts</h3><p>IB, A-Levels, AP, the French Bac, the Abitur and more, read the way universities read them.</p></div>
+    </div>
+  </section>
+
+  <section class="home-section">
+    <div class="cta-band">
+      <div>
+        <h2>Early deadlines are 19 days away.</h2>
+        <p>Start with a 10-minute conversation. You'll leave with a list, a plan and your next three steps.</p>
+      </div>
+      <div class="btns">
+        <a class="btn btn-gold btn-lg" href="#activities">Start your profile<svg class="i"><use href="#i-arrow-right"/></svg></a>
+        <a class="btn btn-lg btn-on-dark" href="#chat">Talk to Alma</a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="footer-brand">
+      <a class="brand" href="#home"><svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="lm-bg" width="32" height="32" rx="9"/><path class="lm-arch" d="M10.5 25V15.5a5.5 5.5 0 0 1 11 0V25"/><circle class="lm-star" cx="16" cy="16.2" r="2.1"/></svg><span class="brand-name">Alma</span></a>
+      <p>An AI college counselor for every student, wherever you're applying.</p>
+    </div>
+    <div class="footer-cols">
+      <div><h4>Product</h4><ul><li><a href="#chat">Chat</a></li><li><a href="#activities">Activity log</a></li><li><a href="#chances">Chances</a></li><li><a href="#essays">Essay grader</a></li><li><a href="#interview">Mock interview</a></li></ul></div>
+      <div><h4>For</h4><ul><li><a href="#home">Students</a></li><li><a href="#home">Parents</a></li><li><a href="#home">School counselors</a></li></ul></div>
+      <div><h4>Company</h4><ul><li><a href="#home">About</a></li><li><a href="#home">Privacy</a></li><li><a href="#home">Terms</a></li></ul></div>
+    </div>
+    <div class="footer-legal">
+      <span>© 2026 Alma</span>
+      <span>Design preview with a sample student. University names are used for illustration only.</span>
+    </div>
+  </footer>
+</section>
+
+<!-- ===================================================== CHAT -->
+<section class="view" id="view-chat" data-view="chat" aria-label="Chat" hidden>
+  <div class="chat" id="chat">
+    <aside class="chat-side" aria-label="Your chats">
+      <div class="side-top">
+        <button class="btn btn-new" id="new-chat" type="button"><svg class="i"><use href="#i-square-pen"/></svg>New chat<kbd>⌘ N</kbd></button>
+        <button class="icon-btn side-close" type="button" aria-label="Close chat list"><svg class="i"><use href="#i-x"/></svg></button>
+      </div>
+      <label class="search" for="chat-search">
+        <svg class="i i-sm"><use href="#i-search"/></svg>
+        <input id="chat-search" type="search" placeholder="Search chats" autocomplete="off">
+        <kbd>⌘ K</kbd>
+      </label>
+      <div class="side-list" id="chat-list"></div>
+      <div class="side-foot">
+        <div class="context-card">
+          <div class="cc-head"><svg class="i"><use href="#i-sparkles"/></svg>What Alma knows about you</div>
+          <div class="cc-stats">
+            <div><b>41</b>IB predicted</div>
+            <div><b>7</b>activities</div>
+            <div><b>10</b>universities</div>
+          </div>
+          <a href="#activities">Review your profile<svg class="i"><use href="#i-arrow-right"/></svg></a>
+        </div>
+      </div>
+    </aside>
+
+    <div class="chat-main" id="chat-main" data-state="empty">
+      <header class="chat-head">
+        <button class="icon-btn side-open" type="button" aria-label="Open chat list"><svg class="i"><use href="#i-panel-left"/></svg></button>
+        <div class="chat-title" id="chat-title">New chat</div>
+        <button class="mode-pill" type="button">Counselor mode<svg class="i"><use href="#i-chevron-down"/></svg></button>
+        <div class="chat-head-actions">
+          <button class="icon-btn" type="button" aria-label="Share chat"><svg class="i"><use href="#i-share"/></svg></button>
+          <button class="icon-btn" type="button" aria-label="More options"><svg class="i"><use href="#i-ellipsis"/></svg></button>
+        </div>
+      </header>
+
+      <div class="chat-body">
+        <div class="welcome">
+          <svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="lm-bg" width="32" height="32" rx="9"/><path class="lm-arch" d="M10.5 25V15.5a5.5 5.5 0 0 1 11 0V25"/><circle class="lm-star" cx="16" cy="16.2" r="2.1"/></svg>
+          <h2>What's on your mind, Sofia?</h2>
+          <p>Ask about universities, essays, deadlines or money. I'll use your profile to answer.</p>
+        </div>
+
+        <div class="thread" id="thread">
+          <div class="thread-inner">
+            <div class="msg-me">Is my college list balanced? I really don't want to end up with no offers.</div>
+
+            <div class="msg-alma">
+              <svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="lm-bg" width="32" height="32" rx="9"/><path class="lm-arch" d="M10.5 25V15.5a5.5 5.5 0 0 1 11 0V25"/><circle class="lm-star" cx="16" cy="16.2" r="2.1"/></svg>
+              <div class="msg-content">
+                <p>Your list is in good shape. You have <strong>3 reaches, 3 targets and 4 likelies</strong>, and at every likely your predicted 41 is above the typical offer. Ending up with no offers is very unlikely.</p>
+                <div class="msg-card">
+                  <div class="msg-card-head"><b>Your list balance</b><a class="btn btn-secondary btn-sm" href="#chances">Open Chances<svg class="i i-sm"><use href="#i-arrow-right"/></svg></a></div>
+                  <div class="balance-bar"><span class="r"></span><span class="t"></span><span class="l"></span></div>
+                  <div class="balance-legend"><span style="--sw:var(--reach)"><b>3</b> Reach</span><span style="--sw:var(--target)"><b>3</b> Target</span><span style="--sw:var(--likely)"><b>4</b> Likely</span></div>
+                </div>
+                <p>Two things I'd change:</p>
+                <ol>
+                  <li><strong>Keep Stanford in Regular Decision.</strong> Stanford's Restrictive Early Action would stop you applying to MIT Early Action, and MIT's early round fits you better.</li>
+                  <li><strong>Consider one smaller campus.</strong> All four likelies are big-city universities. If a smaller place appeals to you, St Andrews and Durham both have strong physics. You're at 5 of 5 UCAS choices, so one would need to replace another.</li>
+                </ol>
+                <p>Want me to compare St Andrews and Durham with Warwick, so you can decide whether to swap?</p>
+                <div class="msg-sources"><span>Used</span><span class="src"><svg class="i"><use href="#i-user-round"/></svg>Your profile</span><span class="src"><svg class="i"><use href="#i-gauge"/></svg>Your chances</span><span class="src"><svg class="i"><use href="#i-calendar-days"/></svg>2026–27 round rules</span></div>
+                <div class="msg-actions">
+                  <button class="icon-btn" type="button" aria-label="Copy"><svg class="i"><use href="#i-copy"/></svg></button>
+                  <button class="icon-btn" type="button" aria-label="Good answer"><svg class="i"><use href="#i-thumbs-up"/></svg></button>
+                  <button class="icon-btn" type="button" aria-label="Bad answer"><svg class="i"><use href="#i-thumbs-down"/></svg></button>
+                  <button class="icon-btn" type="button" aria-label="Try again"><svg class="i"><use href="#i-refresh-cw"/></svg></button>
+                </div>
+              </div>
+            </div>
+
+            <div class="msg-me">Yes, compare them. I care most about research opportunities for undergraduates.</div>
+
+            <div class="msg-alma">
+              <svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="lm-bg" width="32" height="32" rx="9"/><path class="lm-arch" d="M10.5 25V15.5a5.5 5.5 0 0 1 11 0V25"/><circle class="lm-star" cx="16" cy="16.2" r="2.1"/></svg>
+              <div class="msg-content">
+                <div class="thinking-label"><span class="typing"><span></span><span></span><span></span></span>Checking undergraduate research programs at 3 universities</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="composer-zone">
+          <form class="composer" id="composer" autocomplete="off">
+            <label class="sr-only" for="composer-input">Message Alma</label>
+            <textarea id="composer-input" rows="2" placeholder="Ask anything about universities, essays or deadlines…"></textarea>
+            <div class="composer-bar">
+              <div class="cb-left">
+                <button type="button" class="icon-btn round" aria-label="Attach a file"><svg class="i"><use href="#i-plus"/></svg></button>
+                <button type="button" class="tool-chip is-on" aria-pressed="true"><svg class="i"><use href="#i-user-round"/></svg>Use my profile</button>
+                <button type="button" class="tool-chip" aria-pressed="false"><svg class="i"><use href="#i-globe"/></svg>Research</button>
+              </div>
+              <div class="cb-right">
+                <button type="button" class="icon-btn round" aria-label="Dictate"><svg class="i"><use href="#i-mic"/></svg></button>
+                <button type="submit" class="send-btn" aria-label="Send"><svg class="i"><use href="#i-arrow-up"/></svg></button>
+              </div>
+            </div>
+          </form>
+
+          <div class="suggestions">
+            <button class="suggestion" type="button" data-prompt="Is my college list balanced?"><span class="sg-ico"><svg class="i"><use href="#i-scale"/></svg></span><span><b>Balance my list</b><small>Check reaches, targets and likelies</small></span></button>
+            <button class="suggestion" type="button" data-prompt="Compare Imperial and UCL for Physics." style="--sw:var(--info-soft);--sc:var(--info)"><span class="sg-ico"><svg class="i"><use href="#i-git-compare"/></svg></span><span><b>Compare Imperial and UCL</b><small>Physics teaching, cost and city life</small></span></button>
+            <button class="suggestion" type="button" data-prompt="Help me brainstorm my Why Michigan essay." style="--sw:var(--marigold-soft);--sc:var(--marigold-ink)"><span class="sg-ico"><svg class="i"><use href="#i-lightbulb"/></svg></span><span><b>Brainstorm "Why Michigan"</b><small>Find reasons that are specific to you</small></span></button>
+            <button class="suggestion" type="button" data-prompt="Plan everything I need to do before November 1." style="--sw:var(--reach-soft);--sc:var(--reach)"><span class="sg-ico"><svg class="i"><use href="#i-calendar-days"/></svg></span><span><b>Plan the next 19 days</b><small>Everything due before November 1</small></span></button>
+          </div>
+          <div class="topic-row">
+            <button class="chip" type="button">Financial aid</button>
+            <button class="chip" type="button">Scholarships</button>
+            <button class="chip" type="button">Test-optional</button>
+            <button class="chip" type="button">Recommendation letters</button>
+            <button class="chip" type="button">Choosing a major</button>
+            <button class="chip" type="button">Gap year</button>
+          </div>
+          <p class="composer-note">Alma can make mistakes. Check deadlines and requirements on each university's website.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================== ACTIVITIES -->
+<section class="view" id="view-activities" data-view="activities" aria-label="Activity log" hidden>
+  <div class="page">
+    <header class="page-head">
+      <div>
+        <h1 class="page-title">Activity log</h1>
+        <p class="page-sub">Your grades, activities and awards in one place. Alma uses them in chat, chances and essays.</p>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn-secondary" type="button"><svg class="i"><use href="#i-download"/></svg>Export for Common App</button>
+        <button class="btn btn-primary" type="button" data-open-drawer><svg class="i"><use href="#i-plus"/></svg>Add activity</button>
+      </div>
+    </header>
+
+    <div class="act-layout">
+      <div class="act-main">
+
+        <section class="card academics" aria-labelledby="acad-title">
+          <div class="card-head">
+            <h2 class="card-title" id="acad-title"><svg class="i"><use href="#i-graduation-cap"/></svg>Academics</h2>
+            <div class="seg" role="group" aria-label="Grade set">
+              <button type="button" class="is-on">Predicted</button>
+              <button type="button">DP1 final</button>
+              <button type="button">Grade 10</button>
+            </div>
+            <button class="btn btn-ghost btn-sm" type="button"><svg class="i i-sm"><use href="#i-pencil"/></svg>Edit grades</button>
+          </div>
+          <div class="acad-grid">
+            <div class="score-block">
+              <button class="curr-btn" type="button">IB Diploma<svg class="i"><use href="#i-chevron-down"/></svg></button>
+              <div class="big-score"><span class="num">41</span><span class="of">/45</span></div>
+              <div class="score-label">Predicted total, September 2026</div>
+              <div class="score-bar" id="score-bar" aria-hidden="true"></div>
+              <div class="score-legend"><span style="--sw:var(--ivy)">Subjects 38</span><span style="--sw:var(--marigold)">Core 3</span></div>
+            </div>
+            <div class="subjects" id="subjects"></div>
+          </div>
+          <div class="acad-foot">
+            <div class="core"><div class="core-label">Theory of Knowledge</div><div class="core-value"><b>B</b><span>Predicted</span></div></div>
+            <div class="core"><div class="core-label">Extended Essay</div><div class="core-value"><b>A</b><span>Physics</span></div><p>Air pressure and the bounce of a squash ball</p></div>
+            <div class="core"><div class="core-label">SAT</div><div class="core-value"><b>1530</b><span>Aug 2026</span></div><p>Math 790 · Reading and Writing 740</p></div>
+            <button class="core add" type="button"><svg class="i"><use href="#i-plus"/></svg>Add a test</button>
+          </div>
+        </section>
+
+        <section aria-labelledby="act-title">
+          <div class="block-head">
+            <div>
+              <h2 class="block-title" id="act-title">Activities</h2>
+              <p class="block-sub">In Common App order. Drag to reorder; readers pay most attention to the first few.</p>
+            </div>
+            <div class="slots"><span><b>7</b> of 10 slots</span><span class="slot-cells" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i></span></div>
+          </div>
+          <div class="filter-row" id="act-filters">
+            <button class="chip is-on" type="button" data-filter="all">All <span class="n">7</span></button>
+            <button class="chip" type="button" data-filter="lead">Leadership <span class="n">3</span></button>
+            <button class="chip" type="button" data-filter="stem">STEM <span class="n">3</span></button>
+            <button class="chip" type="button" data-filter="service">Service <span class="n">2</span></button>
+            <button class="chip" type="button" data-filter="arts">Arts <span class="n">1</span></button>
+            <button class="chip" type="button" data-filter="work">Work <span class="n">1</span></button>
+          </div>
+          <ol class="act-list" id="act-list"></ol>
+          <button class="add-row" type="button" data-open-drawer><svg class="i"><use href="#i-plus"/></svg>Add an activity<small>· 3 slots left</small></button>
+        </section>
+
+        <section aria-labelledby="honors-title">
+          <div class="block-head">
+            <div>
+              <h2 class="block-title" id="honors-title">Honors and awards</h2>
+              <p class="block-sub">Up to 5 on the Common App, with the level of recognition.</p>
+            </div>
+            <div class="slots"><span><b>4</b> of 5</span><button class="btn btn-secondary btn-sm" type="button"><svg class="i i-sm"><use href="#i-plus"/></svg>Add award</button></div>
+          </div>
+          <ul class="honor-list" id="honor-list"></ul>
+        </section>
+      </div>
+
+      <aside class="act-aside">
+        <div class="story-card">
+          <p class="eyebrow">Your story so far</p>
+          <h3>You use physics and code to protect towns from floods.</h3>
+          <p>Alma sees this thread across your activities. It's a strong center for your essays and interviews.</p>
+          <div class="story-links"><span>TideLine</span><span>Hydrology internship</span><span>Physics Olympiad</span></div>
+        </div>
+        <div class="card aside-card">
+          <h3>Profile strength</h3>
+          <div class="completeness">
+            <div class="ring"><svg viewBox="0 0 64 64"><circle class="track" cx="32" cy="32" r="27"/><circle class="val" cx="32" cy="32" r="27" stroke-dasharray="139.1 169.6"/></svg><b>82%</b></div>
+            <p>Add 3 more details to give Alma a full picture of you.</p>
+          </div>
+          <ul class="todo">
+            <li><span class="box"></span><span>Hours for Model UN<small>Needed for the Common App</small></span></li>
+            <li><span class="box"></span><span>A second teacher reference<small>Ask before October 20</small></span></li>
+            <li><span class="box"></span><span>Plans for summer 2027<small>Helps with UCAS question 2</small></span></li>
+            <li class="is-done"><span class="box done"><svg class="i"><use href="#i-check"/></svg></span><span>Upload your SAT score report</span></li>
+          </ul>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================== CHANCES -->
+<section class="view" id="view-chances" data-view="chances" aria-label="Your chances" hidden>
+  <div class="page">
+    <header class="page-head">
+      <div>
+        <h1 class="page-title">Your chances</h1>
+        <p class="page-sub"><span id="uni-count">10</span> universities · Updated today from your profile</p>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn-secondary" type="button"><svg class="i"><use href="#i-info"/></svg>How chances work</button>
+        <button class="btn btn-primary" type="button" data-open-modal><svg class="i"><use href="#i-plus"/></svg>Add university</button>
+      </div>
+    </header>
+
+    <div class="card ch-summary">
+      <div class="sum-balance">
+        <div class="sum-label">List balance <span class="pill pill-likely">Balanced</span></div>
+        <div class="balance-bar"><span class="r"></span><span class="t"></span><span class="l"></span></div>
+        <div class="balance-legend"><span style="--sw:var(--reach)"><b>3</b> Reach</span><span style="--sw:var(--target)"><b>3</b> Target</span><span style="--sw:var(--likely)"><b>4</b> Likely</span></div>
+      </div>
+      <div><div class="sum-label">Strongest factor</div><div class="sum-value">Academics</div><div class="sum-note">IB 41 with 7-7-6 at Higher Level</div></div>
+      <div><div class="sum-label">Biggest lever</div><div class="sum-value">Essays</div><div class="sum-note">Not reviewed yet for 8 universities</div></div>
+      <div><div class="sum-label">UCAS choices</div><div class="sum-value">5 of 5</div><div class="sum-note">Cambridge is your one Oxbridge choice</div></div>
+    </div>
+
+    <div class="ch-layout">
+      <div class="ch-list-col">
+        <div class="ch-filters" id="uni-filters">
+          <button class="chip is-on" type="button" data-cat="all">All</button>
+          <button class="chip" type="button" data-cat="reach">Reach</button>
+          <button class="chip" type="button" data-cat="target">Target</button>
+          <button class="chip" type="button" data-cat="likely">Likely</button>
+          <button class="sort" type="button">Deadline<svg class="i i-sm"><use href="#i-arrow-up-down"/></svg></button>
+        </div>
+        <ul class="uni-list" id="uni-list"></ul>
+      </div>
+      <article class="card uni-detail" id="uni-detail" aria-live="polite"></article>
+    </div>
+    <p class="fine-print">Chances are estimates from your profile and published admissions data. They are ranges, not promises, and they change as your profile changes. This preview uses a sample student.</p>
+  </div>
+</section>
+
+<!-- ===================================================== ESSAYS -->
+<section class="view" id="view-essays" data-view="essays" aria-label="Essay grader" hidden>
+  <div class="essays">
+    <aside class="es-rail" aria-label="Your essays">
+      <div class="rail-head"><h2>My essays</h2><button class="icon-btn" type="button" aria-label="New essay"><svg class="i"><use href="#i-plus"/></svg></button></div>
+      <ul class="essay-list" id="essay-list">
+        <li><button class="essay-item is-active" type="button"><b>Common App personal statement</b><small>Prompt 2 · 421 / 650 words <span class="pill pill-ivy no-dot">Draft 4</span></small><span class="ei-bar"><span style="width:64.8%"></span></span></button></li>
+        <li><button class="essay-item" type="button"><b>UCAS personal statement</b><small>3 questions · 2,870 / 4,000 characters <span class="pill pill-urgent no-dot">Due in 2 days</span></small><span class="ei-bar"><span style="width:72%"></span></span></button></li>
+        <li><button class="essay-item" type="button"><b>Michigan community essay</b><small>214 / 300 words</small><span class="ei-bar"><span style="width:71%"></span></span></button></li>
+        <li><button class="essay-item" type="button"><b>MIT short answers</b><small>4 of 5 written</small><span class="ei-bar"><span style="width:80%"></span></span></button></li>
+        <li><button class="essay-item" type="button"><b>Stanford short questions</b><small>Not started</small><span class="ei-bar"><span style="width:0%"></span></span></button></li>
+      </ul>
+      <div class="rail-tip"><b><svg class="i"><use href="#i-shield-check"/></svg>Your words, your essay</b>Alma highlights and explains. It never rewrites your essay for you.</div>
+    </aside>
+
+    <div class="es-main">
+      <div class="es-toolbar">
+        <div class="es-title"><svg class="i"><use href="#i-file-text"/></svg>Common App personal statement</div>
+        <span class="saved"><svg class="i"><use href="#i-circle-check"/></svg>Saved just now</span>
+        <div class="fmt" role="toolbar" aria-label="Formatting">
+          <button class="icon-btn" type="button" aria-label="Bold"><svg class="i"><use href="#i-bold"/></svg></button>
+          <button class="icon-btn" type="button" aria-label="Italic"><svg class="i"><use href="#i-italic"/></svg></button>
+          <button class="icon-btn" type="button" aria-label="Underline"><svg class="i"><use href="#i-underline"/></svg></button>
+          <span class="sep"></span>
+          <button class="icon-btn" type="button" aria-label="Undo"><svg class="i"><use href="#i-undo-2"/></svg></button>
+          <button class="icon-btn" type="button" aria-label="Redo"><svg class="i"><use href="#i-redo-2"/></svg></button>
+          <span class="sep"></span>
+          <button class="icon-btn" type="button" aria-label="Version history"><svg class="i"><use href="#i-history"/></svg></button>
+        </div>
+      </div>
+
+      <div class="es-scroll">
+        <article class="paper">
+          <div class="prompt-box">
+            <div class="pb-head"><span>Prompt 2 of 7</span><span class="wordcount"><span class="bar"><span style="width:64.8%"></span></span>421 / 650 words</span></div>
+            <p>The lessons we take from obstacles we encounter can be fundamental to later success. Recount a time when you faced a challenge, setback, or failure. How did it affect you, and what did you learn from the experience?</p>
+          </div>
+
+          <div class="essay-doc" id="essay-doc" data-mode="ai">
+            <p><span class="hl" data-k="strong" id="k0">The water reached the fourth stair before anyone in my grandmother's building woke up.</span> I was sixteen, visiting for the summer, and I remember the sound more than the sight: <span class="hl" data-k="strong" id="k1">a low, patient gurgle, like the river was clearing its throat.</span> By morning, <span class="hl" data-k="grammar" id="g1">their</span> was a brown line across every door on the ground floor, and Mrs. Alves, a neighbor <span class="hl" data-k="grammar" id="g2">who's</span> phone had been charging in the kitchen, had lost everything she couldn't carry upstairs.</p>
+
+            <p><span class="hl" data-k="ai ai-high" id="a1">In today's rapidly evolving world, technology plays a pivotal role in helping communities become more resilient.</span> But in my grandmother's town, the warning system was <span class="hl" data-k="strong" id="k2">a man with a megaphone and a bicycle.</span> The river authority published <span class="hl" data-k="grammar" id="g3">it's</span> sensor readings online every fifteen minutes. Nobody read them at 3 a.m., <span class="hl" data-k="clarity" id="c1">due to the fact that</span> nobody is awake at 3 a.m.</p>
+
+            <p><span class="hl" data-k="clarity" id="c2">Ever since I was a little <span class="hl" data-k="grammar" id="g4">kid</span></span> I have loved taking things apart, but I had never built anything that mattered to someone else. That autumn I taught myself enough Python to pull the readings every five minutes and compare them with the levels from past floods. When the river rose faster than a threshold I had set, the system would send a text. <span class="hl" data-k="clarity long" id="c4">The first real alert <span class="hl" data-k="clarity" id="c3">was sent by the system</span> at 3:12 a.m. on a Tuesday in November, and it went to eleven people, most of them my grandmother's friends, three of whom called her to ask what on earth a "TideLine" was and whether they needed to pay for it.</span></p>
+
+            <p>It also failed. In February the sensor upstream went offline and <span class="hl" data-k="strong" id="k3">my code read the silence as calm water.</span> Nobody was hurt, but <span class="hl" data-k="grammar" id="g5">alot</span> of people got a text saying everything was fine while the car park flooded. <span class="hl" data-k="tell" id="t1">I learned a lot about responsibility.</span> I rewrote the logic so that missing data triggers a warning instead of a reassurance, and I started calling the river authority every time a sensor dropped, <span class="hl" data-k="strong" id="k4">until a technician named Paulo started calling me first.</span></p>
+
+            <p><span class="hl" data-k="ai ai-high" id="a2">This experience taught me that perseverance and determination are the keys to overcoming any obstacle.</span> What it really taught me is narrower and more useful: a system is only as honest as its worst moment. TideLine now has 2,400 subscribers. I check it the way my grandmother checks the sky, and I want to study physics so the next thing I build understands the water as well as it understands the code. <span class="hl" data-k="ai ai-mid tell" id="a3">I realized that I wanted to use my skills to make a meaningful difference in the lives of others.</span></p>
+          </div>
+        </article>
+      </div>
+
+      <div class="es-bottom">
+        <div class="legend" id="legend"></div>
+        <button class="btn btn-primary btn-sm" type="button"><svg class="i i-sm"><use href="#i-scan-text"/></svg>Rescan essay</button>
+      </div>
+    </div>
+
+    <aside class="es-panel" aria-label="Essay checks">
+      <div class="score-card">
+        <div class="ring"><svg viewBox="0 0 64 64"><circle class="track" cx="32" cy="32" r="27"/><circle class="val" cx="32" cy="32" r="27" stroke-dasharray="132.3 169.6"/></svg><b>78</b></div>
+        <div>
+          <h3>Strong draft</h3>
+          <p>Fix 3 things before you submit: two AI-like sentences, five typos and a summary-style ending.</p>
+        </div>
+      </div>
+
+      <div class="panel-label">Choose a check <span>Last run 1 min ago</span></div>
+      <div class="scan-list" id="scan-list" role="tablist" aria-label="Checks">
+        <button class="scan is-on" type="button" role="tab" aria-selected="true" data-scan="ai" style="--sc:var(--marigold-ink);--sw:var(--marigold-soft)">
+          <span class="scan-top"><span class="scan-ico"><svg class="i"><use href="#i-scan-search"/></svg></span><span class="scan-count">3</span></span>
+          <b>AI detection</b><small>Mostly human · 88%</small>
+        </button>
+        <button class="scan" type="button" role="tab" aria-selected="false" data-scan="grammar" style="--sc:var(--danger);--sw:var(--danger-soft)">
+          <span class="scan-top"><span class="scan-ico"><svg class="i"><use href="#i-spell-check"/></svg></span><span class="scan-count">5</span></span>
+          <b>Grammar and spelling</b><small>5 fixes</small>
+        </button>
+        <button class="scan" type="button" role="tab" aria-selected="false" data-scan="clarity" style="--sc:var(--info);--sw:var(--info-soft)">
+          <span class="scan-top"><span class="scan-ico"><svg class="i"><use href="#i-type"/></svg></span><span class="scan-count">4</span></span>
+          <b>Clarity and style</b><small>Wordy, passive, cliché</small>
+        </button>
+        <button class="scan" type="button" role="tab" aria-selected="false" data-scan="impact" style="--sc:var(--violet);--sw:var(--violet-soft)">
+          <span class="scan-top"><span class="scan-ico"><svg class="i"><use href="#i-graduation-cap"/></svg></span><span class="scan-count">7</span></span>
+          <b>Admissions read</b><small>What a reader remembers</small>
+        </button>
+      </div>
+
+      <div class="scan-result" id="scan-result" aria-live="polite"></div>
+    </aside>
+  </div>
+</section>
+
+<!-- ===================================================== INTERVIEW -->
+<section class="view" id="view-interview" data-view="interview" aria-label="Mock interview" hidden>
+  <div class="page">
+    <header class="page-head">
+      <div>
+        <h1 class="page-title">Mock interview</h1>
+        <p class="page-sub">Practice with an AI interviewer modeled on real admissions interviews, then get feedback on every answer.</p>
+      </div>
+      <div class="page-actions">
+        <span class="pill pill-neutral no-dot" style="height:32px;padding:0 14px;font-size:12.5px">4 sessions · average 6.8</span>
+      </div>
+    </header>
+
+    <div class="iv-layout" id="iv-layout" data-state="setup">
+      <aside class="card iv-setup">
+        <div class="card-head"><h2 class="card-title"><svg class="i"><use href="#i-sliders-horizontal"/></svg>Set up your session</h2></div>
+        <div class="setup-body">
+          <div class="field">
+            <span class="field-label">University</span>
+            <button class="uni-pick" type="button">
+              <span class="crest" style="--c:#A3C1AD;--ci:#0F2A1F">C</span>
+              <div><b>University of Cambridge</b><small>Natural Sciences (Physical)</small></div>
+              <svg class="i"><use href="#i-chevron-down"/></svg>
+            </button>
+          </div>
+
+          <fieldset class="field">
+            <legend>Interview style</legend>
+            <div class="style-opts" data-single>
+              <button type="button" class="style-opt is-on"><span class="radio"></span><span><b>Academic</b><small>Oxbridge-style problems you think through out loud</small></span></button>
+              <button type="button" class="style-opt"><span class="radio"></span><span><b>Alumni conversation</b><small>Relaxed chat about you, your school and your interests</small></span></button>
+              <button type="button" class="style-opt"><span class="radio"></span><span><b>Scholarship panel</b><small>Several interviewers asking about values and goals</small></span></button>
+            </div>
+          </fieldset>
+
+          <div class="field">
+            <span class="field-label">Length</span>
+            <div class="seg full" role="group" aria-label="Length"><button type="button">15 min</button><button type="button" class="is-on">30 min</button><button type="button">45 min</button></div>
+          </div>
+
+          <div class="field">
+            <span class="field-label">Format</span>
+            <div class="seg full" role="group" aria-label="Format">
+              <button type="button" class="is-on"><svg class="i i-sm"><use href="#i-mic"/></svg>Voice</button>
+              <button type="button"><svg class="i i-sm"><use href="#i-video"/></svg>Video</button>
+              <button type="button"><svg class="i i-sm"><use href="#i-message-square-text"/></svg>Text</button>
+            </div>
+          </div>
+
+          <div class="field">
+            <span class="field-label">Focus on</span>
+            <div class="chip-row" data-multi>
+              <button class="chip is-on" type="button">Problem-solving</button>
+              <button class="chip is-on" type="button">Why this course</button>
+              <button class="chip" type="button">Reading beyond school</button>
+              <button class="chip" type="button">Your activities</button>
+              <button class="chip" type="button">Current events</button>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="toggle-row"><span>Live coaching<small>Pace, filler words and structure</small></span><button class="switch" type="button" role="switch" aria-checked="true" aria-label="Live coaching"></button></div>
+            <div class="toggle-row"><span>Feedback after each answer<small>Or save it all for the end</small></span><button class="switch" type="button" role="switch" aria-checked="false" aria-label="Feedback after each answer"></button></div>
+          </div>
+        </div>
+        <div class="setup-foot">
+          <button class="btn btn-primary btn-block" type="button" id="iv-start"><svg class="i"><use href="#i-mic"/></svg>Start mock interview</button>
+          <p><svg class="i"><use href="#i-lock"/></svg>Recordings are deleted once your report is ready.</p>
+        </div>
+      </aside>
+
+      <div class="iv-stage">
+        <!-- Before the session -->
+        <div class="iv-pre">
+          <div class="interviewer">
+            <div class="orb-wrap" aria-hidden="true"><span class="orb-ring"></span><span class="orb-ring"></span><span class="orb-ring"></span><span class="orb"></span></div>
+            <div>
+              <p class="eyebrow">Your interviewer</p>
+              <h2>Dr. Hale, Natural Sciences</h2>
+              <p>Dr. Hale is an AI interviewer modeled on a Cambridge Director of Studies. Expect problems you haven't seen before. Getting stuck is fine; what counts is how you reason your way forward.</p>
+              <div class="expect">
+                <span><svg class="i"><use href="#i-list-checks"/></svg>8 questions</span>
+                <span><svg class="i"><use href="#i-chart-line"/></svg>1 graph to interpret</span>
+                <span><svg class="i"><use href="#i-file-text"/></svg>Follow-ups on your personal statement</span>
+              </div>
+              <div class="sample-q"><small>A question like the ones you'll get</small><p>A ball is dropped inside a lift that is accelerating upward. Describe what you would see from inside the lift, then from outside it.</p></div>
+            </div>
+          </div>
+
+          <div class="iv-grid">
+            <div class="card progress-card">
+              <div class="pc-head">
+                <div><h3>Your progress</h3><small>Overall score across 4 sessions</small></div>
+                <div class="pc-score"><b>7.4</b><span>/10</span><em>+1.3 since Sep 22</em></div>
+              </div>
+              <!-- y: 5.5 to 8 maps to 96 to 16; x: 4 sessions at 30, 150, 270, 390 -->
+              <svg class="spark" viewBox="0 0 420 124" role="img" aria-label="Scores: 6.1, 6.6, 7.0, 7.4">
+                <line class="s-grid" x1="16" y1="16" x2="404" y2="16"/><line class="s-grid" x1="16" y1="56" x2="404" y2="56"/><line class="s-grid" x1="16" y1="96" x2="404" y2="96"/>
+                <path class="s-area" d="M30 83.2 L150 67.2 L270 54.4 L390 41.6 L390 96 L30 96 Z"/>
+                <path class="s-line" d="M30 83.2 L150 67.2 L270 54.4 L390 41.6"/>
+                <circle class="s-dot" cx="30" cy="83.2" r="4.5"/><circle class="s-dot" cx="150" cy="67.2" r="4.5"/><circle class="s-dot" cx="270" cy="54.4" r="4.5"/><circle class="s-dot last" cx="390" cy="41.6" r="5.5"/>
+                <text class="s-val" x="30" y="72" text-anchor="middle">6.1</text><text class="s-val" x="150" y="56" text-anchor="middle">6.6</text><text class="s-val" x="270" y="43" text-anchor="middle">7.0</text><text class="s-val" x="390" y="29" text-anchor="middle">7.4</text>
+                <text class="s-lbl" x="30" y="116" text-anchor="middle">Sep 22</text><text class="s-lbl" x="150" y="116" text-anchor="middle">Sep 29</text><text class="s-lbl" x="270" y="116" text-anchor="middle">Oct 5</text><text class="s-lbl" x="390" y="116" text-anchor="middle">Oct 9</text>
+              </svg>
+              <div class="skill-bars">
+                <div class="skill"><span>Clarity</span><span class="bar"><span style="width:80%"></span></span><b>8.0</b></div>
+                <div class="skill"><span>Composure</span><span class="bar"><span style="width:80%"></span></span><b>8.0</b></div>
+                <div class="skill"><span>Enthusiasm</span><span class="bar"><span style="width:75%"></span></span><b>7.5</b></div>
+                <div class="skill"><span>Depth</span><span class="bar"><span style="width:70%"></span></span><b>7.0</b></div>
+                <div class="skill"><span>Thinking aloud</span><span class="bar"><span class="low" style="width:65%"></span></span><b>6.5</b></div>
+              </div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:20px;min-width:0">
+              <div class="card feedback-card">
+                <div class="pc-head"><div><h3>From your last session</h3><small>Oct 9 · Cambridge academic · 28 min</small></div></div>
+                <div class="fb-list takes">
+                  <div class="take good"><span class="take-ico"><svg class="i"><use href="#i-check"/></svg></span><span>You set up the pendulum problem clearly before calculating anything.</span></div>
+                  <div class="take risk"><span class="take-ico"><svg class="i"><use href="#i-triangle-alert"/></svg></span><span>You went quiet for 20 seconds on question 5. Say what you're thinking, even if you're unsure.</span></div>
+                  <div class="take action"><span class="take-ico"><svg class="i"><use href="#i-arrow-right"/></svg></span><span>Practice estimating orders of magnitude out loud. Today's session includes one.</span></div>
+                </div>
+              </div>
+              <div class="card upcoming-card">
+                <div class="pc-head"><div><h3>Your real interviews</h3><small>Alma adds them to your plan when they're likely</small></div></div>
+                <div class="upcoming">
+                  <div class="upc"><span class="crest sm" style="--c:#A3C1AD;--ci:#0F2A1F">C</span><div><b>Cambridge · Natural Sciences</b><p>Invitations usually arrive in late November. Interviews run in early December.</p></div></div>
+                  <div class="upc"><span class="crest sm" style="--c:#A31F34">MIT</span><div><b>MIT · Alumni interview</b><p>An Educational Counselor contacts you after you apply.</p></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- During the session -->
+        <div class="iv-live">
+          <div class="room-col">
+            <div class="room">
+              <div class="room-top">
+                <span class="rec"><i></i><span id="rec-time">08:42</span></span>
+                <span class="q-progress">Question 3 of 8<span class="q-dots"><i class="done"></i><i class="done"></i><i class="now"></i><i></i><i></i><i></i><i></i><i></i></span></span>
+                <span class="room-who"><svg class="i"><use href="#i-audio-lines"/></svg>Dr. Hale is listening</span>
+              </div>
+              <div class="self-view"><svg class="i"><use href="#i-user-round"/></svg><span><svg class="i"><use href="#i-mic"/></svg>You</span></div>
+              <div class="room-center">
+                <div class="orb-wrap" aria-hidden="true"><span class="orb-ring"></span><span class="orb-ring"></span><span class="orb-ring"></span><span class="orb"></span></div>
+                <div class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                <span class="speaking">You're speaking · 1:42 on this question</span>
+              </div>
+              <div class="q-card">
+                <div>
+                  <small>Problem-solving</small>
+                  <p>Here's a cup of tea cooling on a desk. Why does the curve flatten out instead of falling in a straight line?</p>
+                </div>
+                <svg class="q-graph" viewBox="0 0 190 120" aria-label="Graph of temperature falling quickly then leveling off toward room temperature">
+                  <line class="ax" x1="26" y1="8" x2="26" y2="100"/><line class="ax" x1="26" y1="100" x2="184" y2="100"/>
+                  <line class="room-t" x1="26" y1="82" x2="184" y2="82"/>
+                  <path class="curve" d="M26 14 C 52 52, 78 70, 110 77 S 160 81.5, 182 81.8"/>
+                  <text x="20" y="17" text-anchor="end">90°</text><text x="20" y="85" text-anchor="end">20°</text>
+                  <text x="184" y="114" text-anchor="end">time</text>
+                </svg>
+              </div>
+            </div>
+            <div class="controls">
+              <button class="ctl" type="button"><span class="b"><svg class="i"><use href="#i-mic"/></svg></span>Mute</button>
+              <button class="ctl" type="button"><span class="b"><svg class="i"><use href="#i-video-off"/></svg></span>Camera</button>
+              <span class="ctl-sep"></span>
+              <button class="ctl" type="button"><span class="b"><svg class="i"><use href="#i-lightbulb"/></svg></span>Hint</button>
+              <button class="ctl" type="button"><span class="b"><svg class="i"><use href="#i-repeat"/></svg></span>Repeat</button>
+              <button class="ctl" type="button"><span class="b"><svg class="i"><use href="#i-pause"/></svg></span>Pause</button>
+              <span class="ctl-sep"></span>
+              <button class="ctl end" type="button" id="iv-end"><span class="b"><svg class="i"><use href="#i-phone-off"/></svg></span>End</button>
+            </div>
+          </div>
+
+          <div class="live-side">
+            <div class="card panel">
+              <h3>Transcript <span class="live"><i></i>Live</span></h3>
+              <div class="transcript">
+                <div class="line"><b>Dr. Hale</b>Let's try something practical. Here's a cup of tea cooling on a desk. Why does the curve flatten out instead of falling in a straight line?</div>
+                <div class="line you"><b>You</b><span class="filler">Um</span>, so I think it's because how fast it cools depends on the difference between the tea and the room…</div>
+                <div class="line"><b>Dr. Hale</b>Good. Keep going. What happens to that difference over time?</div>
+                <div class="line you"><b>You</b>It gets smaller, so the rate gets smaller, <span class="filler">like</span>, the curve is always getting less steep, and it only reaches room temperature<span class="caret"></span></div>
+              </div>
+            </div>
+            <div class="card panel">
+              <h3>Coaching</h3>
+              <div class="coach">
+                <div class="coach-row">
+                  <div class="coach-top"><span>Pace</span><b>138 wpm</b></div>
+                  <div class="pace"><i style="left:58%"></i></div>
+                  <div class="pace-scale"><span>80</span><span>120</span><span>160</span><span>200</span></div>
+                </div>
+                <div class="coach-row">
+                  <div class="coach-top"><span>Filler words</span><b>5</b></div>
+                  <div class="fillers"><span>um ×3</span><span>like ×2</span></div>
+                </div>
+                <div class="coach-tip"><svg class="i"><use href="#i-sparkles"/></svg><span>Nice. You're explaining your reasoning before giving an answer. Next, name the law you're describing.</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<div class="preview-badge"><span class="dot"></span>Design preview · sample data</div>
+
+<!-- Add or edit activity -->
+<div class="overlay" id="drawer" hidden>
+  <div class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title">
+    <div class="ov-head">
+      <h2 id="drawer-title">Add activity<small id="drawer-sub">Fills one of your 10 Common App slots</small></h2>
+      <button class="icon-btn" type="button" data-close aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button>
+    </div>
+    <form class="ov-body" id="activity-form" autocomplete="off">
+      <div class="field">
+        <label for="f-type">Activity type</label>
+        <div class="select">
+          <select id="f-type">
+            <option>Academic</option><option>Art</option><option>Athletics: Club</option><option>Career-Oriented</option><option>Community Service (Volunteer)</option><option selected>Computer/Technology</option><option>Debate/Speech</option><option>Music: Instrumental</option><option>Research</option><option>Robotics</option><option>Student Govt./Politics</option><option>Work (Paid)</option><option>Other Club/Activity</option>
+          </select>
+          <svg class="i"><use href="#i-chevron-down"/></svg>
+        </div>
+      </div>
+      <div class="field">
+        <label for="f-role">Position or leadership <span class="limit" id="role-count">0 / 50</span></label>
+        <input class="input" id="f-role" maxlength="50" placeholder="e.g. Founder and lead developer">
+      </div>
+      <div class="field">
+        <label for="f-org">Organization <span class="limit" id="org-count">0 / 100</span></label>
+        <input class="input" id="f-org" maxlength="100" placeholder="e.g. TideLine (flood-alert text service)">
+      </div>
+      <div class="field">
+        <label for="f-desc">Description <span class="limit" id="desc-count">0 / 150</span></label>
+        <textarea class="textarea" id="f-desc" rows="3" maxlength="150" placeholder="What you did, what changed because of it, and a number if you have one."></textarea>
+        <span class="hint">Start with a verb, use numbers, and cut words like "very" and "really".</span>
+      </div>
+      <fieldset class="field">
+        <legend>Grade levels</legend>
+        <div class="check-row" data-multi>
+          <button type="button" class="check-pill">9</button><button type="button" class="check-pill">10</button><button type="button" class="check-pill is-on">11</button><button type="button" class="check-pill is-on">12</button><button type="button" class="check-pill">Post-grad</button>
+        </div>
+      </fieldset>
+      <fieldset class="field">
+        <legend>When you take part</legend>
+        <div class="seg full" role="group" aria-label="Timing"><button type="button">School year</button><button type="button">Breaks</button><button type="button" class="is-on">All year</button></div>
+      </fieldset>
+      <div class="field-row">
+        <div class="field"><label for="f-hrs">Hours per week</label><input class="input tnum" id="f-hrs" type="number" min="0" max="40" value="8"></div>
+        <div class="field"><label for="f-wks">Weeks per year</label><input class="input tnum" id="f-wks" type="number" min="0" max="52" value="40"></div>
+      </div>
+      <div class="alma-tip"><svg class="i"><use href="#i-sparkles"/></svg><span>Stuck on the description? Paste your rough notes in chat and Alma will ask questions until you've found the 150 characters that matter.</span></div>
+    </form>
+    <div class="ov-foot">
+      <button class="btn btn-ghost" type="button" data-close>Cancel</button>
+      <button class="btn btn-primary" type="button" data-close>Save activity</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add university -->
+<div class="overlay center" id="add-uni" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="add-uni-title">
+    <div class="ov-head">
+      <h2 id="add-uni-title">Add a university<small>Alma estimates your chances as soon as you add it</small></h2>
+      <button class="icon-btn" type="button" data-close aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="ov-body">
+      <label class="search" for="uni-search"><svg class="i i-sm"><use href="#i-search"/></svg><input id="uni-search" type="search" placeholder="Search by university, city or course" value="Physics"></label>
+      <div class="chip-row" data-single>
+        <button class="chip is-on" type="button">All regions</button><button class="chip" type="button">US</button><button class="chip" type="button">UK</button><button class="chip" type="button">Canada</button><button class="chip" type="button">Europe</button><button class="chip" type="button">Asia</button>
+      </div>
+      <ul class="results">
+        <li class="result"><span class="crest sm" style="--c:#00539B">StA</span><div><b>University of St Andrews</b><small>St Andrews, UK · Physics BSc · 3 likely factors</small></div><button class="btn btn-secondary btn-sm" type="button" data-add>Add</button></li>
+        <li class="result"><span class="crest sm" style="--c:#68246D">D</span><div><b>Durham University</b><small>Durham, UK · Physics MPhys</small></div><button class="btn btn-secondary btn-sm" type="button" data-add>Add</button></li>
+        <li class="result"><span class="crest sm" style="--c:#1F407A">ETH</span><div><b>ETH Zürich</b><small>Zürich, Switzerland · Physics BSc</small></div><button class="btn btn-secondary btn-sm" type="button" data-add>Add</button></li>
+        <li class="result"><span class="crest sm" style="--c:#002145">UBC</span><div><b>University of British Columbia</b><small>Vancouver, Canada · Physics BSc</small></div><button class="btn btn-secondary btn-sm" type="button" data-add>Add</button></li>
+        <li class="result"><span class="crest sm" style="--c:#003E74">IC</span><div><b>Imperial College London</b><small>London, UK · Physics MSci</small></div><button class="btn btn-secondary btn-sm is-added" type="button" disabled><svg class="i i-sm"><use href="#i-check"/></svg>On your list</button></li>
+      </ul>
+      <p class="modal-note"><svg class="i"><use href="#i-triangle-alert"/></svg>You're using 5 of 5 UCAS choices. Adding a UK university means swapping one out.</p>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" hidden><span id="toast-text"></span><button type="button" id="toast-undo">Undo</button></div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
