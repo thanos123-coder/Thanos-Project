@@ -1,4 +1,4 @@
-/* Alma: AI college counselor, UI design prototype.
+/* UpChance AI: AI college counselor, UI design prototype.
    Layout: a quiet app shell with a segmented tab rail; each tab is its own workspace.
    Home is an editorial landing built around an arched "gate" motif (the university gate). */
 
@@ -21,6 +21,9 @@
   --marigold: #EFAB2C;
   --marigold-soft: #FBEFD2;
   --marigold-ink: #7A5104;
+  /* Logo tile. Dark themes use the deep gate green so the marigold star keeps its contrast. */
+  --mark-bg: var(--ivy);
+  --mark-fg: var(--on-ivy);
 
   /* Semantic (separate from the brand accent) */
   --reach: #C2456B;
@@ -88,6 +91,8 @@
     --marigold: #F4BE55;
     --marigold-soft: #2C2410;
     --marigold-ink: #F6CF7E;
+    --mark-bg: var(--gate-top);
+    --mark-fg: #E8F0EC;
     --reach: #EE7C9B;
     --reach-soft: #32171F;
     --target: #EBB44A;
@@ -132,6 +137,8 @@
   --marigold: #F4BE55;
   --marigold-soft: #2C2410;
   --marigold-ink: #F6CF7E;
+  --mark-bg: var(--gate-top);
+  --mark-fg: #E8F0EC;
   --reach: #EE7C9B;
   --reach-soft: #32171F;
   --target: #EBB44A;
@@ -322,9 +329,9 @@ kbd {
 
 /* Logo */
 .logo-mark { width: 30px; height: 30px; flex: none; }
-.logo-mark .lm-bg { fill: var(--ivy); }
-.logo-mark .lm-arch { fill: none; stroke: var(--on-ivy); stroke-width: 2.4; stroke-linecap: round; }
-.logo-mark .lm-star { fill: var(--marigold); }
+.logo-mark .lm-bg { fill: var(--mark-bg); }
+.logo-mark .lm-arch { fill: none; stroke: var(--mark-fg); stroke-width: 2.4; stroke-linecap: round; }
+.logo-mark .lm-star { fill: var(--marigold); stroke: var(--marigold); stroke-width: .9; stroke-linejoin: round; }
 
 /* University crest */
 .crest {
@@ -356,7 +363,15 @@ kbd {
   padding-inline: 20px;
 }
 .brand { display: inline-flex; align-items: center; gap: 10px; justify-self: start; }
-.brand-name { font-family: var(--font-display); font-size: 25px; font-weight: 550; letter-spacing: -0.02em; line-height: 1; }
+.brand-name { font-family: var(--font-display); font-size: 25px; font-weight: 550; letter-spacing: -0.02em; line-height: 1; white-space: nowrap; }
+/* "AI" tag after the wordmark: as tall as its capitals, and raised 3px so it centres on them rather than on the line box */
+.brand-ai {
+  position: relative; top: -3px;
+  display: inline-grid; place-items: center; flex: none;
+  height: 17px; padding: 0 6px; margin-left: -4px; border-radius: 999px;
+  background: var(--ivy-soft); color: var(--ivy-ink);
+  font-family: var(--font-ui); font-size: 11px; font-weight: 650; letter-spacing: .04em; line-height: 1;
+}
 
 .tabs {
   position: relative;
@@ -626,7 +641,7 @@ body:not([data-view="home"]) .preview-badge { display: none; }
 
 .fp-msg { font-size: 13px; line-height: 1.45; padding: 8px 12px; border-radius: 14px; max-width: 86%; }
 .fp-msg.me { align-self: flex-end; background: var(--surface-2); border-bottom-right-radius: 4px; }
-.fp-msg.alma { align-self: flex-start; background: var(--ivy-soft); color: var(--ivy-ink); border-bottom-left-radius: 4px; }
+.fp-msg.counselor { align-self: flex-start; background: var(--ivy-soft); color: var(--ivy-ink); border-bottom-left-radius: 4px; }
 .fp-compose { display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 6px 0 14px; border: 1px solid var(--line); border-radius: 999px; color: var(--ink-3); font-size: 12.5px; }
 .fp-compose > span:first-child { flex: 1; }
 .fp-send { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--ivy); color: var(--on-ivy); }
@@ -840,8 +855,8 @@ body:not([data-view="home"]) .preview-badge { display: none; }
 .thread { flex: 1; min-height: 0; overflow-y: auto; padding: 28px 20px 12px; scroll-behavior: smooth; }
 .thread-inner { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 26px; }
 .msg-me { align-self: flex-end; max-width: 78%; background: var(--surface-2); padding: 11px 16px; border-radius: 20px 20px 6px 20px; font-size: 15px; line-height: 1.55; }
-.msg-alma { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 14px; }
-.msg-alma .logo-mark { width: 30px; height: 30px; }
+.msg-counselor { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 14px; }
+.msg-counselor .logo-mark { width: 30px; height: 30px; }
 .msg-content { font-size: 15px; line-height: 1.7; color: var(--ink); min-width: 0; }
 .msg-content > * + * { margin-top: 12px; }
 .msg-content strong { font-weight: 650; }
@@ -1485,8 +1500,8 @@ body:not([data-view="home"]) .preview-badge { display: none; }
 .check-row { display: flex; gap: 8px; flex-wrap: wrap; }
 .check-pill { display: inline-flex; align-items: center; justify-content: center; min-width: 48px; height: 36px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--line); font-size: 13px; font-weight: 550; color: var(--ink-2); }
 .check-pill.is-on { background: var(--ivy-soft); border-color: var(--ivy); color: var(--ivy-ink); }
-.alma-tip { display: flex; gap: 10px; padding: 12px 14px; border-radius: 12px; background: var(--ivy-soft); color: var(--ivy-ink); font-size: 13px; line-height: 1.5; }
-.alma-tip .i { width: 16px; height: 16px; margin-top: 1px; }
+.counselor-tip { display: flex; gap: 10px; padding: 12px 14px; border-radius: 12px; background: var(--ivy-soft); color: var(--ivy-ink); font-size: 13px; line-height: 1.5; }
+.counselor-tip .i { width: 16px; height: 16px; margin-top: 1px; }
 .results { display: flex; flex-direction: column; }
 .result { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px 4px; border-top: 1px solid var(--line-soft); }
 .result:first-child { border-top: 0; }

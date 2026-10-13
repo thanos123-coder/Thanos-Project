@@ -3,7 +3,7 @@
 (() => {
   'use strict';
 
-  const D = window.ALMA;
+  const D = window.UPCHANCE;
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
   const ic = (name, cls = '') => `<svg class="i ${cls}"><use href="#i-${name}"/></svg>`;
@@ -339,7 +339,7 @@
     const u = unis.find((x) => x.id === selectedUni);
     const el = $('#uni-detail');
     if (!u) {
-      el.innerHTML = `<div class="ud-section"><p class="page-sub">Choose a university to see your chances and Alma's comments.</p></div>`;
+      el.innerHTML = `<div class="ud-section"><p class="page-sub">Choose a university to see your chances and UpChance's comments.</p></div>`;
       return;
     }
     const known = u.factors.filter((f) => f[1] > 0).length;
@@ -349,7 +349,7 @@
         ${crest(u, 'lg')}
         <div><h2>${esc(u.name)}</h2><p>${ic('map-pin')}${esc(u.city)} · ${esc(u.program)}</p></div>
         <div class="ud-actions">
-          <a class="btn btn-secondary btn-sm" href="#chat">${ic('message-circle', 'i-sm')}Ask Alma</a>
+          <a class="btn btn-secondary btn-sm" href="#chat">${ic('message-circle', 'i-sm')}Ask UpChance</a>
           <button class="icon-btn" type="button" data-remove="${u.id}" aria-label="Remove ${esc(u.name)}">${ic('trash-2')}</button>
         </div>
       </header>
@@ -372,7 +372,7 @@
         </div>
       </section>
       <section class="ud-section">
-        <h3>${ic('sparkles')}Alma's take</h3>
+        <h3>${ic('sparkles')}UpChance's take</h3>
         <div class="takes">${u.take.map(([tone, html]) => `<div class="take ${tone}"><span class="take-ico">${ic(TAKE_ICON[tone])}</span><span>${html}</span></div>`).join('')}</div>
       </section>
       <div class="ud-foot">${ic('info')}Estimated from your profile and this university's published admissions data.<a href="#chat">Ask why${ic('arrow-right', 'i-sm')}</a></div>`;
@@ -425,7 +425,7 @@
     add.classList.add('is-added');
     add.disabled = true;
     add.innerHTML = `${ic('check', 'i-sm')}Added`;
-    toast(`Added ${name}. Alma is estimating your chances.`);
+    toast(`Added ${name}. UpChance is estimating your chances.`);
   });
 
   renderUniList();

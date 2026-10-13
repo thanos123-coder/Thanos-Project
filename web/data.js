@@ -2,7 +2,7 @@
    University facts (rounds, deadlines, admit rates) are illustrative and approximate.
    When the UI is wired to the agents, this file is replaced by real API responses. */
 
-window.ALMA = {
+window.UPCHANCE = {
   student: { first: 'Sofia', last: 'Marin', initials: 'SM', curriculum: 'IB Diploma', predicted: 41, subjects: 38, core: 3 },
 
   subjects: [
@@ -176,7 +176,7 @@ window.ALMA = {
       take: [
         ['good', '<b>IB 41 is well above typical admission averages for this stream.</b>'],
         ['action', 'Rank your college choices carefully. Your college shapes housing and community on the St. George campus.'],
-        ['good', 'At your grade level you may be eligible for entrance scholarships. Alma has added two to your list.']
+        ['good', 'At your grade level you may be eligible for entrance scholarships. UpChance has added two to your list.']
       ]
     },
     {
