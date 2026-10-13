@@ -42,13 +42,20 @@
     indicator.style.transform = `translateX(${tab.offsetLeft}px)`;
   }
 
+  let currentView = null;
+  const seenViews = new Set();
+
   function show(name, scroll = true) {
     if (!VIEWS.includes(name)) name = 'home';
     views.forEach((v) => { v.hidden = v.dataset.view !== name; });
     tabs.forEach((t) => (t.dataset.view === name ? t.setAttribute('aria-current', 'page') : t.removeAttribute('aria-current')));
     moveIndicator();
     document.body.dataset.view = name;
+    currentView = name;
     if (scroll) window.scrollTo(0, 0);
+    const first = !seenViews.has(name);
+    seenViews.add(name);
+    document.dispatchEvent(new CustomEvent('uc:view', { detail: { name, first } }));
   }
 
   window.addEventListener('hashchange', () => show(location.hash.slice(1)));
@@ -107,6 +114,18 @@
     if (e.target === o || e.target.closest('[data-close]')) closeOverlays();
   }));
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeOverlays(); });
+
+  /* ---------- Shared API for fx/*.js ----------
+     UC.onView(name, fn) calls fn({ first }) each time that tab is shown, including right away if it is already showing. */
+  window.UC = {
+    D, $, $$, ic, esc, CAT, toast, openOverlay, closeOverlays, show,
+    get reducedMotion() { return matchMedia('(prefers-reduced-motion: reduce)').matches; },
+    get view() { return currentView; },
+    onView(name, fn) {
+      document.addEventListener('uc:view', (e) => { if (e.detail.name === name) fn({ first: e.detail.first }); });
+      if (currentView === name) queueMicrotask(() => fn({ first: true }));
+    }
+  };
 
   /* ---------- Chat ---------- */
 
