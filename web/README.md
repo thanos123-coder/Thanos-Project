@@ -17,10 +17,12 @@ Open `web/index.html` in a browser. No build step and no install are needed; the
 
 ## Files
 
-- `index.html`: markup for all six pages, plus an inline icon sprite (Lucide icons, ISC license).
-- `styles.css`: design tokens (light and dark themes) and all component styles.
+- `index.html`: markup for all six pages. Icons come from the Lucide sprite in `fx/icons.js` (ISC license).
+- `styles.css`: design tokens (light and dark themes), base styles, primitives and components shared by several pages, overlays and the app shell.
 - `data.js`: the sample student, activities, universities, chats and essay findings. When the UI is wired up, this is what the agents' responses replace.
-- `app.js`: tab switching and the small interactions that show how each control behaves.
+- `app.js`: theme, tab switching, shared controls, toast, overlays and the `window.UC` helper API.
+- `fx/PAGE.css` and `fx/PAGE.js` (home, chat, activities, chances, essays, interview): each page's own styles, including its responsive rules, and its own rendering and interactions. They load after `styles.css` and `app.js`, in tab order.
+- `fx/kit.css` and `fx/kit.js`: the shared motion kit. `fx/icons.js` is the generated icon sprite.
 
 ## Design notes
 
