@@ -1,1 +1,104 @@
-/* Shared motion and interaction kit: tokens and utilities used by every page. */
+/* Motion kit: motion tokens, utility classes and view-transition rules shared by every page.
+   The JavaScript side (UC.motion, tooltips, press feedback, menus) lives in fx/kit.js.
+   Durations: 150ms for color and background, 200-250ms for panels, 400ms for entrances.
+   Under prefers-reduced-motion nothing moves; at most a quick fade remains. */
+
+:root {
+  --ease-out: cubic-bezier(.2, .8, .2, 1);
+  --ease-in: cubic-bezier(.4, 0, 1, 1);
+  --ease-in-out: cubic-bezier(.65, 0, .35, 1);
+  /* A damped spring (about 4% overshoot) sampled into linear(); pair it with --dur-spring */
+  --ease-spring: linear(0, 0.059, 0.181, 0.337, 0.491, 0.637, 0.756, 0.856, 0.927, 0.98, 1.012, 1.032, 1.04, 1.042, 1.039, 1.033, 1.027, 1.02, 1.014, 1.009, 1.006, 1.003, 1.001, 0.999, 1);
+  --dur-fast: 150ms;
+  --dur-base: 220ms;
+  --dur-slow: 400ms;
+  --dur-spring: 600ms;
+}
+@supports not (transition-timing-function: linear(0, 1)) {
+  :root { --ease-spring: var(--ease-out); }
+}
+
+/* ---------- One-shot entrances (start from a visible state) ---------- */
+
+@keyframes fx-rise { from { opacity: .4; transform: translateY(8px); } }
+@keyframes fx-fade { from { opacity: .4; } }
+@keyframes fx-pop { from { opacity: .4; transform: scale(.97); } }
+.fx-rise { animation: fx-rise var(--dur-slow) var(--ease-out) both; }
+.fx-fade { animation: fx-fade var(--dur-base) var(--ease-out) both; }
+.fx-pop { animation: fx-pop var(--dur-base) var(--ease-spring) both; }
+
+/* ---------- Tooltip: any element with data-tip="text" (see fx/kit.js) ---------- */
+
+.fx-tip {
+  position: fixed; left: 0; top: 0; z-index: 300;
+  max-width: 240px; padding: 6px 8px; border-radius: var(--radius-sm);
+  background: var(--ink); color: var(--paper);
+  font-size: var(--text-xs); font-weight: 400; line-height: 1.4; letter-spacing: 0;
+  box-shadow: var(--shadow-md);
+  pointer-events: none;
+  opacity: 0; transform: translateY(var(--tip-shift, 4px));
+  transition: opacity var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+}
+.fx-tip.is-shown { opacity: 1; transform: none; }
+.fx-tip[data-side="bottom"] { --tip-shift: -4px; }
+
+/* ---------- Pointer effects ---------- */
+
+/* Press feedback: elements with data-press scale slightly while pressed */
+[data-press] { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+
+/* Spotlight that follows the pointer: UC.motion.glow(el) sets --mx, --my and --glow-o */
+.fx-glow { position: relative; isolation: isolate; }
+.fx-glow::after {
+  content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none;
+  background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), color-mix(in oklab, var(--ink) 5%, transparent), transparent 70%);
+  opacity: var(--glow-o, 0);
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+
+/* 3D tilt: UC.motion.tilt(el) sets the transform and --glare-x, --glare-y, --glare-o for an optional .fx-glare child */
+.fx-tilt { transform-style: preserve-3d; will-change: transform; }
+.fx-glare {
+  position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: radial-gradient(circle at var(--glare-x, 50%) var(--glare-y, 50%), color-mix(in oklab, var(--on-ivy) 22%, transparent), transparent 60%);
+  opacity: var(--glare-o, 0);
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+
+/* ---------- Streamed text: UC.motion.stream() and typewriter() ---------- */
+
+@keyframes fx-word { from { opacity: 0; } }
+.fx-word { animation: fx-word 160ms var(--ease-out) both; }
+@keyframes fx-caret { 50% { opacity: 0; } }
+.fx-typing::after {
+  content: ""; display: inline-block; width: 2px; height: 1em; margin-left: 2px; vertical-align: -0.15em;
+  background: currentColor; animation: fx-caret 1s steps(1) infinite;
+}
+
+/* ---------- View transitions ---------- */
+
+/* Tab switch: the top bar and tab bar stay put and live; the page fades and rises */
+:root[data-vt="tab"] .topbar { view-transition-name: topbar; }
+:root[data-vt="tab"] .tabs { view-transition-name: tabbar; }
+:root[data-vt="tab"]::view-transition-old(topbar),
+:root[data-vt="tab"]::view-transition-old(tabbar) { display: none; }
+:root[data-vt="tab"]::view-transition-new(topbar),
+:root[data-vt="tab"]::view-transition-new(tabbar) { animation: none; }
+:root[data-vt="tab"]::view-transition-group(topbar),
+:root[data-vt="tab"]::view-transition-group(tabbar) { animation: none; }
+:root[data-vt="tab"]::view-transition-old(root) { animation: fx-vt-out 120ms var(--ease-in) both; }
+:root[data-vt="tab"]::view-transition-new(root) { animation: fx-vt-in 260ms var(--ease-out) both; }
+@keyframes fx-vt-out { to { opacity: 0; } }
+@keyframes fx-vt-in { from { opacity: 0; transform: translateY(6px); } }
+
+/* Theme switch: the new theme is revealed in a circle from the toggle (clip-path set in app.js) */
+:root[data-vt="theme"]::view-transition-old(root),
+:root[data-vt="theme"]::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+:root[data-vt="theme"]::view-transition-new(root) { z-index: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-rise, .fx-pop { animation-name: fx-fade; }
+  .fx-tip { transition: none; transform: none; }
+  .fx-glow::after, .fx-glare { display: none; }
+  .fx-typing::after { animation: none; }
+}

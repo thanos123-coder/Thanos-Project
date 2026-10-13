@@ -8,7 +8,7 @@
   let uniFilter = 'all';
   let selectedUni = 'imperial';
 
-  const crest = (u, size = '') => `<span class="crest ${size}" style="--c:${u.c};--ci:${u.ci}">${esc(u.initials)}</span>`;
+  const crest = (u, size = '') => `<span class="crest ${size}" aria-hidden="true">${esc(u.initials)}</span>`;
 
   function gauge(u) {
     const cx = 120, cy = 120, r = 96;
@@ -96,7 +96,7 @@
         </div>
       </section>
       <section class="ud-section">
-        <h3>${ic('sparkles')}UpChance's take</h3>
+        <h3>UpChance's take</h3>
         <div class="takes">${u.take.map(([tone, html]) => `<div class="take ${tone}"><span class="take-ico">${ic(TAKE_ICON[tone])}</span><span>${html}</span></div>`).join('')}</div>
       </section>
       <div class="ud-foot">${ic('info')}Estimated from your profile and this university's published admissions data.<a href="#chat">Ask why${ic('arrow-right', 'i-sm')}</a></div>`;

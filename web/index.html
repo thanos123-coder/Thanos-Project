@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>UpChance AI</title>
-<meta name="description" content="UpChance AI, an AI college counselor: chat, activity log, admission chances, essay grader and mock interviews.">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='9'%20fill='%2317604A'/%3E%3Cpath%20d='M9.2%2027V20.4A6.8%206.8%200%200%201%2012.4%2014.63M19.6%2014.63A6.8%206.8%200%200%201%2022.8%2020.4V27'%20fill='none'%20stroke='%23FFFFFF'%20stroke-width='2.4'%20stroke-linecap='round'/%3E%3Cpath%20d='M16.44%203.3Q17.69%208.53%2020.78%209.89A0.45%200.45%200%200%201%2020.78%2010.71Q17.66%2012.08%2016.43%2015.74A0.45%200.45%200%200%201%2015.57%2015.74Q14.34%2012.08%2011.22%2010.71A0.45%200.45%200%200%201%2011.22%209.89Q14.31%208.53%2015.56%203.3A0.45%200.45%200%200%201%2016.44%203.3Z'%20fill='%23EFAB2C'/%3E%3C/svg%3E">
+<meta name="description" content="UpChance AI, a college counselor for every student: chat, activity log, admission chances, essay grader and mock interviews.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='8'%20fill='%232448E5'/%3E%3Cpath%20d='M10.5%2012.5v5.5a5.5%205.5%200%200%200%2011%200V8'%20fill='none'%20stroke='%23FFFFFF'%20stroke-width='3.2'%20stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..600&display=swap">
@@ -23,10 +23,13 @@
 
 <header class="topbar">
   <div class="topbar-inner">
-    <a class="brand" href="#home" aria-label="UpChance AI home">
-      <svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="lm-bg" width="32" height="32" rx="9"/><path class="lm-arch" d="M9.2 27V20.4A6.8 6.8 0 0 1 12.4 14.63M19.6 14.63A6.8 6.8 0 0 1 22.8 20.4V27"/><path class="lm-star" d="M16 3.4Q17.3 8.85 20.6 10.3Q17.3 11.75 16 15.6Q14.7 11.75 11.4 10.3Q14.7 8.85 16 3.4Z"/></svg>
-      <span class="brand-name">UpChance</span><span class="brand-ai">AI</span>
-    </a>
+    <div class="topbar-start">
+      <a class="brand" href="#home" aria-label="UpChance AI home">
+        <svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="lm-bg" width="32" height="32" rx="8"/><path class="lm-u" d="M10.5 12.5v5.5a5.5 5.5 0 0 0 11 0V8"/></svg>
+        <span class="brand-name">UpChance</span> <span class="brand-ai">AI</span>
+      </a>
+      <span class="preview-badge" data-tip="Every name, grade and number here belongs to a fictional sample student." data-tip-side="bottom"><span class="dot" aria-hidden="true"></span>Preview · sample data</span>
+    </div>
 
     <nav class="tabs" id="tabs" aria-label="Sections">
       <span class="tabs-indicator" aria-hidden="true"></span>
@@ -39,14 +42,15 @@
     </nav>
 
     <div class="topbar-actions">
-      <a class="deadline-chip" href="#chances" title="Cambridge UCAS deadline: October 15, 18:00 UK time">
-        <svg class="i"><use href="#i-clock"/></svg><span class="dc-long">Cambridge deadline</span><b>2 days</b>
+      <a class="deadline" href="#chances" aria-label="Cambridge deadline in 2 days" data-tip="Cambridge UCAS deadline: Oct 15, 18:00 UK time" data-tip-side="bottom">
+        <span class="dot" aria-hidden="true"></span><span class="dc-long">Cambridge deadline</span><b>2 days</b>
       </a>
-      <button class="icon-btn" id="theme-toggle" type="button" aria-label="Switch theme">
+      <button class="icon-btn" id="cmdk-open" type="button" aria-label="Search and commands" aria-haspopup="dialog" data-tip="Search" data-tip-side="bottom"><svg class="i"><use href="#i-search"/></svg></button>
+      <button class="icon-btn" id="theme-toggle" type="button" aria-label="Switch theme" data-tip-side="bottom">
         <svg class="i i-sun"><use href="#i-sun"/></svg><svg class="i i-moon"><use href="#i-moon"/></svg>
       </button>
-      <button class="icon-btn has-dot" type="button" aria-label="Notifications, 3 new"><svg class="i"><use href="#i-bell"/></svg></button>
-      <button class="avatar" type="button" aria-label="Account: Sofia Marin">SM</button>
+      <button class="icon-btn has-dot" type="button" aria-label="Notifications, 3 new" data-tip="Notifications" data-tip-side="bottom"><svg class="i"><use href="#i-bell"/></svg></button>
+      <button class="avatar" type="button" aria-label="Account: Sofia Marin" data-tip="Sofia Marin" data-tip-side="bottom">SM</button>
     </div>
   </div>
 </header>
@@ -58,56 +62,31 @@
   <div class="home-hero">
     <div class="hero">
       <div class="hero-copy">
-        <a class="eyebrow-chip" href="#chances"><span class="live-dot" aria-hidden="true"></span>The 2026–27 application season is open<svg class="i"><use href="#i-arrow-right"/></svg></a>
         <h1 class="hero-title">A college counselor who knows your <em>whole story.</em></h1>
-        <p class="hero-lead">UpChance AI learns your grades, activities and goals, then helps you build your university list, see your chances, improve your essays and practice for interviews.</p>
+        <p class="hero-lead">Build your university list, see your chances, improve your essays and practice interviews, all from one profile.</p>
         <div class="hero-ctas">
           <a class="btn btn-primary btn-lg" href="#activities">Start your profile<svg class="i"><use href="#i-arrow-right"/></svg></a>
-          <a class="btn btn-secondary btn-lg" href="#chat"><svg class="i"><use href="#i-message-circle"/></svg>Ask UpChance a question</a>
+          <a class="btn btn-ghost btn-lg" href="#chat">Ask a question</a>
         </div>
         <ul class="hero-facts">
-          <li><svg class="i"><use href="#i-timer"/></svg>10-minute setup</li>
-          <li><svg class="i"><use href="#i-graduation-cap"/></svg>IB, A-Levels, AP and national curricula</li>
-          <li><svg class="i"><use href="#i-shield-check"/></svg>Delete your data any time</li>
+          <li>10-minute setup</li>
+          <li>IB, A-Levels, AP and national curricula</li>
+          <li>Delete your data any time</li>
         </ul>
       </div>
 
       <div class="hero-visual" aria-hidden="true">
-        <div class="hv">
-          <div class="gate"><span class="gate-class"><small>Applying for</small>the Class of 2031</span></div>
-
-          <div class="float-card fc-score">
-            <span class="fc-ico"><svg class="i"><use href="#i-graduation-cap"/></svg></span>
-            <span class="num">41</span>
-            <span class="lbl">/ 45 IB<br>predicted</span>
-          </div>
-
-          <div class="float-card fc-chance">
-            <div class="fc-row">
-              <span class="crest" style="--c:#003E74;--ci:#fff">IC</span>
-              <div><div class="fc-name">Imperial College London</div><div class="fc-meta">Physics MSci · UCAS</div></div>
-            </div>
-            <div class="fc-range"><span class="big">38–50%</span><span class="pill pill-target">Target</span></div>
-            <div class="range-track"><span style="left:38%;width:12%"></span></div>
-            <div class="fc-foot"><svg class="i"><use href="#i-trending-up"/></svg>Biggest lever: Physics HL from 6 to 7</div>
-          </div>
-
-          <div class="float-card fc-chat">
-            <div class="fc-who"><svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="lm-bg" width="32" height="32" rx="9"/><path class="lm-arch" d="M9.2 27V20.4A6.8 6.8 0 0 1 12.4 14.63M19.6 14.63A6.8 6.8 0 0 1 22.8 20.4V27"/><path class="lm-star" d="M16 3.4Q17.3 8.85 20.6 10.3Q17.3 11.75 16 15.6Q14.7 11.75 11.4 10.3Q14.7 8.85 16 3.4Z"/></svg>UpChance</div>
-            <p>Your list has 3 reaches and 4 likelies. Want two smaller campuses with strong physics?</p>
-            <div class="fc-replies"><span>Yes, show me</span><span>Maybe later</span></div>
-          </div>
-
-          <div class="float-card fc-essay">
-            <div class="fc-doc-head"><span>Personal statement</span><span class="mono">421 / 650</span></div>
-            <p class="fc-doc">…and my code read <mark class="m-strong">the silence as calm water.</mark> <mark class="m-ai">This experience taught me that perseverance is key.</mark></p>
-            <div class="fc-tags"><span class="fc-tag" style="--sw:var(--likely)">Strong moment</span><span class="fc-tag" style="--sw:var(--marigold)">Reads as AI-like</span></div>
-          </div>
-
-          <div class="float-card fc-deadline">
-            <span class="fc-ico"><svg class="i"><use href="#i-clock"/></svg></span>
-            <span>Cambridge deadline in <b>2 days</b></span>
-          </div>
+        <div class="hv-panel">
+          <div class="hv-head"><b>Your chances</b><span>Sofia M. · IB 41 predicted</span></div>
+          <ul class="hv-rows">
+            <li style="--lo:7;--hi:11;--c:var(--reach)"><span class="hv-name">MIT</span><span class="hv-bar"><i></i></span><span class="hv-pct">7–11%</span></li>
+            <li style="--lo:18;--hi:26;--c:var(--reach)"><span class="hv-name">Cambridge</span><span class="hv-bar"><i></i></span><span class="hv-pct">18–26%</span></li>
+            <li style="--lo:30;--hi:42;--c:var(--target)"><span class="hv-name">Michigan</span><span class="hv-bar"><i></i></span><span class="hv-pct">30–42%</span></li>
+            <li style="--lo:38;--hi:50;--c:var(--target)"><span class="hv-name">Imperial</span><span class="hv-bar"><i></i></span><span class="hv-pct">38–50%</span></li>
+            <li style="--lo:68;--hi:80;--c:var(--likely)"><span class="hv-name">Warwick</span><span class="hv-bar"><i></i></span><span class="hv-pct">68–80%</span></li>
+            <li style="--lo:78;--hi:88;--c:var(--likely)"><span class="hv-name">Toronto</span><span class="hv-bar"><i></i></span><span class="hv-pct">78–88%</span></li>
+          </ul>
+          <div class="hv-foot"><span class="hv-legend"><i style="--sw:var(--reach)"></i>Reach<i style="--sw:var(--target)"></i>Target<i style="--sw:var(--likely)"></i>Likely</span><span>Sample data</span></div>
         </div>
       </div>
     </div>
@@ -117,10 +96,8 @@
   <section class="home-section" aria-labelledby="season-title">
     <div class="section-head">
       <div>
-        <p class="eyebrow">Your season at a glance</p>
         <h2 class="section-title" id="season-title">Every deadline, planned backward.</h2>
       </div>
-      <p class="section-sub">UpChance tracks the deadlines for every university on your list and tells you what to do this week to meet them.</p>
     </div>
     <div class="card timeline">
       <!-- Axis runs Oct 1, 2026 to May 15, 2027 (226 days). Positions are day offsets / 226. -->
@@ -149,7 +126,6 @@
         <div class="tl-item up end" style="--x:93.8%;--dot:var(--ivy)"><div class="tl-date"><i></i>May 1</div><div class="tl-what">US National Decision Day</div></div>
       </div>
       <div class="tl-note">
-        <svg class="i"><use href="#i-sparkles"/></svg>
         On your list, 3 applications are due by November 1.
         <a href="#chances">See your plan<svg class="i i-sm"><use href="#i-arrow-right"/></svg></a>
       </div>
@@ -160,110 +136,50 @@
   <section class="home-section" aria-labelledby="features-title">
     <div class="section-head">
       <div>
-        <p class="eyebrow">What's inside</p>
         <h2 class="section-title" id="features-title">One counselor for the whole application.</h2>
       </div>
-      <p class="section-sub">Each tab covers one part of applying. UpChance connects them, so advice in one place uses what you've done in the others.</p>
     </div>
 
     <div class="features">
       <a class="feature wide" href="#chat">
         <div class="feature-top"><span class="feature-tag"><svg class="i"><use href="#i-message-circle"/></svg>Chat</span><span class="feature-go"><svg class="i"><use href="#i-arrow-right"/></svg></span></div>
         <h3>Ask anything, any time.</h3>
-        <p>Lists, majors, deadlines, financial aid. UpChance answers with your profile in mind and shows what it used.</p>
-        <div class="feature-preview"><div class="fp-inner">
-          <div class="fp-msg me">Should I apply to Stanford early too?</div>
-          <div class="fp-msg counselor">Not this year. Stanford's Restrictive Early Action would rule out MIT Early Action, and MIT's early round suits you better.</div>
-          <div class="fp-compose"><span>Ask a follow-up…</span><span class="fp-send"><svg class="i"><use href="#i-arrow-up"/></svg></span></div>
-        </div></div>
       </a>
 
       <a class="feature wide" href="#chances">
         <div class="feature-top"><span class="feature-tag"><svg class="i"><use href="#i-gauge"/></svg>Chances</span><span class="feature-go"><svg class="i"><use href="#i-arrow-right"/></svg></span></div>
         <h3>Chances, with reasons.</h3>
-        <p>A realistic range for every university on your list, what's behind it, and what would move it.</p>
-        <div class="feature-preview"><div class="fp-inner">
-          <div class="fp-uni"><span class="crest sm" style="--c:#A31F34">MIT</span><span class="nm">Massachusetts Institute of Technology</span><span class="rg">7–11%</span><div class="range-track"><span style="left:7%;width:4%;background:var(--reach)"></span></div></div>
-          <div class="fp-uni"><span class="crest sm" style="--c:#003E74">IC</span><span class="nm">Imperial College London</span><span class="rg">38–50%</span><div class="range-track"><span style="left:38%;width:12%;background:var(--target)"></span></div></div>
-          <div class="fp-uni"><span class="crest sm" style="--c:#041E42">E</span><span class="nm">University of Edinburgh</span><span class="rg">75–86%</span><div class="range-track"><span style="left:75%;width:11%;background:var(--likely)"></span></div></div>
-        </div></div>
       </a>
 
       <a class="feature" href="#activities">
         <div class="feature-top"><span class="feature-tag"><svg class="i"><use href="#i-list-checks"/></svg>Activities</span><span class="feature-go"><svg class="i"><use href="#i-arrow-right"/></svg></span></div>
         <h3>One record of everything you've done.</h3>
-        <p>Grades, activities and awards, ready for the Common App or UCAS.</p>
-        <div class="feature-preview"><div class="fp-inner">
-          <div class="fp-act"><span class="fp-act-ico"><svg class="i"><use href="#i-waves"/></svg></span><div><b>Founder · TideLine</b><p>Built a text-alert service that warns 2,400 residents of my grandmother's town when the river rises fast, using open sensor data.</p></div></div>
-          <div class="fp-count"><span class="bar"><span></span></span><span class="mono">129 / 150</span></div>
-        </div></div>
       </a>
 
       <a class="feature" href="#essays">
         <div class="feature-top"><span class="feature-tag"><svg class="i"><use href="#i-file-pen-line"/></svg>Essay grader</span><span class="feature-go"><svg class="i"><use href="#i-arrow-right"/></svg></span></div>
         <h3>Check your essay before anyone reads it.</h3>
-        <p>Grammar, clarity, AI-like phrasing and what a reader will remember.</p>
-        <div class="feature-preview"><div class="fp-inner">
-          <p class="fp-essay">By morning, <mark class="m-g">their</mark> was a brown line across every door. <mark class="m-a">Technology plays a pivotal role in resilience.</mark> <mark class="m-c">due to the fact that</mark></p>
-          <div class="fp-legend"><span style="--sw:var(--danger)">Grammar</span><span style="--sw:var(--marigold)">AI-like</span><span style="--sw:var(--info)">Clarity</span></div>
-        </div></div>
       </a>
 
       <a class="feature" href="#interview">
         <div class="feature-top"><span class="feature-tag"><svg class="i"><use href="#i-mic"/></svg>Mock interview</span><span class="feature-go"><svg class="i"><use href="#i-arrow-right"/></svg></span></div>
         <h3>Practice until it feels easy.</h3>
-        <p>Alumni, Oxbridge and scholarship-style interviews, with feedback on every answer.</p>
-        <div class="feature-preview"><div class="fp-room">
-          <span class="fp-orb"></span>
-          <p class="fp-q"><small>Question 3 of 8</small>Why does a cup of tea cool quickly at first, then slowly?</p>
-        </div></div>
       </a>
     </div>
-  </section>
-
-  <!-- How it works -->
-  <section class="home-section" aria-labelledby="how-title">
-    <div class="section-head">
-      <div>
-        <p class="eyebrow">How it works</p>
-        <h2 class="section-title" id="how-title">From first question to final decision.</h2>
-      </div>
-    </div>
-    <ol class="steps">
-      <li class="step">
-        <span class="step-num">1</span>
-        <h3>Tell UpChance about you</h3>
-        <p>A short conversation about your grades, interests, budget and where you'd like to study.</p>
-        <span class="step-meta"><svg class="i"><use href="#i-timer"/></svg>About 10 minutes</span>
-      </li>
-      <li class="step">
-        <span class="step-num">2</span>
-        <h3>Get your plan</h3>
-        <p>A balanced university list, your chances at each, and every deadline in one calendar.</p>
-        <span class="step-meta"><svg class="i"><use href="#i-calendar-days"/></svg>Updated as you go</span>
-      </li>
-      <li class="step">
-        <span class="step-num">3</span>
-        <h3>Apply with confidence</h3>
-        <p>Write essays with feedback, rehearse interviews, and know what to do each week.</p>
-        <span class="step-meta"><svg class="i"><use href="#i-circle-check"/></svg>Until you choose your offer</span>
-      </li>
-    </ol>
   </section>
 
   <!-- Principles -->
   <section class="home-section" aria-labelledby="principles-title">
     <div class="section-head">
       <div>
-        <p class="eyebrow">Our principles</p>
         <h2 class="section-title" id="principles-title">How UpChance gives advice.</h2>
       </div>
     </div>
     <div class="principles">
-      <div class="principle"><span class="principle-ico"><svg class="i"><use href="#i-pen-line"/></svg></span><h3>Your essays stay yours</h3><p>UpChance asks questions, comments on your drafts and checks your writing. It won't write essays for you, because readers want to hear you.</p></div>
-      <div class="principle"><span class="principle-ico"><svg class="i"><use href="#i-gauge"/></svg></span><h3>Chances come with reasons</h3><p>Every estimate is a range, with the factors behind it and what would change it.</p></div>
-      <div class="principle"><span class="principle-ico"><svg class="i"><use href="#i-shield-check"/></svg></span><h3>You control your data</h3><p>See everything UpChance knows about you. Correct it or delete it whenever you want.</p></div>
-      <div class="principle"><span class="principle-ico"><svg class="i"><use href="#i-globe"/></svg></span><h3>Every curriculum counts</h3><p>IB, A-Levels, AP, the French Bac, the Abitur and more, read the way universities read them.</p></div>
+      <div class="principle"><h3>Your essays stay yours</h3><p>UpChance asks questions, comments on your drafts and checks your writing. It won't write essays for you, because readers want to hear you.</p></div>
+      <div class="principle"><h3>Chances come with reasons</h3><p>Every estimate is a range, with the factors behind it and what would change it.</p></div>
+      <div class="principle"><h3>You control your data</h3><p>See everything UpChance knows about you. Correct it or delete it whenever you want.</p></div>
+      <div class="principle"><h3>Every curriculum counts</h3><p>IB, A-Levels, AP, the French Bac, the Abitur and more, read the way universities read them.</p></div>
     </div>
   </section>
 
@@ -274,15 +190,15 @@
         <p>Start with a 10-minute conversation. You'll leave with a list, a plan and your next three steps.</p>
       </div>
       <div class="btns">
-        <a class="btn btn-gold btn-lg" href="#activities">Start your profile<svg class="i"><use href="#i-arrow-right"/></svg></a>
-        <a class="btn btn-lg btn-on-dark" href="#chat">Talk to UpChance</a>
+        <a class="btn btn-primary btn-lg" href="#activities">Start your profile<svg class="i"><use href="#i-arrow-right"/></svg></a>
+        <a class="btn btn-ghost btn-lg" href="#chat">Talk to UpChance</a>
       </div>
     </div>
   </section>
 
   <footer class="footer">
     <div class="footer-brand">
-      <a class="brand" href="#home" aria-label="UpChance AI home"><svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="lm-bg" width="32" height="32" rx="9"/><path class="lm-arch" d="M9.2 27V20.4A6.8 6.8 0 0 1 12.4 14.63M19.6 14.63A6.8 6.8 0 0 1 22.8 20.4V27"/><path class="lm-star" d="M16 3.4Q17.3 8.85 20.6 10.3Q17.3 11.75 16 15.6Q14.7 11.75 11.4 10.3Q14.7 8.85 16 3.4Z"/></svg><span class="brand-name">UpChance</span><span class="brand-ai">AI</span></a>
+      <a class="brand" href="#home" aria-label="UpChance AI home"><svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="lm-bg" width="32" height="32" rx="8"/><path class="lm-u" d="M10.5 12.5v5.5a5.5 5.5 0 0 0 11 0V8"/></svg><span class="brand-name">UpChance</span> <span class="brand-ai">AI</span></a>
       <p>An AI college counselor for every student, wherever you're applying.</p>
     </div>
     <div class="footer-cols">
@@ -302,18 +218,17 @@
   <div class="chat" id="chat">
     <aside class="chat-side" aria-label="Your chats">
       <div class="side-top">
-        <button class="btn btn-new" id="new-chat" type="button"><svg class="i"><use href="#i-square-pen"/></svg>New chat<kbd>⌘ N</kbd></button>
+        <button class="btn btn-new" id="new-chat" type="button"><svg class="i"><use href="#i-square-pen"/></svg>New chat</button>
         <button class="icon-btn side-close" type="button" aria-label="Close chat list"><svg class="i"><use href="#i-x"/></svg></button>
       </div>
       <label class="search" for="chat-search">
         <svg class="i i-sm"><use href="#i-search"/></svg>
         <input id="chat-search" type="search" placeholder="Search chats" autocomplete="off">
-        <kbd>⌘ K</kbd>
       </label>
       <div class="side-list" id="chat-list"></div>
       <div class="side-foot">
         <div class="context-card">
-          <div class="cc-head"><svg class="i"><use href="#i-sparkles"/></svg>What UpChance knows about you</div>
+          <div class="cc-head">What UpChance knows about you</div>
           <div class="cc-stats">
             <div><b>41</b>IB predicted</div>
             <div><b>7</b>activities</div>
@@ -337,9 +252,9 @@
 
       <div class="chat-body">
         <div class="welcome">
-          <svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="lm-bg" width="32" height="32" rx="9"/><path class="lm-arch" d="M9.2 27V20.4A6.8 6.8 0 0 1 12.4 14.63M19.6 14.63A6.8 6.8 0 0 1 22.8 20.4V27"/><path class="lm-star" d="M16 3.4Q17.3 8.85 20.6 10.3Q17.3 11.75 16 15.6Q14.7 11.75 11.4 10.3Q14.7 8.85 16 3.4Z"/></svg>
+          <svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="lm-bg" width="32" height="32" rx="8"/><path class="lm-u" d="M10.5 12.5v5.5a5.5 5.5 0 0 0 11 0V8"/></svg>
           <h2>What's on your mind, Sofia?</h2>
-          <p>Ask about universities, essays, deadlines or money. I'll use your profile to answer.</p>
+          <p>Ask about universities, essays, deadlines or money.</p>
         </div>
 
         <div class="thread" id="thread">
@@ -347,7 +262,7 @@
             <div class="msg-me">Is my college list balanced? I really don't want to end up with no offers.</div>
 
             <div class="msg-counselor">
-              <svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="lm-bg" width="32" height="32" rx="9"/><path class="lm-arch" d="M9.2 27V20.4A6.8 6.8 0 0 1 12.4 14.63M19.6 14.63A6.8 6.8 0 0 1 22.8 20.4V27"/><path class="lm-star" d="M16 3.4Q17.3 8.85 20.6 10.3Q17.3 11.75 16 15.6Q14.7 11.75 11.4 10.3Q14.7 8.85 16 3.4Z"/></svg>
+              <svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="lm-bg" width="32" height="32" rx="8"/><path class="lm-u" d="M10.5 12.5v5.5a5.5 5.5 0 0 0 11 0V8"/></svg>
               <div class="msg-content">
                 <p>Your list is in good shape. You have <strong>3 reaches, 3 targets and 4 likelies</strong>, and at every likely your predicted 41 is above the typical offer. Ending up with no offers is very unlikely.</p>
                 <div class="msg-card">
@@ -374,7 +289,7 @@
             <div class="msg-me">Yes, compare them. I care most about research opportunities for undergraduates.</div>
 
             <div class="msg-counselor">
-              <svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="lm-bg" width="32" height="32" rx="9"/><path class="lm-arch" d="M9.2 27V20.4A6.8 6.8 0 0 1 12.4 14.63M19.6 14.63A6.8 6.8 0 0 1 22.8 20.4V27"/><path class="lm-star" d="M16 3.4Q17.3 8.85 20.6 10.3Q17.3 11.75 16 15.6Q14.7 11.75 11.4 10.3Q14.7 8.85 16 3.4Z"/></svg>
+              <svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="lm-bg" width="32" height="32" rx="8"/><path class="lm-u" d="M10.5 12.5v5.5a5.5 5.5 0 0 0 11 0V8"/></svg>
               <div class="msg-content">
                 <div class="thinking-label"><span class="typing"><span></span><span></span><span></span></span>Checking undergraduate research programs at 3 universities</div>
               </div>
@@ -439,7 +354,7 @@
 
         <section class="card academics" aria-labelledby="acad-title">
           <div class="card-head">
-            <h2 class="card-title" id="acad-title"><svg class="i"><use href="#i-graduation-cap"/></svg>Academics</h2>
+            <h2 class="card-title" id="acad-title">Academics</h2>
             <div class="seg" role="group" aria-label="Grade set">
               <button type="button" class="is-on">Predicted</button>
               <button type="button">DP1 final</button>
@@ -499,7 +414,7 @@
 
       <aside class="act-aside">
         <div class="story-card">
-          <p class="eyebrow">Your story so far</p>
+          <p class="story-label">Your story so far</p>
           <h3>You use physics and code to protect towns from floods.</h3>
           <p>UpChance sees this thread across your activities. It's a strong center for your essays and interviews.</p>
           <div class="story-links"><span>TideLine</span><span>Hydrology internship</span><span>Physics Olympiad</span></div>
@@ -528,7 +443,7 @@
     <header class="page-head">
       <div>
         <h1 class="page-title">Your chances</h1>
-        <p class="page-sub"><span id="uni-count">10</span> universities · Updated today from your profile</p>
+        <p class="page-sub"><span id="uni-count" hidden>10</span>Updated today from your profile</p>
       </div>
       <div class="page-actions">
         <button class="btn btn-secondary" type="button"><svg class="i"><use href="#i-info"/></svg>How chances work</button>
@@ -542,9 +457,9 @@
         <div class="balance-bar"><span class="r"></span><span class="t"></span><span class="l"></span></div>
         <div class="balance-legend"><span style="--sw:var(--reach)"><b>3</b> Reach</span><span style="--sw:var(--target)"><b>3</b> Target</span><span style="--sw:var(--likely)"><b>4</b> Likely</span></div>
       </div>
-      <div><div class="sum-label">Strongest factor</div><div class="sum-value">Academics</div><div class="sum-note">IB 41 with 7-7-6 at Higher Level</div></div>
-      <div><div class="sum-label">Biggest lever</div><div class="sum-value">Essays</div><div class="sum-note">Not reviewed yet for 8 universities</div></div>
-      <div><div class="sum-label">UCAS choices</div><div class="sum-value">5 of 5</div><div class="sum-note">Cambridge is your one Oxbridge choice</div></div>
+      <div data-tip="IB 41 with 7-7-6 at Higher Level"><div class="sum-label">Strongest factor</div><div class="sum-value">Academics</div><div class="sum-note">IB 41 with 7-7-6 at Higher Level</div></div>
+      <div data-tip="Not reviewed yet for 8 universities"><div class="sum-label">Biggest lever</div><div class="sum-value">Essays</div><div class="sum-note">Not reviewed yet for 8 universities</div></div>
+      <div data-tip="Cambridge is your one Oxbridge choice"><div class="sum-label">UCAS choices</div><div class="sum-value">5 of 5</div><div class="sum-note">Cambridge is your one Oxbridge choice</div></div>
     </div>
 
     <div class="ch-layout">
@@ -627,7 +542,7 @@
         <div class="ring"><svg viewBox="0 0 64 64"><circle class="track" cx="32" cy="32" r="27"/><circle class="val" cx="32" cy="32" r="27" stroke-dasharray="132.3 169.6"/></svg><b>78</b></div>
         <div>
           <h3>Strong draft</h3>
-          <p>Fix 3 things before you submit: two AI-like sentences, five typos and a summary-style ending.</p>
+          <p>3 things to fix before you submit</p>
         </div>
       </div>
 
@@ -665,18 +580,18 @@
         <p class="page-sub">Practice with an AI interviewer modeled on real admissions interviews, then get feedback on every answer.</p>
       </div>
       <div class="page-actions">
-        <span class="pill pill-neutral no-dot" style="height:32px;padding:0 14px;font-size:12.5px">4 sessions · average 6.8</span>
+        <span class="pill pill-neutral no-dot">4 sessions · average 6.8</span>
       </div>
     </header>
 
     <div class="iv-layout" id="iv-layout" data-state="setup">
       <aside class="card iv-setup">
-        <div class="card-head"><h2 class="card-title"><svg class="i"><use href="#i-sliders-horizontal"/></svg>Set up your session</h2></div>
+        <div class="card-head"><h2 class="card-title">Set up your session</h2></div>
         <div class="setup-body">
           <div class="field">
             <span class="field-label">University</span>
             <button class="uni-pick" type="button">
-              <span class="crest" style="--c:#A3C1AD;--ci:#0F2A1F">C</span>
+              <span class="crest">C</span>
               <div><b>University of Cambridge</b><small>Natural Sciences (Physical)</small></div>
               <svg class="i"><use href="#i-chevron-down"/></svg>
             </button>
@@ -731,9 +646,9 @@
         <!-- Before the session -->
         <div class="iv-pre">
           <div class="interviewer">
-            <div class="orb-wrap" aria-hidden="true"><span class="orb-ring"></span><span class="orb-ring"></span><span class="orb-ring"></span><span class="orb"></span></div>
+            <div class="orb-wrap" aria-hidden="true"><span class="orb"></span></div>
             <div>
-              <p class="eyebrow">Your interviewer</p>
+              <p class="iv-label">Your interviewer</p>
               <h2>Dr. Hale, Natural Sciences</h2>
               <p>Dr. Hale is an AI interviewer modeled on a Cambridge Director of Studies. Expect problems you haven't seen before. Getting stuck is fine; what counts is how you reason your way forward.</p>
               <div class="expect">
@@ -781,8 +696,8 @@
               <div class="card upcoming-card">
                 <div class="pc-head"><div><h3>Your real interviews</h3><small>UpChance adds them to your plan when they're likely</small></div></div>
                 <div class="upcoming">
-                  <div class="upc"><span class="crest sm" style="--c:#A3C1AD;--ci:#0F2A1F">C</span><div><b>Cambridge · Natural Sciences</b><p>Invitations usually arrive in late November. Interviews run in early December.</p></div></div>
-                  <div class="upc"><span class="crest sm" style="--c:#A31F34">MIT</span><div><b>MIT · Alumni interview</b><p>An Educational Counselor contacts you after you apply.</p></div></div>
+                  <div class="upc"><span class="crest sm">C</span><div><b>Cambridge · Natural Sciences</b><p>Invitations usually arrive in late November. Interviews run in early December.</p></div></div>
+                  <div class="upc"><span class="crest sm">MIT</span><div><b>MIT · Alumni interview</b><p>An Educational Counselor contacts you after you apply.</p></div></div>
                 </div>
               </div>
             </div>
@@ -800,7 +715,7 @@
               </div>
               <div class="self-view"><svg class="i"><use href="#i-user-round"/></svg><span><svg class="i"><use href="#i-mic"/></svg>You</span></div>
               <div class="room-center">
-                <div class="orb-wrap" aria-hidden="true"><span class="orb-ring"></span><span class="orb-ring"></span><span class="orb-ring"></span><span class="orb"></span></div>
+                <div class="orb-wrap" aria-hidden="true"><span class="orb"></span></div>
                 <div class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
                 <span class="speaking">You're speaking · 1:42 on this question</span>
               </div>
@@ -852,7 +767,7 @@
                   <div class="coach-top"><span>Filler words</span><b>5</b></div>
                   <div class="fillers"><span>um ×3</span><span>like ×2</span></div>
                 </div>
-                <div class="coach-tip"><svg class="i"><use href="#i-sparkles"/></svg><span>Nice. You're explaining your reasoning before giving an answer. Next, name the law you're describing.</span></div>
+                <div class="coach-tip"><span>Nice. You're explaining your reasoning before giving an answer. Next, name the law you're describing.</span></div>
               </div>
             </div>
           </div>
@@ -864,7 +779,6 @@
 
 </main>
 
-<div class="preview-badge"><span class="dot"></span>Design preview · sample data</div>
 
 <!-- Add or edit activity -->
 <div class="overlay" id="drawer" hidden>
@@ -910,7 +824,7 @@
         <div class="field"><label for="f-hrs">Hours per week</label><input class="input tnum" id="f-hrs" type="number" min="0" max="40" value="8"></div>
         <div class="field"><label for="f-wks">Weeks per year</label><input class="input tnum" id="f-wks" type="number" min="0" max="52" value="40"></div>
       </div>
-      <div class="counselor-tip"><svg class="i"><use href="#i-sparkles"/></svg><span>Stuck on the description? Paste your rough notes in chat and UpChance will ask questions until you've found the 150 characters that matter.</span></div>
+      <div class="counselor-tip"><span>Stuck on the description? Paste your rough notes in chat and UpChance will ask questions until you've found the 150 characters that matter.</span></div>
     </form>
     <div class="ov-foot">
       <button class="btn btn-ghost" type="button" data-close>Cancel</button>
@@ -932,22 +846,33 @@
         <button class="chip is-on" type="button">All regions</button><button class="chip" type="button">US</button><button class="chip" type="button">UK</button><button class="chip" type="button">Canada</button><button class="chip" type="button">Europe</button><button class="chip" type="button">Asia</button>
       </div>
       <ul class="results">
-        <li class="result"><span class="crest sm" style="--c:#00539B">StA</span><div><b>University of St Andrews</b><small>St Andrews, UK · Physics BSc · 3 likely factors</small></div><button class="btn btn-secondary btn-sm" type="button" data-add>Add</button></li>
-        <li class="result"><span class="crest sm" style="--c:#68246D">D</span><div><b>Durham University</b><small>Durham, UK · Physics MPhys</small></div><button class="btn btn-secondary btn-sm" type="button" data-add>Add</button></li>
-        <li class="result"><span class="crest sm" style="--c:#1F407A">ETH</span><div><b>ETH Zürich</b><small>Zürich, Switzerland · Physics BSc</small></div><button class="btn btn-secondary btn-sm" type="button" data-add>Add</button></li>
-        <li class="result"><span class="crest sm" style="--c:#002145">UBC</span><div><b>University of British Columbia</b><small>Vancouver, Canada · Physics BSc</small></div><button class="btn btn-secondary btn-sm" type="button" data-add>Add</button></li>
-        <li class="result"><span class="crest sm" style="--c:#003E74">IC</span><div><b>Imperial College London</b><small>London, UK · Physics MSci</small></div><button class="btn btn-secondary btn-sm is-added" type="button" disabled><svg class="i i-sm"><use href="#i-check"/></svg>On your list</button></li>
+        <li class="result"><span class="crest sm">StA</span><div><b>University of St Andrews</b><small>St Andrews, UK · Physics BSc · 3 likely factors</small></div><button class="btn btn-secondary btn-sm" type="button" data-add>Add</button></li>
+        <li class="result"><span class="crest sm">D</span><div><b>Durham University</b><small>Durham, UK · Physics MPhys</small></div><button class="btn btn-secondary btn-sm" type="button" data-add>Add</button></li>
+        <li class="result"><span class="crest sm">ETH</span><div><b>ETH Zürich</b><small>Zürich, Switzerland · Physics BSc</small></div><button class="btn btn-secondary btn-sm" type="button" data-add>Add</button></li>
+        <li class="result"><span class="crest sm">UBC</span><div><b>University of British Columbia</b><small>Vancouver, Canada · Physics BSc</small></div><button class="btn btn-secondary btn-sm" type="button" data-add>Add</button></li>
+        <li class="result"><span class="crest sm">IC</span><div><b>Imperial College London</b><small>London, UK · Physics MSci</small></div><button class="btn btn-secondary btn-sm is-added" type="button" disabled><svg class="i i-sm"><use href="#i-check"/></svg>On your list</button></li>
       </ul>
       <p class="modal-note"><svg class="i"><use href="#i-triangle-alert"/></svg>You're using 5 of 5 UCAS choices. Adding a UK university means swapping one out.</p>
     </div>
   </div>
 </div>
 
+<!-- Command palette -->
+<div class="overlay center" id="cmdk" hidden>
+  <div class="palette" role="dialog" aria-modal="true" aria-label="Search and commands">
+    <label class="palette-search" for="cmdk-input">
+      <svg class="i"><use href="#i-search"/></svg>
+      <input id="cmdk-input" type="text" role="combobox" aria-expanded="true" aria-controls="cmdk-list" aria-autocomplete="list" placeholder="Search pages, universities and actions" autocomplete="off" spellcheck="false">
+    </label>
+    <ul class="palette-list" id="cmdk-list" role="listbox" aria-label="Results"></ul>
+  </div>
+</div>
+
 <div class="toast" id="toast" role="status" hidden><span id="toast-text"></span><button type="button" id="toast-undo">Undo</button></div>
 
 <script src="data.js"></script>
-<script src="app.js"></script>
 <script src="fx/kit.js"></script>
+<script src="app.js"></script>
 <script src="fx/home.js"></script>
 <script src="fx/chat.js"></script>
 <script src="fx/activities.js"></script>

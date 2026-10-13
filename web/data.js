@@ -81,7 +81,7 @@ window.UPCHANCE = {
      factors: [label, 0-5 (0 = not known yet), note] */
   universities: [
     {
-      id: 'cambridge', name: 'University of Cambridge', initials: 'C', c: '#A3C1AD', ci: '#0F2A1F',
+      id: 'cambridge', name: 'University of Cambridge', initials: 'C',
       city: 'Cambridge, UK', program: 'Natural Sciences (Physical)', round: 'UCAS', deadline: 'Oct 15', days: 2,
       lo: 18, hi: 26, cat: 'reach', admit: null, confidence: 'Medium',
       factors: [['Academics', 5, '41 with 7-7-6 at HL meets the usual offer'], ['Course rigor', 5, 'HL Math and HL Physics'], ['Activities', 4, 'Real physics beyond the syllabus'], ['Personal statement', 3, 'Draft ready; needs a final read'], ['Interview', 0, 'Happens in December']],
@@ -92,7 +92,7 @@ window.UPCHANCE = {
       ]
     },
     {
-      id: 'mit', name: 'Massachusetts Institute of Technology', initials: 'MIT', c: '#A31F34', ci: '#fff',
+      id: 'mit', name: 'Massachusetts Institute of Technology', initials: 'MIT',
       city: 'Cambridge, MA, USA', program: 'Physics (Course 8)', round: 'Early Action', deadline: 'Nov 1', days: 19,
       lo: 7, hi: 11, cat: 'reach', admit: 5, confidence: 'Medium',
       factors: [['Academics', 5, 'Top of the range for IB applicants'], ['Course rigor', 5, 'HL Math and HL Physics'], ['Activities', 4, 'TideLine is a strong "maker" story'], ['Essays', 0, 'Not reviewed yet'], ['Testing', 4, 'SAT 1530, Math 790']],
@@ -103,7 +103,7 @@ window.UPCHANCE = {
       ]
     },
     {
-      id: 'michigan', name: 'University of Michigan', initials: 'M', c: '#FFCB05', ci: '#00274C',
+      id: 'michigan', name: 'University of Michigan', initials: 'M',
       city: 'Ann Arbor, MI, USA', program: 'Physics, College of LSA', round: 'Early Action', deadline: 'Nov 1', days: 19,
       lo: 30, hi: 42, cat: 'target', admit: 16, confidence: 'Medium',
       factors: [['Academics', 5, 'Well above the typical admit'], ['Course rigor', 5, 'Full IB Diploma'], ['Activities', 4, 'Depth plus service'], ['Essays', 0, 'Community essay in progress'], ['Testing', 4, 'SAT 1530']],
@@ -114,7 +114,7 @@ window.UPCHANCE = {
       ]
     },
     {
-      id: 'stanford', name: 'Stanford University', initials: 'S', c: '#8C1515', ci: '#fff',
+      id: 'stanford', name: 'Stanford University', initials: 'S',
       city: 'Stanford, CA, USA', program: 'Physics (declared later)', round: 'Regular Decision', deadline: 'Jan 5', days: 84,
       lo: 4, hi: 7, cat: 'reach', admit: 4, confidence: 'Low',
       factors: [['Academics', 5, 'Top of the range'], ['Course rigor', 5, 'Full IB Diploma'], ['Activities', 4, 'Range beyond STEM'], ['Essays', 0, 'Short questions not started'], ['Testing', 4, 'SAT 1530']],
@@ -125,7 +125,7 @@ window.UPCHANCE = {
       ]
     },
     {
-      id: 'imperial', name: 'Imperial College London', initials: 'IC', c: '#003E74', ci: '#fff',
+      id: 'imperial', name: 'Imperial College London', initials: 'IC',
       city: 'London, UK', program: 'Physics MSci', round: 'UCAS', deadline: 'Jan 14', days: 93,
       lo: 38, hi: 50, cat: 'target', admit: null, confidence: 'High',
       factors: [['Academics', 4, '41 overall; Physics HL predicted 6'], ['Course rigor', 5, 'HL Math and HL Physics'], ['Activities', 5, 'Research internship and Olympiad'], ['Personal statement', 3, 'Shared with your UCAS choices'], ['Admissions test', 0, 'Check the current requirement']],
@@ -136,7 +136,7 @@ window.UPCHANCE = {
       ]
     },
     {
-      id: 'ucl', name: 'University College London', initials: 'UCL', c: '#500778', ci: '#fff',
+      id: 'ucl', name: 'University College London', initials: 'UCL',
       city: 'London, UK', program: 'Physics BSc', round: 'UCAS', deadline: 'Jan 14', days: 93,
       lo: 45, hi: 58, cat: 'target', admit: null, confidence: 'Medium',
       factors: [['Academics', 5, 'Inside the typical offer'], ['Course rigor', 5, 'HL Math and HL Physics'], ['Activities', 4, 'Clear thread'], ['Personal statement', 3, 'Shared with your UCAS choices'], ['Interview', 0, 'Not usually required']],
@@ -147,7 +147,7 @@ window.UPCHANCE = {
       ]
     },
     {
-      id: 'warwick', name: 'University of Warwick', initials: 'W', c: '#3C1053', ci: '#fff',
+      id: 'warwick', name: 'University of Warwick', initials: 'W',
       city: 'Coventry, UK', program: 'Physics BSc', round: 'UCAS', deadline: 'Jan 14', days: 93,
       lo: 68, hi: 80, cat: 'likely', admit: null, confidence: 'High',
       factors: [['Academics', 5, 'Above the typical offer'], ['Course rigor', 5, 'HL Math and HL Physics'], ['Activities', 4, 'Applied physics and data'], ['Personal statement', 3, 'Shared with your UCAS choices'], ['Interview', 0, 'Not usually required']],
@@ -158,7 +158,7 @@ window.UPCHANCE = {
       ]
     },
     {
-      id: 'edinburgh', name: 'University of Edinburgh', initials: 'E', c: '#041E42', ci: '#fff',
+      id: 'edinburgh', name: 'University of Edinburgh', initials: 'E',
       city: 'Edinburgh, UK', program: 'Physics MPhys', round: 'UCAS', deadline: 'Jan 14', days: 93,
       lo: 75, hi: 86, cat: 'likely', admit: null, confidence: 'High',
       factors: [['Academics', 5, 'Above the typical offer'], ['Course rigor', 5, 'HL Math and HL Physics'], ['Activities', 4, 'Flood work fits the region'], ['Personal statement', 3, 'Shared with your UCAS choices'], ['Interview', 0, 'Not usually required']],
@@ -169,7 +169,7 @@ window.UPCHANCE = {
       ]
     },
     {
-      id: 'toronto', name: 'University of Toronto', initials: 'UofT', c: '#1E3765', ci: '#fff',
+      id: 'toronto', name: 'University of Toronto', initials: 'UofT',
       city: 'Toronto, Canada', program: 'Physical and Mathematical Sciences', round: 'OUAC', deadline: 'Jan 15', days: 94,
       lo: 78, hi: 88, cat: 'likely', admit: 43, confidence: 'High',
       factors: [['Academics', 5, 'Well above typical admission averages'], ['Course rigor', 5, 'Full IB Diploma'], ['Activities', 3, 'Not heavily weighted here'], ['Essays', 0, 'No essay for this program'], ['Testing', 0, 'Not required']],
@@ -180,7 +180,7 @@ window.UPCHANCE = {
       ]
     },
     {
-      id: 'mcgill', name: 'McGill University', initials: 'McG', c: '#ED1B2F', ci: '#fff',
+      id: 'mcgill', name: 'McGill University', initials: 'McG',
       city: 'Montréal, Canada', program: 'Physics BSc', round: 'Regular', deadline: 'Jan 15', days: 94,
       lo: 72, hi: 84, cat: 'likely', admit: 45, confidence: 'High',
       factors: [['Academics', 5, 'McGill admits mainly on grades'], ['Course rigor', 5, 'Full IB Diploma'], ['Activities', 2, 'Rarely considered'], ['Essays', 0, 'Not required'], ['Testing', 0, 'Not required']],

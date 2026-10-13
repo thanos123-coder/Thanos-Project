@@ -8,7 +8,7 @@ Open `web/index.html` in a browser. No build step and no install are needed; the
 
 | Tab | What it shows |
 |---|---|
-| Home | Landing page for new students: hero, the 2026–27 deadline timeline, a tour of every tab, how it works, and the product's principles |
+| Home | Landing page for new students: hero, the 2026–27 deadline timeline, a tour of every tab and the product's principles |
 | Chat | ChatGPT-style chat. Searchable chat history on the left, starter suggestions and the message bar in the middle. Click a past chat to see a conversation |
 | Activities | Activity log: IB grades and core at the top, then Common App activities (150-character descriptions, grade levels, hours) and honors. "Add activity" and the pencil icons open the edit drawer |
 | Chances | Every university on the list with a chance range and Reach / Target / Likely label. Select one for the gauge, the factors behind it and UpChance's comments. Add with "Add university", remove with the × on a row (with Undo) |
@@ -17,20 +17,23 @@ Open `web/index.html` in a browser. No build step and no install are needed; the
 
 ## Files
 
-- `index.html`: markup for all six pages. Icons come from the Lucide sprite in `fx/icons.js` (ISC license).
-- `styles.css`: design tokens (light and dark themes), base styles, primitives and components shared by several pages, overlays and the app shell.
+- `index.html`: markup for all six pages, the top bar, the overlays (activity drawer, add-university modal, command palette) and the toast. Icons come from the Lucide sprite in `fx/icons.js` (ISC license).
+- `styles.css`: design tokens (light and dark themes), base styles, the type scale, shared primitives and components, overlays, the command palette and the app shell.
 - `data.js`: the sample student, activities, universities, chats and essay findings. When the UI is wired up, this is what the agents' responses replace.
-- `app.js`: theme, tab switching, shared controls, toast, overlays and the `window.UC` helper API.
-- `fx/PAGE.css` and `fx/PAGE.js` (home, chat, activities, chances, essays, interview): each page's own styles, including its responsive rules, and its own rendering and interactions. They load after `styles.css` and `app.js`, in tab order.
-- `fx/kit.css` and `fx/kit.js`: the shared motion kit. `fx/icons.js` is the generated icon sprite.
+- `fx/kit.css` and `fx/kit.js`: the shared motion kit. Motion tokens, `UC.motion` (tweens, springs, FLIP, stagger, reveal, pointer effects, streamed text), `data-tip` tooltips, `data-press` feedback and `UC.menu`. The API is documented at the top of `fx/kit.js`.
+- `app.js`: theme (with a circular reveal), tab switching (View Transitions with a fallback and a spring indicator), shared controls, overlays and toast with enter and exit motion, the Cmd-K / Ctrl-K command palette and the `window.UC` helper API.
+- `fx/PAGE.css` and `fx/PAGE.js` (home, chat, activities, chances, essays, interview): each page's own styles, including its responsive rules, and its own rendering and interactions. They load after the shared files, in tab order.
+- `fx/icons.js` is the generated icon sprite (`node web/tools/build-icons.mjs <lucide icons dir>`).
 
 ## Design notes
 
-- **Name.** The product is "UpChance AI"; in running copy the assistant is simply "UpChance". The mark is an arched university gate on an ivy tile, with a marigold four-point star rising out of the gap where the keystone would be.
-- **Palette.** Ivy green as the brand color, marigold for highlights and deadlines. Reach, target and likely use their own colors so they never compete with the brand.
-- **Type.** Newsreader for headings and essay text, Geist for the interface, Geist Mono for numbers and counters.
-- **Responsive.** Works from phone width up. Below 760px the tabs move to a bottom bar and the chat list becomes a slide-out panel.
+- **Name.** The product is "UpChance AI"; in running copy the assistant is simply "UpChance". The mark is a white U on a cobalt tile, its right arm rising.
+- **Palette.** Paper and cobalt: white and cool gray surfaces, near-black ink, and one cobalt accent used sparingly (primary buttons, focus, selection bars, links, rings, Likely data). Amber marks deadlines and AI-like highlights. Reach, target and likely are data colors used only as fills. There is no green.
+- **Type.** Geist for the interface and headings, Geist Mono for percentages and counters, Newsreader only on the essay paper. Sentence case throughout; numbers use tabular figures.
+- **Motion.** Short and quiet: 150ms for color, 200-250ms for panels, a spring on the tab indicator. With reduced motion, nothing moves.
+- **Responsive.** Works from phone width up. Below 760px the tabs move to a bottom bar, the chat list becomes a slide-out panel, and the drawer and modal become bottom sheets.
 - **Themes.** Follows the system light or dark setting. The sun/moon button in the top bar switches manually.
+- **Sample data.** Everything shown belongs to one fictional student; the badge next to the logo says so on wide screens.
 
 ## Before wiring it to the agents
 

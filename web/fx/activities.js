@@ -50,7 +50,7 @@
             <span>${ic('calendar-clock')}${esc(a.timing)}</span>
             <span class="char-count${len > 140 ? ' near' : ''}">${len} / 150</span>
           </div>
-          ${a.note ? `<div class="act-note">${ic('sparkles')}<span>${esc(a.note)}</span></div>` : ''}
+          ${a.note ? `<div class="act-note"><span>${esc(a.note)}</span></div>` : ''}
         </div>
         <div class="act-actions">
           <button class="icon-btn" type="button" data-edit="${a.id}" aria-label="Edit ${esc(a.role)}">${ic('pencil')}</button>
