@@ -195,7 +195,7 @@ window.UPCHANCE = {
   /* Essay grader: results per check. `target` is the id of a highlighted span in the essay. */
   scans: {
     ai: {
-      legend: [['Likely AI-like', 'var(--hl-ai-high)'], ['Possibly AI-like', 'var(--hl-ai-mid)']],
+      legend: [['Likely AI-like', 'var(--hl-ai-strong)'], ['Possibly AI-like', 'var(--hl-ai-weak)']],
       issues: [
         { target: 'a1', kind: 'Likely AI-like', text: 'Generic, high-probability phrasing with no detail from your life.', quote: "In today's rapidly evolving world, technology plays a pivotal role…" },
         { target: 'a2', kind: 'Likely AI-like', text: 'A stock lesson that many essays share. The next sentence says it better in your own words.', quote: 'This experience taught me that perseverance and determination…' },
@@ -213,7 +213,7 @@ window.UPCHANCE = {
       ]
     },
     clarity: {
-      legend: [['Wordy, passive or cliché', 'var(--info-soft)', 'var(--info)'], ['Long sentence', 'transparent', 'var(--info)']],
+      legend: [['Wordy, passive or cliché', 'var(--data-info-soft)', 'var(--data-info)'], ['Long sentence', 'transparent', 'var(--data-info)']],
       issues: [
         { target: 'c1', kind: 'Wordy', text: '"Due to the fact that" means "because".', from: 'due to the fact that', to: 'because' },
         { target: 'c2', kind: 'Cliché', text: 'Many essays open a paragraph this way. Start with the first thing you took apart instead.' },
@@ -222,7 +222,7 @@ window.UPCHANCE = {
       ]
     },
     impact: {
-      legend: [['Strong, specific moment', 'var(--likely-soft)', 'var(--likely)'], ['Telling, not showing', 'var(--violet-soft)', 'var(--violet)']],
+      legend: [['Strong, specific moment', 'var(--data-likely-soft)', 'var(--data-likely)'], ['Telling, not showing', 'var(--data-violet-soft)', 'var(--data-violet)']],
       rubric: [['Voice', 4], ['Specificity', 4], ['Reflection', 3], ['Structure', 4], ['Prompt fit', 5]],
       issues: [
         { target: 'k3', kind: 'Strong moment', text: 'The best line in the essay. It shows the failure and the lesson at once.', tone: 'good' },

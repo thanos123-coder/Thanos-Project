@@ -5,11 +5,11 @@
   const { D, $, $$, ic, esc, openOverlay } = UC;
 
   const TONES = {
-    ivy: ['var(--ivy-soft)', 'var(--ivy)'],
-    info: ['var(--info-soft)', 'var(--info)'],
-    violet: ['var(--violet-soft)', 'var(--violet)'],
-    reach: ['var(--reach-soft)', 'var(--reach)'],
-    target: ['var(--target-soft)', 'var(--target)']
+    ivy: ['var(--accent-soft)', 'var(--accent)'],
+    info: ['var(--data-info-soft)', 'var(--data-info)'],
+    violet: ['var(--data-violet-soft)', 'var(--data-violet)'],
+    reach: ['var(--data-reach-soft)', 'var(--data-reach)'],
+    target: ['var(--data-target-soft)', 'var(--data-target)']
   };
 
   $('#score-bar').innerHTML = Array.from({ length: 45 }, (_, i) => {

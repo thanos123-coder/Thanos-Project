@@ -12,7 +12,7 @@
 
   const doc = $('#essay-doc');
   const MODE_KINDS = { ai: ['ai'], grammar: ['grammar'], clarity: ['clarity'], impact: ['strong', 'tell'] };
-  const SCAN_COLOR = { ai: 'var(--marigold-ink)', grammar: 'var(--danger)', clarity: 'var(--info)', impact: 'var(--violet)' };
+  const SCAN_COLOR = { ai: 'var(--warn-text)', grammar: 'var(--danger)', clarity: 'var(--data-info)', impact: 'var(--data-violet)' };
   const kindsOf = (el) => (el.dataset.k || '').split(' ');
   const activeFor = (el, mode) => kindsOf(el).some((k) => MODE_KINDS[mode].includes(k));
 
@@ -23,7 +23,7 @@
     const quote = issue.quote ? `<p class="issue-quote">"${esc(issue.quote)}"</p>` : '';
     const text = issue.text ? `<p class="issue-text">${esc(issue.text)}</p>` : '';
     const actions = issue.from ? '<div class="fix-actions"><span class="btn btn-primary btn-sm">Accept</span><span class="btn btn-ghost btn-sm">Ignore</span></div>' : '';
-    const c = issue.tone === 'good' ? 'var(--likely)' : color;
+    const c = issue.tone === 'good' ? 'var(--data-likely)' : color;
     return `<button class="issue" type="button" data-target="${issue.target}" style="--sc:${c}"><span class="issue-bar"></span><span><span class="issue-kind">${esc(issue.kind)}</span>${text}${quote}${fix}${actions}</span></button>`;
   }
 
@@ -38,7 +38,7 @@
         <div class="result-card">
           <h4>${ic('scan-search')}AI detection</h4>
           <p class="ai-verdict" style="margin-top:10px">Most of this essay reads as written by you.</p>
-          <div class="ai-split" aria-hidden="true"><span style="flex:88;background:var(--likely)"></span><span style="flex:7;background:var(--violet)"></span><span style="flex:5;background:var(--marigold)"></span></div>
+          <div class="ai-split" aria-hidden="true"><span style="flex:88;background:var(--data-likely)"></span><span style="flex:7;background:var(--data-violet)"></span><span style="flex:5;background:var(--warn)"></span></div>
           <div class="ai-split-legend"><span><b>88%</b> human</span><span><b>7%</b> mixed</span><span><b>5%</b> AI-like</span></div>
           <div class="note">${ic('info')}<span>Detectors can be wrong, especially with formal writing or English as a second language. Treat this as a signal and revise flagged sentences in your own words.</span></div>
         </div>`;

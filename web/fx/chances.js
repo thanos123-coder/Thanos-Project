@@ -35,10 +35,10 @@
       <svg class="gauge" viewBox="0 0 240 150" role="img" aria-label="Estimated chance ${u.lo} to ${u.hi} percent">
         <path class="g-track" d="M${x0} ${y0} A${r} ${r} 0 0 1 ${x1} ${y1}"/>
         ${ticks}
-        <path class="g-band" style="stroke:var(--${u.cat})" d="M${a0} ${b0} A${r} ${r} 0 0 1 ${a1} ${b1}"/>
+        <path class="g-band" style="stroke:var(--data-${u.cat})" d="M${a0} ${b0} A${r} ${r} 0 0 1 ${a1} ${b1}"/>
         ${avg}
         <text class="g-range" x="120" y="104" text-anchor="middle">${u.lo}–${u.hi}%</text>
-        <text class="g-cap" x="120" y="126" text-anchor="middle" style="fill:var(--${u.cat})">${CAT[u.cat]}</text>
+        <text class="g-cap" x="120" y="126" text-anchor="middle" style="fill:var(--data-${u.cat})">${CAT[u.cat]}</text>
         <text class="g-end" x="${x0}" y="146" text-anchor="middle">0</text>
         <text class="g-end" x="${x1}" y="146" text-anchor="middle">100%</text>
       </svg>`;
@@ -52,7 +52,7 @@
           ${crest(u)}
           <span class="ur-main"><span class="ur-name">${esc(u.name)}</span><span class="ur-meta">${esc(u.round)} · <span class="${u.days <= 7 ? 'soon' : ''}">${u.deadline}${u.days <= 7 ? ` (${u.days} days)` : ''}</span></span></span>
           <span class="ur-chance"><span class="ur-range">${u.lo}–${u.hi}%</span><span class="pill pill-${u.cat}">${CAT[u.cat]}</span></span>
-          <span class="range-track" aria-hidden="true"><span style="left:${u.lo}%;width:${u.hi - u.lo}%;background:var(--${u.cat})"></span></span>
+          <span class="range-track" aria-hidden="true"><span style="left:${u.lo}%;width:${u.hi - u.lo}%;background:var(--data-${u.cat})"></span></span>
         </button>
         <button class="ur-remove" type="button" data-remove="${u.id}" aria-label="Remove ${esc(u.name)}">${ic('x')}</button>
       </li>`).join('') || '<li class="side-empty">No universities in this group yet.</li>';
@@ -80,7 +80,7 @@
       <div class="ud-top">
         <div class="gauge-wrap">
           ${gauge(u)}
-          <div class="gauge-legend"><span><i class="sw-band" style="--sw:var(--${u.cat})"></i>Your range</span>${u.admit != null ? '<span><i class="sw-avg"></i>Overall admit rate</span>' : ''}</div>
+          <div class="gauge-legend"><span><i class="sw-band" style="--sw:var(--data-${u.cat})"></i>Your range</span>${u.admit != null ? '<span><i class="sw-avg"></i>Overall admit rate</span>' : ''}</div>
         </div>
         <div class="ud-facts">
           <div class="fact"><span>Category</span><b class="pill pill-${u.cat}">${CAT[u.cat]}</b><em>${u.cat === 'reach' ? 'Admission is unlikely for most applicants' : u.cat === 'target' ? 'Your profile fits the typical admit' : 'Your profile is above the typical admit'}</em></div>
