@@ -25,7 +25,7 @@ export function Trust() {
             <div className="flex flex-col items-start gap-4">
               <p className="text-body">{t.text}</p>
               {t.link ? (
-                <TextLink href={t.link.href} tone="cobalt">
+                <TextLink href={t.link.href} prefetch={false} tone="cobalt">
                   {t.link.label}
                 </TextLink>
               ) : null}

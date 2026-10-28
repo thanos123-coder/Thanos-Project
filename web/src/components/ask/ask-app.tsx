@@ -712,11 +712,11 @@ export function AskApp() {
               <p className="mt-2.5 px-3 text-center text-small text-soft">
                 Upchance is an AI and can make mistakes. Check important information with the university.{" "}
                 <span className="whitespace-nowrap">
-                  <Link href="/ai-notice" className="font-medium text-ink underline decoration-mid decoration-2 underline-offset-4 hover:decoration-ink">
+                  <Link href="/ai-notice" prefetch={false} className="font-medium text-ink underline decoration-mid decoration-2 underline-offset-4 hover:decoration-ink">
                     AI Notice
                   </Link>
                   {" and "}
-                  <Link href="/contact" className="font-medium text-ink underline decoration-mid decoration-2 underline-offset-4 hover:decoration-ink">
+                  <Link href="/contact" prefetch={false} className="font-medium text-ink underline decoration-mid decoration-2 underline-offset-4 hover:decoration-ink">
                     Contact
                   </Link>
                 </span>

@@ -208,7 +208,8 @@ export function SiteHeader({ app = false }: { app?: boolean }) {
         app ? "relative" : "sticky",
       )}
     >
-      <div className="frame flex h-[4.5rem] items-center justify-between gap-6">
+      {/* App screens run edge to edge, so their header does too; site pages keep the 96rem frame */}
+      <div className={clsx("frame flex h-[4.5rem] items-center justify-between gap-6", app && "max-w-none")}>
         <Logo />
         <NavBand pathname={pathname} />
         <div className="flex items-center gap-2">

@@ -17,11 +17,12 @@ export function HomeHero() {
   const unis = useFixture(dreamUniversities, worstDreamUniversities);
   const [uni, setUni] = useState<ExampleChance>(() => unis.find((u) => u.id === "imperial")!);
   return (
-    <section className="relative isolate" aria-labelledby="hero-title">
+    // The section is a size container so both columns can line up with the 96rem frame on wide screens
+    <section className="relative isolate [container-type:inline-size]" aria-labelledby="hero-title">
       <div className="grid grid-cols-[minmax(0,1fr)] lg:min-h-[calc(100svh-4.5rem)] lg:grid-cols-[minmax(0,1.18fr)_minmax(0,1fr)]">
         <div
           data-field="cobalt"
-          className="hero-field relative flex flex-col justify-center rounded-b-[2.5rem] bg-cobalt px-[var(--margin)] pb-12 pt-10 text-on-cobalt lg:rounded-b-none lg:rounded-r-[50vh] lg:py-16 lg:pr-[14vh]"
+          className="hero-field relative flex flex-col justify-center rounded-b-[2.5rem] bg-cobalt px-[var(--margin)] pb-12 pt-10 text-on-cobalt lg:rounded-b-none lg:rounded-r-[50vh] lg:py-16 lg:pl-[max(var(--margin),calc((100cqw-96rem)/2+var(--margin)))] lg:pr-[14vh]"
         >
           <div className="w-full [container-type:inline-size] lg:ml-auto lg:max-w-[44rem]">
             <h1
@@ -37,7 +38,7 @@ export function HomeHero() {
           </div>
         </div>
 
-        <div className="hero-live frame flex flex-col justify-center gap-7 py-10 lg:max-w-none lg:py-16 lg:pl-12 lg:pr-[var(--margin)]">
+        <div className="hero-live frame flex flex-col justify-center gap-7 py-10 lg:max-w-none lg:py-16 lg:pl-12 lg:pr-[max(var(--margin),calc((100cqw-96rem)/2+var(--margin)))]">
           <DreamPicker value={uni.id} onChange={setUni} />
           <ChanceCard uni={uni} size="lg" moverToggle className="hero-card" />
         </div>
