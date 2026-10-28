@@ -29,7 +29,7 @@ With this many skills, the skill listing can exceed its budget. Claude Code then
 ## MCP servers (`.mcp.json`)
 
 - `playwright`: Microsoft's Playwright MCP (`npx @playwright/mcp@latest`). Where `/opt/pw-browsers/chromium` exists (the cloud container), it runs headless against that browser with the Chromium sandbox off, which the container needs. Anywhere else it runs the plain command. Snapshots go to `.playwright-mcp/`, which is ignored by git.
-- `21st`: the 21st.dev component generator. Needs `API_KEY_21ST` set in the environment, and `21st.dev` reachable.
+- `21st`: the 21st.dev component generator. In cloud sessions, store the key as a network secret for `21st.dev` (the default Authorization header with the Bearer prefix). The agent proxy then attaches the key and serves the connection with a certificate Claude Code trusts; without the secret, cloud sessions reject 21st.dev's certificate. Elsewhere, set `API_KEY_21ST`. The `x-api-key` header is sent empty when the variable isn't set, since a wrong value there overrides the key the proxy attaches.
 - `getlayers`: GetLayers, which needs a paid plan and a sign-in on the first tool call. Needs `mcp.getlayers.ai` reachable.
 
 `settings.json` approves these three servers in folders Claude Code trusts.
