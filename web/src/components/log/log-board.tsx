@@ -1,11 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import clsx from "clsx";
 import { toast } from "sonner";
-import { Button, TextLink } from "@/components/ui/button";
+import { Button, LinkButton, TextLink } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
-import { Field, Select, TextArea, TextInput } from "@/components/ui/fields";
+import { Field, Select, TextArea, TextInput, shake } from "@/components/ui/fields";
 import { Segmented } from "@/components/ui/tabs";
 import { MotifSlider } from "@/components/ui/motif-slider";
 import { ChancesFragment } from "@/components/fragments/fragments";
@@ -53,6 +53,8 @@ export function LogBoard() {
   // Add-to-log form
   const [kind, setKind] = useState<Kind>("Activity");
   const [title, setTitle] = useState("");
+  const [titleError, setTitleError] = useState("");
+  const titleId = useId();
   const [role, setRole] = useState("");
   const [when, setWhen] = useState("");
   const [hours, setHours] = useState("");
@@ -78,6 +80,7 @@ export function LogBoard() {
   const resetForm = () => {
     setKind("Activity");
     setTitle("");
+    setTitleError("");
     setRole("");
     setWhen("");
     setHours("");
@@ -86,7 +89,10 @@ export function LogBoard() {
 
   const addEntry = () => {
     if (!title.trim()) {
-      toast("Give it a title first, like ‘Captain, robotics team’.");
+      setTitleError("Give it a title, like ‘Captain, robotics team’.");
+      const input = document.getElementById(titleId);
+      shake(input);
+      input?.focus();
       return;
     }
     setEntries((list) => [{ id: Date.now(), kind, title: title.trim(), role: role.trim(), when: when.trim(), hours: hours.trim(), text: text.trim() }, ...list]);
@@ -173,9 +179,9 @@ export function LogBoard() {
             ) : (
               <>
                 <p className="text-body">Choose universities in the free check to see your chances here.</p>
-                <Button tone="outline" dot={false} className="mt-5" onClick={() => (window.location.href = "/assessment")}>
+                <LinkButton href="/assessment" tone="outline" dot={false} className="mt-5">
                   Edit your answers
-                </Button>
+                </LinkButton>
               </>
             )}
           </Card>
@@ -268,8 +274,21 @@ export function LogBoard() {
               ]}
             />
           </div>
-          <Field label="Title" className="sm:col-span-2">
-            {({ id }) => <TextInput id={id} value={title} onChange={(e) => setTitle(e.target.value)} placeholder="For example, Captain, robotics team" autoFocus />}
+          <Field label="Title" className="sm:col-span-2" htmlFor={titleId} error={titleError}>
+            {({ id, hintId, invalid }) => (
+              <TextInput
+                id={id}
+                value={title}
+                onChange={(e) => {
+                  setTitle(e.target.value);
+                  if (titleError) setTitleError("");
+                }}
+                placeholder="For example, Captain, robotics team"
+                aria-invalid={invalid}
+                aria-describedby={hintId}
+                autoFocus
+              />
+            )}
           </Field>
           <Field label={kind === "Award" ? "Level" : "Your role"}>
             {({ id }) => <TextInput id={id} value={role} onChange={(e) => setRole(e.target.value)} placeholder={kind === "Award" ? "For example, National round" : "For example, Leader"} />}

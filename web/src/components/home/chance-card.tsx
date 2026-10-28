@@ -3,7 +3,7 @@
 import { useState } from "react";
 import NumberFlow from "@number-flow/react";
 import clsx from "clsx";
-import { RangeBar, VerdictChip } from "@/components/ui/range-bar";
+import { RangeBar, Swap, VerdictChip } from "@/components/ui/range-bar";
 import { Switch } from "@/components/ui/switch";
 import { exampleStudent, verdictFor, type ExampleChance } from "@/content/universities";
 
@@ -35,11 +35,15 @@ export function ChanceCard({
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 items-center gap-3">
           <span className="grid size-12 shrink-0 place-items-center rounded-full bg-surface text-small font-bold tracking-tight">
-            {uni.short}
+            <Swap value={uni.short} />
           </span>
           <div className="min-w-0">
-            <p className="truncate text-lead font-medium leading-tight">{uni.name}</p>
-            <p className="truncate text-small text-soft">Engineering, {uni.country}</p>
+            <p className="truncate text-lead font-medium leading-tight">
+              <Swap value={uni.name} />
+            </p>
+            <p className="truncate text-small text-soft">
+              <Swap value={`Engineering, ${uni.country}`} />
+            </p>
           </div>
         </div>
         <span className="shrink-0 rounded-full bg-surface px-3 py-1 text-small font-medium text-soft">Example</span>
@@ -85,8 +89,8 @@ export function ChanceCard({
       {hasRange && uni.mover ? (
         moverToggle ? (
           <div className="mt-5 flex items-center justify-between gap-4 rounded-full bg-ground py-2 pl-5 pr-2">
-            <p className={clsx("text-body transition-opacity duration-300", showMover ? "opacity-100" : "opacity-60")}>
-              {showMover ? uni.mover : "Show what would move it"}
+            <p className={clsx("text-body transition-opacity duration-200", showMover ? "opacity-100" : "opacity-60")}>
+              <Swap value={showMover ? uni.mover : "Show what would move it"} />
             </p>
             <span className="text-[1.6rem] leading-none">
               <Switch checked={showMover} onCheckedChange={setShowMover} label="Show what would move it" />

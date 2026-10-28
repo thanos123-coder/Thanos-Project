@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { M_PLUS_Rounded_1c } from "next/font/google";
 import { Toaster } from "sonner";
 import { SmoothScroll } from "@/components/motion/smooth-scroll";
+import "@/lib/generation/ui-generation.css";
+import "@/lib/generation/text-image-generation.css";
 import "./globals.css";
 
 // ui-ux-pro-max pick: a rounded geometric sans that also carries Greek (ΔΟΑΤΑΠ, Μηχανογραφικό).
@@ -30,7 +32,8 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={rounded.variable}>
+    // The site is light only; data-theme keeps the generation overlay's dots light too
+    <html lang="en" data-theme="light" className={rounded.variable}>
       <body className="min-h-dvh">
         <SmoothScroll />
         {children}

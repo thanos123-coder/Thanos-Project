@@ -5,7 +5,7 @@ import NumberFlow from "@number-flow/react";
 import clsx from "clsx";
 import { toast } from "sonner";
 import { Button, LinkButton } from "@/components/ui/button";
-import { Field, Select, TextArea, TextInput } from "@/components/ui/fields";
+import { Field, Select, TextArea, TextInput, shake } from "@/components/ui/fields";
 import { Modal } from "@/components/ui/modal";
 import { Segmented } from "@/components/ui/tabs";
 import { FaqCards } from "@/components/ui/faq-cards";
@@ -255,11 +255,19 @@ function CompareTable({ billing, region }: { billing: BillingId; region: PriceRe
   );
 }
 
+const schoolErrors: Record<string, string> = {
+  school: "Enter your school’s name.",
+  name: "Enter your name.",
+  email: "Enter a work email, like name@school.org.",
+};
+
 function SchoolsForm() {
   const [open, setOpen] = useState(false);
   const [sent, setSent] = useState(false);
   const [role, setRole] = useState("counsellor");
   const [size, setSize] = useState("100-499");
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const fix = (name: string) => setErrors((e) => (e[name] ? { ...e, [name]: "" } : e));
   return (
     <section className="frame py-[calc(var(--section)/2)]" aria-labelledby="schools-title">
       <div className="flex flex-col gap-8 rounded-[2.5rem] bg-cobalt px-8 py-10 text-on-cobalt sm:rounded-[999px] md:flex-row md:items-center md:justify-between md:px-14 md:py-12" data-field="cobalt">
@@ -289,25 +297,60 @@ function SchoolsForm() {
         >
           {sent ? (
             <div className="flex flex-col items-start gap-6">
-              <div className="relative h-10 w-20 rounded-full bg-cobalt" aria-hidden>
-                <span className="absolute right-2 top-1/2 size-6 -translate-y-1/2 rounded-full bg-paper" />
-              </div>
+              {/* transitions.dev success check: it turns, settles and draws itself once */}
+              <span className="t-success-check grid size-16 place-items-center rounded-full bg-cobalt text-on-cobalt" data-state="in" aria-hidden>
+                <svg viewBox="0 0 24 24" className="size-8" fill="none" stroke="currentColor" strokeWidth={2.6} strokeLinecap="round" strokeLinejoin="round">
+                  <path d="m5 12.5 4.5 4.5L19 7.5" />
+                </svg>
+              </span>
               <Button onClick={() => setOpen(false)}>Done</Button>
             </div>
           ) : (
             <form
+              noValidate
               className="grid gap-5 sm:grid-cols-2"
               onSubmit={(e) => {
                 e.preventDefault();
+                const form = e.currentTarget;
+                const invalid = Array.from(form.querySelectorAll<HTMLInputElement>("input[name]")).filter(
+                  (el) => !el.checkValidity(),
+                );
+                if (invalid.length) {
+                  setErrors(Object.fromEntries(invalid.map((el) => [el.name, schoolErrors[el.name] ?? "Check this field."])));
+                  invalid.forEach(shake);
+                  invalid[0].focus();
+                  return;
+                }
+                setErrors({});
                 setSent(true);
                 toast("Form sent. We’ll be in touch.");
               }}
             >
-              <Field label="School name" className="sm:col-span-2">
-                {({ id }) => <TextInput id={id} required autoComplete="organization" />}
+              <Field label="School name" className="sm:col-span-2" error={errors.school}>
+                {({ id, hintId, invalid }) => (
+                  <TextInput
+                    id={id}
+                    name="school"
+                    required
+                    autoComplete="organization"
+                    aria-invalid={invalid}
+                    aria-describedby={hintId}
+                    onChange={() => fix("school")}
+                  />
+                )}
               </Field>
-              <Field label="Your name">
-                {({ id }) => <TextInput id={id} required autoComplete="name" />}
+              <Field label="Your name" error={errors.name}>
+                {({ id, hintId, invalid }) => (
+                  <TextInput
+                    id={id}
+                    name="name"
+                    required
+                    autoComplete="name"
+                    aria-invalid={invalid}
+                    aria-describedby={hintId}
+                    onChange={() => fix("name")}
+                  />
+                )}
               </Field>
               <Field label="Your role">
                 {({ id }) => (
@@ -325,8 +368,20 @@ function SchoolsForm() {
                   />
                 )}
               </Field>
-              <Field label="Work email">
-                {({ id }) => <TextInput id={id} type="email" required autoComplete="email" inputMode="email" />}
+              <Field label="Work email" error={errors.email}>
+                {({ id, hintId, invalid }) => (
+                  <TextInput
+                    id={id}
+                    name="email"
+                    type="email"
+                    required
+                    autoComplete="email"
+                    inputMode="email"
+                    aria-invalid={invalid}
+                    aria-describedby={hintId}
+                    onChange={() => fix("email")}
+                  />
+                )}
               </Field>
               <Field label="Students in the final two years">
                 {({ id }) => (

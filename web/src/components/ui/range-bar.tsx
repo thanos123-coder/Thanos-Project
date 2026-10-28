@@ -91,12 +91,24 @@ export function VerdictChip({ verdict, className }: { verdict: Verdict | "More d
   return (
     <span
       className={clsx(
-        "inline-flex h-7 items-center rounded-full px-3 text-small font-medium leading-none",
+        "inline-flex h-7 items-center rounded-full px-3 text-small font-medium leading-none transition-[background-color,color] duration-200 ease-[ease]",
         tone,
         className,
       )}
     >
-      {verdict}
+      <Swap value={verdict} />
+    </span>
+  );
+}
+
+/**
+ * Text that changes in place (a verdict, a name) arrives with a short blurred rise instead of teleporting
+ * (transitions.dev text swap: 4px, 2px blur). Keyed, so each new value plays once.
+ */
+export function Swap({ value }: { value: string }) {
+  return (
+    <span key={value} className="swap-in">
+      {value}
     </span>
   );
 }

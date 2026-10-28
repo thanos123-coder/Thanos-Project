@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
+
+const noop = () => () => {};
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import clsx from "clsx";
 import { toast } from "sonner";
@@ -11,6 +13,7 @@ import { Select, TextInput } from "@/components/ui/fields";
 import { RangeBar, VerdictChip } from "@/components/ui/range-bar";
 import { activityKinds, applyingFrom, courses, gradeScales, systemOptions, type System } from "@/content/assessment";
 import { dreamUniversities, moreUniversities, verdictFor, type ExampleChance } from "@/content/universities";
+import { Generated } from "@/components/motion/generated";
 
 const allUnis = [...dreamUniversities, ...moreUniversities];
 const TOTAL = 6;
@@ -42,13 +45,18 @@ export function Assessment() {
   const [phase, setPhase] = useState<"questions" | "building" | "results">("questions");
   const [a, setA] = useState<Answers>({ activities: [], lead: "", unis: [], from: "Greece", age13: false });
 
-  // A university chosen on the home page arrives in the link (?uni=Edinburgh).
-  useEffect(() => {
-    const name = new URLSearchParams(window.location.search).get("uni");
-    if (!name) return;
-    const match = allUnis.find((u) => u.name.toLowerCase() === name.trim().toLowerCase());
-    setA((s) => ({ ...s, unis: [match ? match.id : `custom:${name.trim()}`] }));
-  }, []);
+  // A university chosen on the home page arrives in the link (?uni=Edinburgh) and is added once.
+  const fromLink = useSyncExternalStore(
+    noop,
+    () => new URLSearchParams(window.location.search).get("uni")?.trim() || null,
+    () => null,
+  );
+  const [seeded, setSeeded] = useState<string | null>(null);
+  if (fromLink && seeded !== fromLink) {
+    setSeeded(fromLink);
+    const match = allUnis.find((u) => u.name.toLowerCase() === fromLink.toLowerCase());
+    setA((s) => ({ ...s, unis: [match ? match.id : `custom:${fromLink}`] }));
+  }
 
   const scale = a.system ? gradeScales[a.system] : undefined;
   const canContinue = useMemo(() => {
@@ -80,7 +88,7 @@ export function Assessment() {
     if (step < TOTAL - 1) go(step + 1);
     else {
       setPhase("building");
-      setTimeout(() => setPhase("results"), 1900);
+      setTimeout(() => setPhase("results"), 1200);
     }
   };
 
@@ -343,13 +351,8 @@ function Results({ phase, answers, onRestart }: { phase: "building" | "results";
         <ul className="mt-12 flex flex-col gap-2">
           {chosen.map((u, i) => {
             const has = u.low !== undefined && u.high !== undefined;
-            return (
-              <li
-                key={u.id}
-                data-ui
-                className={clsx("result-row rounded-[var(--radius)] bg-paper p-6 sm:p-7", building && "is-building")}
-                style={{ "--i": i } as React.CSSProperties}
-              >
+            const content = (
+              <>
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
                     <span className="grid size-11 place-items-center rounded-full bg-surface text-small font-bold">{u.short}</span>
@@ -386,6 +389,21 @@ function Results({ phase, answers, onRestart }: { phase: "building" | "results";
                     {u.mover}
                   </p>
                 ) : null}
+              </>
+            );
+            const card = "result-row rounded-[var(--radius)] bg-paper p-6 sm:p-7";
+            return (
+              <li key={u.id}>
+                {building ? (
+                  <div data-ui className={clsx(card, "is-building")} style={{ "--i": i } as React.CSSProperties}>
+                    {content}
+                  </div>
+                ) : (
+                  // Each range is drawn as it arrives, one after another (transitions.dev UI generation)
+                  <Generated data-ui className={card} delay={i * 260}>
+                    {content}
+                  </Generated>
+                )}
               </li>
             );
           })}

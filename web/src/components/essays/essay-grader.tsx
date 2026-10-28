@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Field, Select, TextArea, TextInput } from "@/components/ui/fields";
 import { Tabs } from "@/components/ui/tabs";
 import { draftStages, feedback, promptTypes, sampleEssay, scanLevels, type ScanVerdict } from "@/content/essays";
+import { Generated } from "@/components/motion/generated";
 
 type Mode = "feedback" | "scan";
 type Phase = "empty" | "working" | "done";
@@ -248,7 +249,7 @@ function Results({ mode, phase, essay }: { mode: Mode; phase: Phase; essay: stri
     const all = sentences(essay);
     const counts = all.reduce<Record<string, number>>((m, s) => ((m[verdictFor(s)] = (m[verdictFor(s)] ?? 0) + 1), m), {});
     return (
-      <div className="result-reveal rounded-[var(--radius)] bg-paper p-6 sm:p-8" data-ui>
+      <Generated className="rounded-[var(--radius)] bg-paper p-6 sm:p-8" data-ui duration={1800}>
         <p className="text-small text-soft">AI scan, private in your browser</p>
         <p className="mt-2 text-lead font-medium">
           {counts["Reads as AI-written"] ?? 0} of {all.length} sentences read as AI-written
@@ -257,7 +258,7 @@ function Results({ mode, phase, essay }: { mode: Mode; phase: Phase; essay: stri
           {all.map((s, i) => {
             const v = verdictFor(s);
             return (
-              <li key={i} className="reveal-item rounded-[1rem] bg-ground p-4" style={{ "--i": i } as React.CSSProperties}>
+              <li key={i} className="rounded-[1rem] bg-ground p-4">
                 <p className="text-body leading-relaxed">{s}</p>
                 <div className="mt-3 flex items-center gap-3">
                   <div className="relative h-2 flex-1 rounded-full bg-surface">
@@ -272,17 +273,17 @@ function Results({ mode, phase, essay }: { mode: Mode; phase: Phase; essay: stri
             );
           })}
         </ul>
-      </div>
+      </Generated>
     );
   }
 
   return (
-    <div className="result-reveal flex flex-col gap-2" data-ui>
-      <div className="reveal-item rounded-[var(--radius)] bg-paper p-6" style={{ "--i": 0 } as React.CSSProperties}>
+    <div className="flex flex-col gap-2" data-ui>
+      <Generated className="rounded-[var(--radius)] bg-paper p-6" delay={0 * 260}>
         <p className="text-small font-medium text-cobalt">First impression</p>
         <p className="mt-2 text-body leading-relaxed">{feedback.impression}</p>
-      </div>
-      <div className="reveal-item rounded-[var(--radius)] bg-paper p-6" style={{ "--i": 1 } as React.CSSProperties}>
+      </Generated>
+      <Generated className="rounded-[var(--radius)] bg-paper p-6" delay={1 * 260}>
         <p className="text-small font-medium text-cobalt">Scores, with the evidence</p>
         <ul className="mt-4 flex flex-col gap-4">
           {feedback.scores.map((s) => (
@@ -300,8 +301,8 @@ function Results({ mode, phase, essay }: { mode: Mode; phase: Phase; essay: stri
             </li>
           ))}
         </ul>
-      </div>
-      <div className="reveal-item rounded-[var(--radius)] bg-paper p-6" style={{ "--i": 2 } as React.CSSProperties}>
+      </Generated>
+      <Generated className="rounded-[var(--radius)] bg-paper p-6" delay={2 * 260}>
         <p className="text-small font-medium text-cobalt">Highest-leverage changes</p>
         <ol className="mt-3 flex flex-col gap-2.5">
           {feedback.opportunities.map((o) => (
@@ -311,8 +312,8 @@ function Results({ mode, phase, essay }: { mode: Mode; phase: Phase; essay: stri
             </li>
           ))}
         </ol>
-      </div>
-      <div className="reveal-item rounded-[var(--radius)] bg-paper p-6" style={{ "--i": 3 } as React.CSSProperties}>
+      </Generated>
+      <Generated className="rounded-[var(--radius)] bg-paper p-6" delay={3 * 260}>
         <p className="text-small font-medium text-cobalt">Line comments</p>
         <ul className="mt-3 flex flex-col gap-2">
           {feedback.lines.map((l, i) => (
@@ -324,8 +325,8 @@ function Results({ mode, phase, essay }: { mode: Mode; phase: Phase; essay: stri
             </li>
           ))}
         </ul>
-      </div>
-      <div className="reveal-item rounded-[var(--radius)] bg-ink p-6 text-paper" style={{ "--i": 4 } as React.CSSProperties}>
+      </Generated>
+      <Generated className="rounded-[var(--radius)] bg-ink p-6 text-paper" delay={4 * 260}>
         <p className="text-small font-medium text-white/70">What to protect</p>
         <p className="mt-2 text-body">{feedback.protect}</p>
         <p className="mt-5 text-small font-medium text-white/70">Your next-draft plan</p>
@@ -335,7 +336,7 @@ function Results({ mode, phase, essay }: { mode: Mode; phase: Phase; essay: stri
           ))}
         </ol>
         <p className="mt-5 text-small text-white/70">Upchance asks questions and never rewrites your words.</p>
-      </div>
+      </Generated>
     </div>
   );
 }

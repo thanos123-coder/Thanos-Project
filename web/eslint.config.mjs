@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Third-party code copied in (React Bits, 21st.dev, transitions.dev): kept as published, not linted
+    "src/components/vendor/text-type.tsx",
+    "src/components/vendor/ascii-voice-orb.tsx",
+    "src/lib/generation/**",
   ]),
 ]);
 

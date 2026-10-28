@@ -67,9 +67,11 @@ export function InterviewStudio() {
   // The question types out while the interviewer speaks, then the room listens.
   useEffect(() => {
     if (phase !== "asking") return;
-    setTyped(0);
     const id = setInterval(() => setTyped((n) => (n >= q.length ? n : n + 1)), 28);
-    const done = setTimeout(() => setPhase("listening"), q.length * 28 + 700);
+    const done = setTimeout(() => {
+      setHeard(0);
+      setPhase("listening");
+    }, q.length * 28 + 700);
     return () => {
       clearInterval(id);
       clearTimeout(done);
@@ -78,7 +80,6 @@ export function InterviewStudio() {
 
   useEffect(() => {
     if (phase !== "listening") return;
-    setHeard(0);
     const id = setInterval(() => setHeard((n) => (n >= words.length ? n : n + 1)), 190);
     return () => clearInterval(id);
   }, [phase, words.length]);
@@ -96,11 +97,16 @@ export function InterviewStudio() {
     return () => clearInterval(id);
   }, [phase]);
 
+  const ask = () => {
+    setTyped(0);
+    setPhase("asking");
+  };
+
   const start = () => {
     setLeft((n) => Math.max(0, n - 1));
     setSeconds(0);
     setQIndex(0);
-    setPhase("asking");
+    ask();
     requestAnimationFrame(() => panel.current?.focus());
   };
 
@@ -124,9 +130,9 @@ export function InterviewStudio() {
             level={level}
             color="#d9dcfa"
             charset=" ·•●"
-            fontSize={10}
+            fontSize={11}
             size="min(24rem, 80vw)"
-            glow={0.25}
+            glow={0}
           />
           {phase !== "setup" ? (
             <p className="absolute left-6 top-6 text-small tabular text-white/70 sm:left-8 sm:top-8" aria-live="off">
@@ -243,7 +249,7 @@ export function InterviewStudio() {
                 ) : null}
                 {phase === "feedback" ? (
                   <>
-                    <Button tone="paper" onClick={() => setPhase("asking")}>
+                    <Button tone="paper" onClick={ask}>
                       Try this question again
                     </Button>
                     <Button
@@ -251,7 +257,7 @@ export function InterviewStudio() {
                       dot={false}
                       onClick={() => {
                         setQIndex((i) => i + 1);
-                        setPhase("asking");
+                        ask();
                       }}
                     >
                       Next question

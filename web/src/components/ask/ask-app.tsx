@@ -1,7 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from "react";
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type CSSProperties,
+} from "react";
 import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from "motion/react";
 import { Dialog } from "@base-ui/react/dialog";
 import { Drawer } from "@base-ui/react/drawer";
@@ -62,6 +72,8 @@ const initialChats: Chat[] = pastChats.map((title, i) => {
   };
 });
 
+const noop = () => () => {};
+
 /** The globe is drawn only where there's room for it, so phones never spend battery on it. */
 function useWide() {
   return useSyncExternalStore(
@@ -73,6 +85,18 @@ function useWide() {
     () => window.matchMedia("(min-width: 640px)").matches,
     () => false,
   );
+}
+
+/**
+ * A handler whose identity never changes but which always sees the latest state, so memoised children
+ * (the sidebar, finished answers) don't re-render on every streamed word.
+ */
+function useStableCallback<A extends unknown[], R>(fn: (...args: A) => R) {
+  const ref = useRef(fn);
+  useLayoutEffect(() => {
+    ref.current = fn;
+  });
+  return useCallback((...args: A) => ref.current(...args), []);
 }
 
 /* ——— Composer: the band, with its marker as the send button ——— */
@@ -194,7 +218,9 @@ function Composer({
 
 /* ——— Sidebar ——— */
 
-function Sidebar({
+type ChatItem = { id: string; title: string };
+
+const Sidebar = memo(function Sidebar({
   chats,
   activeId,
   onNew,
@@ -204,7 +230,7 @@ function Sidebar({
   onMemory,
   shortcut,
 }: {
-  chats: Chat[];
+  chats: ChatItem[];
   activeId: string | null;
   onNew: () => void;
   onOpen: (id: string) => void;
@@ -304,7 +330,7 @@ function Sidebar({
       </Link>
     </div>
   );
-}
+});
 
 /* ——— Search chats (cmdk). Opened often by keyboard, so it appears without animation ——— */
 
@@ -317,7 +343,7 @@ function SearchChats({
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
-  chats: Chat[];
+  chats: ChatItem[];
   onPick: (id: string) => void;
   onNew: () => void;
 }) {
@@ -375,11 +401,21 @@ export function AskApp() {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [memory, setMemory] = useState<string[]>(memoryItems);
   const [paused, setPaused] = useState(false);
-  const [memoryOpen, setMemoryOpen] = useState(false);
+  // The account menu deep-links here with ?panel=memory; after that, the panel is the visitor's to open and close
+  const deepMemory = useSyncExternalStore(
+    noop,
+    () => new URLSearchParams(window.location.search).get("panel") === "memory",
+    () => false,
+  );
+  const [memoryChoice, setMemoryOpen] = useState<boolean | null>(null);
+  const memoryOpen = memoryChoice ?? deepMemory;
   const [searchOpen, setSearchOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [shortcut, setShortcut] = useState("");
-  const [announce, setAnnounce] = useState("");
+  const shortcut = useSyncExternalStore(
+    noop,
+    () => (/Mac|iPhone|iPad/.test(navigator.platform) ? "⌘ K" : "Ctrl K"),
+    () => "",
+  );
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const scroller = useRef<HTMLDivElement>(null);
   const stick = useRef(true);
@@ -402,11 +438,6 @@ export function AskApp() {
     );
   }, []);
 
-  // Deep link from the account menu, and the platform's shortcut label
-  useEffect(() => {
-    if (new URLSearchParams(window.location.search).get("panel") === "memory") setMemoryOpen(true);
-    setShortcut(/Mac|iPhone|iPad/.test(navigator.platform) ? "⌘ K" : "Ctrl K");
-  }, []);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -446,14 +477,14 @@ export function AskApp() {
     return () => window.clearTimeout(t);
   }, [active, working, patch, reduce]);
 
-  // Announce once per answer, not per word
+  // Announce once per answer, not per word: the live region changes only when the phase does
   const lastDone = [...messages].reverse().find((m): m is AssistantMessage => m.role === "assistant");
-  const lastPhase = lastDone?.phase;
-  useEffect(() => {
-    if (lastPhase === "thinking") setAnnounce("Upchance is checking your details.");
-    else if (lastPhase === "done" && lastDone?.streamed) setAnnounce(plainText(lastDone.answer));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lastPhase, lastDone?.id]);
+  const announce =
+    lastDone?.phase === "thinking" || lastDone?.phase === "streaming"
+      ? "Upchance is checking your details."
+      : lastDone?.phase === "done" && lastDone.streamed
+        ? plainText(lastDone.answer)
+        : "";
 
   // Follow the answer while you're at the bottom; stop following if you scroll up to read
   useLayoutEffect(() => {
@@ -528,22 +559,35 @@ export function AskApp() {
     });
   };
 
-  const sidebarProps = {
-    chats,
-    activeId,
-    onNew: newChat,
-    onOpen: openChat,
-    onDelete: deleteChat,
-    onSearch: () => {
-      setDrawerOpen(false);
-      setSearchOpen(true);
-    },
-    onMemory: () => {
-      setDrawerOpen(false);
-      setMemoryOpen(true);
-    },
-    shortcut,
-  };
+  // Titles change rarely; messages change on every streamed word. The sidebar only hears about titles.
+  const titlesKey = chats.map((c) => `${c.id}\u0000${c.title}`).join("\u0001");
+  const chatItems = useMemo(
+    () => titlesKey.split("\u0001").filter(Boolean).map((row) => {
+      const [id, title] = row.split("\u0000");
+      return { id, title };
+    }),
+    [titlesKey],
+  );
+  const onNew = useStableCallback(newChat);
+  const onOpen = useStableCallback(openChat);
+  const onDelete = useStableCallback(deleteChat);
+  const onSearch = useStableCallback(() => {
+    setDrawerOpen(false);
+    setSearchOpen(true);
+  });
+  const onMemory = useStableCallback(() => {
+    setDrawerOpen(false);
+    setMemoryOpen(true);
+  });
+  const onFeedback = useStableCallback((msgId: string, v: "up" | "down") => {
+    if (!active) return;
+    const current = active.messages.find((m): m is AssistantMessage => m.id === msgId && m.role === "assistant");
+    patch(active.id, msgId, (x) => ({ ...x, feedback: x.feedback === v ? undefined : v }));
+    if (current && current.feedback !== v) toast("Thanks. Upchance will use this to improve.");
+  });
+  const onFollowUp = useStableCallback((f: string) => send(f));
+
+  const sidebarProps = { chats: chatItems, activeId, onNew, onOpen, onDelete, onSearch, onMemory, shortcut };
 
   const lastAssistantId = lastDone?.id;
   const ease = [0.77, 0, 0.175, 1] as const;
@@ -643,12 +687,8 @@ export function AskApp() {
                       key={m.id}
                       msg={m}
                       last={m.id === lastAssistantId}
-                      onFeedback={(v) => {
-                        if (!active) return;
-                        patch(active.id, m.id, (x) => ({ ...x, feedback: x.feedback === v ? undefined : v }));
-                        if (m.feedback !== v) toast("Thanks. Upchance will use this to improve.");
-                      }}
-                      onFollowUp={(f) => send(f)}
+                      onFeedback={onFeedback}
+                      onFollowUp={onFollowUp}
                     />
                   ),
                 )}
@@ -717,13 +757,7 @@ export function AskApp() {
         </section>
       </div>
 
-      <SearchChats
-        open={searchOpen}
-        onOpenChange={setSearchOpen}
-        chats={chats}
-        onPick={openChat}
-        onNew={newChat}
-      />
+      <SearchChats open={searchOpen} onOpenChange={setSearchOpen} chats={chatItems} onPick={onOpen} onNew={onNew} />
       <MemoryDrawer
         open={memoryOpen}
         onOpenChange={setMemoryOpen}

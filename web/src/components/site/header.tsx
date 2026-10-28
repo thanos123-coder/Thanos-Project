@@ -73,7 +73,12 @@ function AccountMenu() {
 
 function MobileMenu({ pathname }: { pathname: string }) {
   const [open, setOpen] = useState(false);
-  useEffect(() => setOpen(false), [pathname]);
+  // A new page closes the menu (adjusting state while rendering, not in an effect)
+  const [openedOn, setOpenedOn] = useState(pathname);
+  if (openedOn !== pathname) {
+    setOpenedOn(pathname);
+    setOpen(false);
+  }
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Trigger className="press flex h-11 items-center gap-2 rounded-full bg-surface px-4 text-body font-medium text-ink hover:bg-mid lg:hidden">

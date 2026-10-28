@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type CSSProperties } from "react";
+import { memo, useState, type CSSProperties } from "react";
 import clsx from "clsx";
 import { toast } from "sonner";
 import { Mark } from "@/components/brand/logo";
@@ -201,13 +201,14 @@ function Blocks({ msg }: { msg: AssistantMessage }) {
         </p>,
       );
     } else if (block.kind === "list") {
-      let left = budget;
+      // Each item's share of the budget: what's left after the items before it
+      const before = block.items.map((_, ii) =>
+        block.items.slice(0, ii).reduce((n, item) => n + words(item).length, 0),
+      );
       out.push(
         <ul key={bi} className="mb-4 flex max-w-[62ch] flex-col gap-2.5">
           {block.items.map((item, ii) => {
-            const n = words(item).length;
-            const count = left;
-            left -= n;
+            const count = budget - before[ii];
             if (count <= 0) return null;
             return (
               <li key={ii} className="flex gap-3 text-body leading-[1.6]">
@@ -239,14 +240,15 @@ function Blocks({ msg }: { msg: AssistantMessage }) {
   return <>{out}</>;
 }
 
-export function AnswerView({
+/** Memoised: while one answer streams, the finished ones above it don't re-render. */
+export const AnswerView = memo(function AnswerView({
   msg,
   onFeedback,
   onFollowUp,
   last,
 }: {
   msg: AssistantMessage;
-  onFeedback: (v: "up" | "down") => void;
+  onFeedback: (msgId: string, v: "up" | "down") => void;
   onFollowUp: (text: string) => void;
   last: boolean;
 }) {
@@ -289,7 +291,7 @@ export function AnswerView({
                 type="button"
                 aria-label="Helpful"
                 aria-pressed={msg.feedback === "up"}
-                onClick={() => onFeedback("up")}
+                onClick={() => onFeedback(msg.id, "up")}
                 className="press grid size-10 place-items-center rounded-full text-soft hover:bg-surface hover:text-ink aria-pressed:bg-cobalt-tint aria-pressed:text-cobalt"
               >
                 <Icon name="thumbUp" className="size-[1.125rem]" />
@@ -300,7 +302,7 @@ export function AnswerView({
                 type="button"
                 aria-label="Not helpful"
                 aria-pressed={msg.feedback === "down"}
-                onClick={() => onFeedback("down")}
+                onClick={() => onFeedback(msg.id, "down")}
                 className="press grid size-10 place-items-center rounded-full text-soft hover:bg-surface hover:text-ink aria-pressed:bg-surface aria-pressed:text-ink"
               >
                 <Icon name="thumbDown" className="size-[1.125rem]" />
@@ -328,4 +330,4 @@ export function AnswerView({
       </div>
     </div>
   );
-}
+});

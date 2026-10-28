@@ -465,6 +465,19 @@
   .fade-in {
     animation: fade-in 260ms var(--ease-out) both;
   }
+
+  /* Text swap: the new value rises 4px out of a 2px blur */
+  .swap-in {
+    display: inline-block;
+    animation: swap-in 180ms var(--ease-out) both;
+  }
+  @keyframes swap-in {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+      filter: blur(2px);
+    }
+  }
   @keyframes fade-in {
     from {
       opacity: 0;
@@ -558,6 +571,222 @@
       filter: blur(0);
       transform: none;
     }
+  }
+}
+
+/* ——— States, from transitions.dev recipes (values kept, selectors fitted to this markup) ——— */
+:root {
+  /* 14 Skeleton loader and reveal */
+  --pulse-dur: 1000ms;
+  --pulse-min: 0.5;
+  --reveal-dur: 400ms;
+  --reveal-blur: 2px;
+  --reveal-ease: ease-in-out;
+  /* 10 Success check */
+  --check-opacity-dur: 500ms;
+  --check-rotate-dur: 500ms;
+  --check-rotate-from: 80deg;
+  --check-bob-dur: 500ms;
+  --check-y-amount: 40px;
+  --check-blur-dur: 500ms;
+  --check-blur-from: 10px;
+  --check-path-dur: 500ms;
+  --check-path-delay: 80ms;
+  --check-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --check-ease-opacity: cubic-bezier(0.22, 1, 0.36, 1);
+  --check-ease-rotate: cubic-bezier(0.22, 1, 0.36, 1);
+  --check-ease-bob: cubic-bezier(0.34, 1.35, 0.64, 1);
+  --check-ease-path: cubic-bezier(0.22, 1, 0.36, 1);
+  /* 12 Error state shake */
+  --shake-distance: 6px;
+  --shake-overshoot: 4px;
+  --shake-dur-a: 80ms;
+  --shake-dur-b: 60ms;
+  --shake-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --revert-dur: 280ms;
+}
+
+@layer components {
+  /* Skeleton bars pulse while an answer is being built, each a beat after the last */
+  .gen-shimmer,
+  .gen-line {
+    animation: t-skel-pulse var(--pulse-dur) ease-in-out infinite;
+    animation-delay: calc(var(--i, 0) * 90ms);
+  }
+  @keyframes t-skel-pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: var(--pulse-min);
+    }
+  }
+
+  /* The real content arrives through the skeleton's cross-blur, block by block */
+  .result-reveal,
+  .reveal-item {
+    animation: t-reveal-in var(--reveal-dur) var(--reveal-ease) both;
+  }
+  .reveal-item {
+    animation-delay: calc(var(--i, 0) * 70ms);
+  }
+  @keyframes t-reveal-in {
+    from {
+      opacity: 0;
+      filter: blur(var(--reveal-blur));
+    }
+  }
+
+  /* The interviewer's question types out behind a caret */
+  .type-caret {
+    display: inline-block;
+    width: 0.08em;
+    height: 0.95em;
+    margin-left: 0.06em;
+    border-radius: 999px;
+    background: currentColor;
+    vertical-align: -0.1em;
+    animation: caret-blink 1s steps(1, end) infinite;
+  }
+  @keyframes caret-blink {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  /* Recording: the dot breathes */
+  .live-dot {
+    animation: live-dot 1.6s ease-in-out infinite;
+  }
+  @keyframes live-dot {
+    50% {
+      opacity: 0.45;
+      transform: scale(0.8);
+    }
+  }
+
+  /* 12 Error state shake: a decaying shake on the field, and the message fades in under it */
+  .is-shaking {
+    animation: t-input-shake calc(var(--shake-dur-a) * 2 + var(--shake-dur-b) * 2) linear;
+  }
+  @keyframes t-input-shake {
+    0% {
+      transform: translateX(0);
+      animation-timing-function: var(--shake-ease);
+    }
+    28.57% {
+      transform: translateX(var(--shake-distance));
+      animation-timing-function: var(--shake-ease);
+    }
+    57.14% {
+      transform: translateX(calc(var(--shake-distance) * -1));
+      animation-timing-function: var(--shake-ease);
+    }
+    78.57% {
+      transform: translateX(var(--shake-overshoot));
+      animation-timing-function: var(--shake-ease);
+    }
+    100% {
+      transform: translateX(0);
+    }
+  }
+  .field-error {
+    animation: t-error-in var(--revert-dur) ease-out both;
+  }
+  @keyframes t-error-in {
+    from {
+      opacity: 0;
+      transform: translateY(-3px);
+    }
+  }
+
+  /* 10 Success check: fade, turn, settle and draw, once */
+  .t-success-check {
+    display: inline-block;
+    transform-origin: center;
+    opacity: 0;
+    will-change: transform, opacity, filter;
+  }
+  .t-success-check svg {
+    display: block;
+    overflow: visible;
+  }
+  .t-success-check svg path {
+    stroke-dasharray: 20;
+    stroke-dashoffset: 20;
+  }
+  .t-success-check[data-state="in"] {
+    animation:
+      t-check-fade var(--check-opacity-dur) var(--check-ease-opacity) forwards,
+      t-check-rotate var(--check-rotate-dur) var(--check-ease-rotate) forwards,
+      t-check-blur var(--check-blur-dur) var(--check-ease-out) forwards,
+      t-check-bob var(--check-bob-dur) var(--check-ease-bob) forwards;
+  }
+  .t-success-check[data-state="in"] svg path {
+    animation: t-check-draw var(--check-path-dur) var(--check-ease-path) var(--check-path-delay, 0ms) forwards;
+  }
+  @keyframes t-check-fade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes t-check-rotate {
+    from {
+      transform: rotate(var(--check-rotate-from));
+    }
+    to {
+      transform: rotate(0deg);
+    }
+  }
+  @keyframes t-check-blur {
+    from {
+      filter: blur(var(--check-blur-from));
+    }
+    to {
+      filter: blur(0);
+    }
+  }
+  @keyframes t-check-bob {
+    from {
+      translate: 0 var(--check-y-amount);
+    }
+    to {
+      translate: 0 0;
+    }
+  }
+  @keyframes t-check-draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gen-shimmer,
+  .gen-line,
+  .live-dot,
+  .type-caret {
+    animation: none;
+  }
+  .result-reveal,
+  .reveal-item {
+    animation: fade-in 200ms ease both;
+  }
+  .is-shaking {
+    animation: none !important;
+    transform: none !important;
+  }
+  .t-success-check {
+    animation: none !important;
+    opacity: 1;
+  }
+  .t-success-check svg path {
+    animation: none !important;
+    stroke-dashoffset: 0 !important;
   }
 }
 
@@ -774,6 +1003,7 @@
   .block-in,
   .msg-in,
   .stream-word,
+  .swap-in,
   .blur-word {
     animation: fade-in 200ms ease both;
     animation-delay: 0ms;
