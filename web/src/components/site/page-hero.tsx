@@ -9,6 +9,12 @@ const stageTone = {
   surface: "bg-surface",
 };
 
+/** A size, in container units, at which the longer of the two lines still fits on one line. */
+function titleSize(title: [string, string]) {
+  const longest = Math.max(title[0].length, title[1].length);
+  return Math.min(12.4, +(188 / longest).toFixed(2));
+}
+
 /**
  * Product-page hero: a two-line title and one sentence on the ground, and a stage cut to the motif
  * (the band's rounded end, entering from the right edge) carrying a piece of the product.
@@ -34,7 +40,11 @@ export function PageHero({
     <section className="page-hero relative overflow-hidden" aria-labelledby={id}>
       <div className="frame grid-12 items-center gap-y-10 pb-8 pt-8 lg:min-h-[calc(100svh-4.5rem)] lg:py-12">
         <div className="col-span-12 [container-type:inline-size] lg:col-span-6">
-          <h1 id={id} className="page-title text-[clamp(2.4rem,12.4cqi,6.25rem)] font-medium leading-[1.02] tracking-[-0.035em]">
+          <h1
+            id={id}
+            className="page-title font-medium leading-[1.02] tracking-[-0.035em]"
+            style={{ fontSize: `min(${titleSize(title)}cqi, 6.25rem)` }}
+          >
             <BlurText text={title[0]} className="block" />
             <BlurText text={title[1]} start={wordCount(title[0])} className="block" />
           </h1>

@@ -8,6 +8,7 @@ import { Modal } from "@/components/ui/modal";
 import { Field, Select, TextArea, TextInput, shake } from "@/components/ui/fields";
 import { Segmented } from "@/components/ui/tabs";
 import { MotifSlider } from "@/components/ui/motif-slider";
+import { Swap } from "@/components/ui/range-bar";
 import { ChancesFragment } from "@/components/fragments/fragments";
 import { gradeScales, systemOptions, type System } from "@/content/assessment";
 
@@ -135,8 +136,12 @@ export function LogBoard() {
           <Card title="Grades" action={<EditButton onClick={() => setGradesOpen(true)} aria-label="Edit grades" />}>
             {grades ? (
               <div>
-                <p className="text-[2.5rem] font-medium leading-none tracking-[-0.03em] tabular">{gradeScales[grades.system].format(grades.value)}</p>
-                <p className="mt-2 text-body text-soft">Predicted, {grades.system}</p>
+                <p className="text-[2.5rem] font-medium leading-none tracking-[-0.03em] tabular">
+                  <Swap value={gradeScales[grades.system].format(grades.value)} />
+                </p>
+                <p className="mt-2 text-body text-soft">
+                  <Swap value={`Predicted, ${grades.system}`} />
+                </p>
               </div>
             ) : (
               <p className="text-body text-soft">Add your grades to see them here.</p>
@@ -149,7 +154,10 @@ export function LogBoard() {
                   .filter(([, v]) => v)
                   .map(([k, v]) => (
                     <li key={k} className="rounded-full bg-ground px-4 py-2 text-body">
-                      <span className="font-medium">{k}</span> <span className="tabular">{v}</span>
+                      <span className="font-medium">{k}</span>{" "}
+                      <span className="tabular">
+                        <Swap value={String(v)} />
+                      </span>
                     </li>
                   ))}
               </ul>

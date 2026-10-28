@@ -26,7 +26,7 @@ export function Switch({
       onCheckedChange={(v) => onCheckedChange(v)}
       aria-label={label}
       className={clsx(
-        "group/sw press relative inline-flex h-[1.1em] w-[2em] shrink-0 items-center rounded-full p-[0.12em] transition-colors duration-300 ease-[var(--ease-out)]",
+        "group/sw press relative inline-flex h-[1.1em] w-[2em] shrink-0 items-center rounded-full p-[0.12em] transition-colors duration-200 ease-[var(--ease-out)]",
         "data-unchecked:bg-mid",
         tone === "cobalt" && "data-checked:bg-cobalt",
         tone === "ink" && "data-checked:bg-ink",
@@ -36,7 +36,7 @@ export function Switch({
     >
       <BaseSwitch.Thumb
         className={clsx(
-          "block aspect-square h-full rounded-full transition-transform duration-300 ease-[var(--ease-out)] data-checked:translate-x-[0.9em]",
+          "block aspect-square h-full rounded-full transition-transform duration-200 ease-[var(--ease-out)] data-checked:translate-x-[0.9em]",
           tone === "paper" ? "bg-paper data-checked:bg-cobalt" : "bg-paper",
         )}
       />

@@ -135,7 +135,7 @@ export function EssayGrader() {
               <Field label="Limit">
                 {({ id }) => (
                   <div className="flex gap-2">
-                    <TextInput id={id} inputMode="numeric" placeholder="e.g. 650" value={limit} onChange={(e) => setLimit(e.target.value.replace(/\D/g, ""))} className="w-28 shrink-0" />
+                    <TextInput id={id} inputMode="numeric" placeholder="e.g. 650" value={limit} onChange={(e) => setLimit(e.target.value.replace(/\D/g, ""))} className="w-28! shrink-0" />
                     <Select label="Limit unit" value={unit} onChange={setUnit} items={[{ value: "words", label: "words" }, { value: "characters", label: "characters" }]} />
                   </div>
                 )}
@@ -162,7 +162,7 @@ export function EssayGrader() {
               value={essay}
               onChange={(e) => setEssay(e.target.value)}
               placeholder="Paste your essay here…"
-              className="essay-input min-h-[22rem] w-full resize-y rounded-[1.25rem] bg-ground p-5 text-[1.125rem] leading-[1.75] text-ink outline-none transition-shadow placeholder:text-soft/70 focus-visible:shadow-[0_0_0_3px_var(--cobalt)] sm:p-6"
+              className="essay-input min-h-[22rem] w-full resize-y rounded-[1.25rem] bg-ground p-5 text-[1.125rem] leading-[1.75] text-ink outline-none transition-shadow placeholder:text-soft focus-visible:shadow-[0_0_0_3px_var(--cobalt)] sm:p-6"
             />
           </label>
 
@@ -204,7 +204,7 @@ export function EssayGrader() {
           </p>
         </form>
 
-        <div ref={resultsRef} className="scroll-mt-24 lg:col-span-5">
+        <div ref={resultsRef} className="scroll-mt-24 lg:sticky lg:top-24 lg:col-span-5 lg:self-start">
           <div className="lg:sticky lg:top-24">
             <Results mode={mode} phase={phase} essay={essay} />
           </div>

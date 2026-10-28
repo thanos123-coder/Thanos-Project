@@ -42,12 +42,12 @@ export function ClosingCta() {
             onBlur={() => setFocused(false)}
             placeholder={typing ? "" : "Edinburgh"}
             autoComplete="off"
-            className="cta-blank block h-[1.12em] w-full rounded-full bg-surface px-[0.4em] font-medium tracking-[-0.03em] text-ink outline-none placeholder:text-soft/70 focus-visible:bg-cobalt-tint"
+            className="cta-blank block h-[1.12em] w-full rounded-full bg-surface px-[0.4em] font-medium tracking-[-0.03em] text-ink outline-none placeholder:text-soft focus-visible:bg-cobalt-tint"
           />
           <span
             aria-hidden
             className={clsx(
-              "pointer-events-none absolute inset-y-0 left-[0.4em] flex items-center font-medium text-soft/70 transition-opacity duration-200",
+              "pointer-events-none absolute inset-y-0 left-[0.4em] flex items-center font-medium text-soft transition-opacity duration-200",
               typing ? "opacity-100" : "opacity-0",
             )}
           >

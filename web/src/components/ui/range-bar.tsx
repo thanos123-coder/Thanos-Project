@@ -57,7 +57,7 @@ export function RangeBar({
       {reach !== undefined && reach > high ? (
         <div
           aria-hidden
-          className="absolute inset-0 rounded-full transition-[clip-path] duration-700 ease-[var(--ease-in-out)]"
+          className="absolute inset-0 rounded-full transition-[clip-path] duration-550 ease-[var(--ease-in-out)] motion-reduce:transition-none"
           style={{
             background: tone === "paper" ? "rgba(255,255,255,0.35)" : "var(--cobalt-tint)",
             clipPath: `inset(0 ${100 - reach}% 0 ${low}% round 999px)`,
@@ -67,14 +67,14 @@ export function RangeBar({
       <div
         aria-hidden
         data-range-band
-        className="absolute inset-0 rounded-full transition-[clip-path] duration-700 ease-[var(--ease-in-out)]"
+        className="absolute inset-0 rounded-full transition-[clip-path] duration-550 ease-[var(--ease-in-out)] motion-reduce:transition-none"
         style={{ background: band, clipPath: `inset(0 ${100 - high}% 0 ${low}% round 999px)` }}
       />
       {/* A zero-width rail moved in container units, so the marker glides without widening the page */}
       <div
         aria-hidden
         data-range-rail
-        className="absolute left-0 top-0 h-full w-0 transition-transform duration-700 ease-[var(--ease-in-out)]"
+        className="absolute left-0 top-0 h-full w-0 transition-transform duration-550 ease-[var(--ease-in-out)] motion-reduce:transition-none"
         style={{ transform: `translateX(${mid}cqw)` }}
       >
         <span

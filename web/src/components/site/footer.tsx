@@ -6,14 +6,14 @@ import { Scene } from "@/components/motion/scene";
 
 const letters = ["U", "p", "c", "h", "a", "n", "c", "e"];
 const fills = [
-  "bg-cobalt text-ink",
+  "bg-cobalt text-paper",
   "bg-cobalt-tint text-ink",
   "bg-paper text-ink",
-  "bg-cobalt text-ink",
+  "bg-cobalt text-paper",
   "bg-mid text-ink",
   "bg-cobalt-tint text-ink",
   "bg-paper text-ink",
-  "bg-cobalt text-ink",
+  "bg-cobalt text-paper",
 ];
 
 /**

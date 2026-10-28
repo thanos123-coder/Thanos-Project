@@ -72,7 +72,7 @@ const scenes = {
         opacity: 0,
         duration: 0.7,
         ease: ARRIVE,
-        stagger: 0.05,
+        stagger: 0.035,
         clearProps: "transform,opacity",
         scrollTrigger: once(list, "top 82%"),
       });
@@ -86,7 +86,7 @@ const scenes = {
       opacity: 0,
       duration: 0.9,
       ease: ARRIVE,
-      stagger: { each: 0.07, grid: "auto", from: "start" },
+      stagger: { each: 0.045, grid: "auto", from: "start" },
       transformOrigin: "50% 100%",
       clearProps: "transform,opacity",
       scrollTrigger: once(root),
@@ -102,7 +102,7 @@ const scenes = {
       opacity: 0,
       duration: 0.95,
       ease: ARRIVE,
-      stagger: 0.08,
+      stagger: 0.045,
       clearProps: "transform,opacity",
       scrollTrigger: once(root),
     });
@@ -115,11 +115,11 @@ const scenes = {
       const pops = step.querySelectorAll("[data-pop]");
       if (pops.length)
         tl.from(pops, {
-          scale: 0.4,
+          scale: 0.6,
           opacity: 0,
           duration: 0.55,
           ease: ARRIVE,
-          stagger: { each: 0.025, from: "random" },
+          stagger: { each: 0.015, from: "random" },
           clearProps: "transform,opacity",
         });
       const band = step.querySelector("[data-band]");

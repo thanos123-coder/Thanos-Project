@@ -69,7 +69,7 @@ function Category({ title, items, id }: { title: string; items: Item[]; id: stri
           <li key={it.name} className="flex gap-5">
             <Bullet item={it} />
             <div className="min-w-0 flex-1">
-              <p className="flex items-baseline justify-between gap-4">
+              <p className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5">
                 <span className="text-[1.125rem] font-bold leading-snug">{it.name}</span>
                 <span className="shrink-0 text-body text-soft">{it.value}</span>
               </p>

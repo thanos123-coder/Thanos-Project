@@ -10,6 +10,7 @@ import { Modal } from "@/components/ui/modal";
 import { Segmented } from "@/components/ui/tabs";
 import { FaqCards } from "@/components/ui/faq-cards";
 import { BlurText } from "@/components/vendor/blur-text";
+import { Swap } from "@/components/ui/range-bar";
 import {
   billingOptions,
   compareGroups,
@@ -119,12 +120,16 @@ function PlanCard({ plan, billing, region }: { plan: Plan; billing: BillingId; r
               <NumberFlow value={price.billed * rate} format={fmtFlow} locales={localeFor(region.currency)} /> plus tax
             </span>
           </p>
-          <p className={clsx("mt-1.5 text-small", featured ? "text-white/70" : "text-soft")}>{billedNote}</p>
+          <p className={clsx("mt-1.5 text-small", featured ? "text-white/70" : "text-soft")}>
+            {billedNote ? <Swap value={billedNote} /> : null}
+          </p>
         </div>
       ) : (
         <div className="mt-5 min-h-[5.6rem]" aria-hidden />
       )}
-      <p className={clsx("mt-3 min-h-[1.5em] text-body font-medium", featured ? "text-[#a9b0ff]" : "text-cobalt")}>{save ?? ""}</p>
+      <p className={clsx("mt-3 min-h-[1.5em] text-body font-medium", featured ? "text-[#a9b0ff]" : "text-cobalt")}>
+        {save ? <Swap value={save} /> : null}
+      </p>
 
       <div className="mt-5">
         {current ? (
@@ -213,7 +218,7 @@ function CompareTable({ billing, region }: { billing: BillingId; region: PriceRe
               {plans.map((p) => (
                 <th key={p.id} scope="col" className={clsx("p-6 text-center align-bottom", p.id === "plus" && "bg-cobalt-tint")}>
                   <span className="block text-lead font-medium">{p.name}</span>
-                  <span className="mt-1 block text-small font-normal text-soft tabular">
+                  <span className={clsx("mt-1 block text-small font-normal tabular", p.id === "plus" ? "text-ink" : "text-soft")}>
                     {p.prices ? (
                       <>
                         <NumberFlow value={p.prices[billing].perMonth * rate} format={fmtFlow} locales={localeFor(region.currency)} /> / month
@@ -445,12 +450,17 @@ export function PlansView() {
           </Field>
           <Segmented className="mt-4" label="Billing" value={billing} onChange={setBilling} options={billingOptions.map((b) => ({ value: b.id, label: b.label, note: b.note }))} />
           <p className="mt-4 text-small text-soft">
-            Shown in {region.currencyName}, before tax.{regionId === "none" ? " Choose your country to see your price." : ""}
+            <Swap
+              value={`Shown in ${region.currencyName}, before tax.${regionId === "none" ? " Choose your country to see your price." : ""}`}
+            />
           </p>
         </div>
       </section>
 
-      <section className="frame pb-6 pt-8" aria-label="Plans">
+      <section className="frame pb-6 pt-8" aria-labelledby="plan-cards-title">
+        <h2 id="plan-cards-title" className="sr-only">
+          Choose a plan
+        </h2>
         {/* Each card spans eight shared rows (subgrid), so names, prices and buttons line up across plans */}
         <div className="grid gap-x-2 gap-y-8 md:grid-cols-2 md:gap-y-0 xl:grid-cols-4 md:max-xl:[&>*:nth-child(n+3)]:mt-10">
           {plans.map((p) => (

@@ -5,7 +5,7 @@ import clsx from "clsx";
 import { useId, type ComponentProps, type ReactNode } from "react";
 
 export const inputClass =
-  "w-full rounded-[1rem] bg-surface px-4 text-body text-ink outline-none transition-[background-color,box-shadow] duration-200 placeholder:text-soft/80 hover:bg-mid/60 focus-visible:bg-paper focus-visible:shadow-[0_0_0_3px_var(--cobalt)] aria-[invalid=true]:shadow-[0_0_0_2px_var(--danger)] aria-[invalid=true]:focus-visible:shadow-[0_0_0_3px_var(--danger)]";
+  "w-full rounded-[1rem] bg-surface px-4 text-body text-ink outline-none transition-[background-color,box-shadow] duration-200 placeholder:text-soft hover:bg-mid/60 focus-visible:bg-paper focus-visible:shadow-[0_0_0_3px_var(--cobalt)] aria-[invalid=true]:shadow-[0_0_0_2px_var(--danger)] aria-[invalid=true]:focus-visible:shadow-[0_0_0_3px_var(--danger)]";
 
 /**
  * The transitions.dev error shake: a short, decaying side-to-side shake on the field that needs attention.
@@ -44,7 +44,7 @@ export function Field({
   const errorId = error ? `${id}-error` : undefined;
   const describedBy = [hintId, errorId].filter(Boolean).join(" ") || undefined;
   return (
-    <div className={clsx("flex flex-col gap-2", className)}>
+    <div className={clsx("flex min-w-0 flex-col gap-2", className)}>
       <label htmlFor={id} className="text-body font-medium">
         {label}
       </label>
@@ -103,7 +103,7 @@ export function Select<T extends string>({
           className,
         )}
       >
-        <BaseSelect.Value className="truncate" />
+        <BaseSelect.Value className="min-w-0 truncate" />
         <BaseSelect.Icon className="shrink-0">
           <svg viewBox="0 0 16 16" className="size-4 opacity-70" aria-hidden>
             <path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />

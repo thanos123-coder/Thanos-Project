@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useState, type CSSProperties } from "react";
+import { memo, useEffect, useState, type CSSProperties } from "react";
 import clsx from "clsx";
 import { toast } from "sonner";
 import { Mark } from "@/components/brand/logo";
@@ -254,6 +254,12 @@ export const AnswerView = memo(function AnswerView({
 }) {
   const thinking = msg.phase === "thinking";
   const settled = msg.phase === "done" || msg.phase === "stopped";
+  const [copied, setCopied] = useState(false);
+  useEffect(() => {
+    if (!copied) return;
+    const t = window.setTimeout(() => setCopied(false), 1200);
+    return () => window.clearTimeout(t);
+  }, [copied]);
 
   return (
     <div className="msg-in flex gap-3 sm:gap-4" aria-busy={!settled}>
@@ -271,19 +277,29 @@ export const AnswerView = memo(function AnswerView({
 
         {settled && msg.shown > 0 ? (
           <div className="fade-in mt-1 flex items-center gap-1">
-            <Tip label="Copy">
+            <Tip label={copied ? "Copied" : "Copy"}>
               <button
                 type="button"
-                aria-label="Copy answer"
+                aria-label={copied ? "Answer copied" : "Copy answer"}
+                data-busy={copied ? "" : undefined}
                 onClick={() => {
                   navigator.clipboard?.writeText(plainText(msg.answer)).then(
-                    () => toast("Answer copied"),
+                    () => {
+                      toast("Answer copied");
+                      setCopied(true);
+                    },
                     () => toast("Couldn’t copy. Select the text instead."),
                   );
                 }}
-                className="press grid size-10 place-items-center rounded-full text-soft hover:bg-surface hover:text-ink"
+                className="send-marker press relative grid size-10 place-items-center rounded-full text-soft hover:bg-surface hover:text-ink"
               >
-                <Icon name="copy" className="size-[1.125rem]" />
+                {/* Icon swap: the copy icon turns into a check for a moment (same recipe as the send marker) */}
+                <span className="swap-a absolute inset-0 grid place-items-center">
+                  <Icon name="copy" className="size-[1.125rem]" />
+                </span>
+                <span className="swap-b absolute inset-0 grid place-items-center text-cobalt">
+                  <Icon name="check" className="size-[1.125rem]" />
+                </span>
               </button>
             </Tip>
             <Tip label="Helpful">

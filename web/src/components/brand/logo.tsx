@@ -60,7 +60,7 @@ export function Logo({
     >
       <Mark
         tone={tone === "paper" ? "paper" : "cobalt"}
-        className="size-[1.6em] transition-transform duration-300 ease-[var(--ease-out)] group-hover/logo:-translate-y-0.5"
+        className="size-[1.6em] transition-transform duration-200 ease-[var(--ease-out)] group-hover/logo:-translate-y-0.5"
       />
       <span className="text-[1.375em] font-bold leading-none tracking-[-0.035em]">Upchance</span>
     </Link>

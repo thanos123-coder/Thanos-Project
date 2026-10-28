@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { Icon } from "@/components/ui/icons";
 import { Switch } from "@/components/ui/switch";
 
-const HOLD_MS = 1600;
+const HOLD_MS = 1600; // matches --hold-confirm in globals.css
 
 /**
  * Forgetting everything can't be undone, so it asks for a held press instead of a second dialog.
@@ -136,7 +136,7 @@ export function MemoryDrawer({
                 />
               </div>
 
-              <ul className={clsx("mt-4 flex flex-col gap-2 transition-opacity duration-300", paused && "opacity-50")}>
+              <ul className={clsx("mt-4 flex flex-col gap-2 transition-opacity duration-200", paused && "opacity-50")}>
                 <AnimatePresence initial={false}>
                   {items.map((item) => (
                     <motion.li
@@ -145,7 +145,7 @@ export function MemoryDrawer({
                       initial={{ opacity: 0, transform: "scale(0.97)" }}
                       animate={{ opacity: 1, transform: "scale(1)" }}
                       exit={{ opacity: 0, transform: "scale(0.97)" }}
-                      transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
+                      transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
                       className="flex min-h-14 items-center justify-between gap-3 rounded-[1.25rem] bg-surface py-2 pl-4 pr-2"
                     >
                       <span className="text-body">{item}</span>
@@ -161,11 +161,20 @@ export function MemoryDrawer({
                   ))}
                 </AnimatePresence>
               </ul>
-              {items.length === 0 ? (
-                <p className="fade-in mt-2 rounded-[1.25rem] bg-ground p-5 text-body text-soft">
-                  Nothing remembered yet. Upchance learns from your log and your chats.
-                </p>
-              ) : null}
+              <AnimatePresence initial={false}>
+                {items.length === 0 ? (
+                  <motion.p
+                    key="empty"
+                    initial={{ opacity: 0, transform: "translateY(8px)" }}
+                    animate={{ opacity: 1, transform: "translateY(0px)" }}
+                    exit={{ opacity: 0, transition: { duration: 0.15 } }}
+                    transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                    className="mt-2 rounded-[1.25rem] bg-ground p-5 text-body text-soft"
+                  >
+                    Nothing remembered yet. Upchance learns from your log and your chats.
+                  </motion.p>
+                ) : null}
+              </AnimatePresence>
 
               <div className="mt-auto pt-8">
                 <HoldToForget

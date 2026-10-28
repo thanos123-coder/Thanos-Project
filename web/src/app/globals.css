@@ -28,9 +28,37 @@
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
-  --dur-press: 140ms;
-  --dur-ui: 220ms;
-  --dur-sheet: 420ms;
+  --dur-press: var(--duration-quick);
+  --dur-ui: var(--duration-fast);
+
+  /* transitions.dev motion-token scale (transitions-polish). Its --ease-out / --ease-in-out keyword
+     aliases are left out on purpose: here those names hold the stronger emil-design-eng curves. */
+  --duration-stagger: 40ms;
+  --duration-micro: 80ms;
+  --duration-quick: 150ms;
+  --duration-fast: 250ms;
+  --duration-medium: 350ms;
+  --duration-slow: 400ms;
+  --duration-very-slow: 500ms;
+  --ease-smooth-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-linear: linear;
+  --distance-micro: 4px;
+  --distance-base: 8px;
+  --distance-medium: 12px;
+  --scale-large: 0.96;
+  --scale-medium: 0.97;
+  --scale-small: 0.98;
+  --scale-tiny: 0.99;
+  --blur-small: 2px;
+  --blur-medium: 3px;
+
+  /* Ambient loops and the one deliberate hold, named so they are tuned in one place */
+  --loop-caret: 1s;
+  --loop-wave: 1.1s;
+  --loop-breath: 1.4s;
+  --loop-live: 1.6s;
+  --loop-orb: 2.4s;
+  --hold-confirm: 1600ms;
 }
 
 @theme inline {
@@ -229,7 +257,7 @@
 /* ——— Shell ——— */
 @layer components {
   .site-header {
-    transition: transform 320ms var(--ease-out);
+    transition: transform var(--duration-fast) var(--ease-smooth-out);
   }
   .site-header[data-hidden] {
     transform: translateY(-100%);
@@ -239,16 +267,17 @@
   .menu-pop {
     transform-origin: var(--transform-origin);
     transition:
-      transform 180ms var(--ease-out),
-      opacity 180ms var(--ease-out);
+      transform var(--duration-fast) var(--ease-smooth-out),
+      opacity var(--duration-fast) var(--ease-smooth-out);
   }
-  .menu-pop[data-starting-style],
+  .menu-pop[data-starting-style] {
+    opacity: 0;
+    transform: scale(var(--scale-medium));
+  }
   .menu-pop[data-ending-style] {
     opacity: 0;
-    transform: scale(0.96);
-  }
-  .menu-pop[data-ending-style] {
-    transition-duration: 120ms;
+    transform: scale(var(--scale-tiny));
+    transition-duration: var(--duration-quick);
   }
 
   .menu-item {
@@ -268,19 +297,19 @@
   /* The phone menu opens from the Menu button, top right, and closes back into it */
   .mobile-menu {
     clip-path: circle(150% at calc(100% - 3rem) 2.25rem);
-    transition: clip-path 460ms var(--ease-drawer);
+    transition: clip-path var(--duration-fast) var(--ease-smooth-out);
   }
   .mobile-menu[data-starting-style],
   .mobile-menu[data-ending-style] {
     clip-path: circle(0% at calc(100% - 3rem) 2.25rem);
   }
   .mobile-menu[data-ending-style] {
-    transition-duration: 300ms;
+    transition-duration: var(--duration-quick);
   }
   .mobile-menu-item {
     transition:
-      transform 420ms var(--ease-out),
-      opacity 420ms var(--ease-out);
+      transform var(--duration-slow) var(--ease-out),
+      opacity var(--duration-slow) var(--ease-out);
     transition-delay: calc(80ms + var(--i) * 35ms);
   }
   .mobile-menu[data-starting-style] .mobile-menu-item {
@@ -290,7 +319,10 @@
 
   /* Dialogs: a modal stays centred (not origin-aware); on phones it rises as a sheet from the bottom */
   .dialog-backdrop {
-    transition: opacity 240ms var(--ease-out);
+    transition: opacity var(--duration-fast) var(--ease-smooth-out);
+  }
+  .dialog-backdrop[data-ending-style] {
+    transition-duration: var(--duration-quick);
   }
   .dialog-backdrop[data-starting-style],
   .dialog-backdrop[data-ending-style] {
@@ -298,21 +330,29 @@
   }
   .dialog-pop {
     transition:
-      transform 340ms var(--ease-drawer),
-      opacity 240ms var(--ease-out);
+      transform var(--duration-medium) var(--ease-smooth-out),
+      opacity var(--duration-fast) var(--ease-smooth-out);
   }
   .dialog-pop[data-starting-style],
   .dialog-pop[data-ending-style] {
     transform: translateY(100%);
   }
   .dialog-pop[data-ending-style] {
-    transition-duration: 220ms;
+    transition-duration: var(--duration-quick);
   }
   @media (min-width: 640px) {
+    .dialog-pop {
+      transition:
+        transform var(--duration-fast) var(--ease-smooth-out),
+        opacity var(--duration-fast) var(--ease-smooth-out);
+    }
     .dialog-pop[data-starting-style],
     .dialog-pop[data-ending-style] {
       opacity: 0;
-      transform: scale(0.96) translateY(8px);
+      transform: scale(var(--scale-large)) translateY(var(--distance-base));
+    }
+    .dialog-pop[data-ending-style] {
+      transition-duration: var(--duration-quick);
     }
   }
 
@@ -337,11 +377,27 @@
   .press:active {
     transform: none;
   }
+  .site-header {
+    transition: none;
+  }
+  .dialog-pop,
+  .menu-pop,
+  .tip-pop {
+    transition: opacity var(--duration-quick) ease;
+  }
+  .dialog-pop[data-starting-style],
+  .dialog-pop[data-ending-style],
+  .menu-pop[data-starting-style],
+  .menu-pop[data-ending-style],
+  .tip-pop[data-starting-style],
+  .tip-pop[data-ending-style] {
+    transform: none;
+  }
   .mobile-menu,
   .mobile-menu[data-starting-style],
   .mobile-menu[data-ending-style] {
     clip-path: none;
-    transition: opacity 200ms ease;
+    transition: opacity var(--duration-quick) ease;
   }
   .mobile-menu[data-starting-style],
   .mobile-menu[data-ending-style] {
@@ -374,7 +430,7 @@
     border-radius: 1rem 1rem 0 0;
     font-size: 1rem;
     font-weight: 500;
-    color: var(--soft);
+    color: var(--ink);
   }
   @media (max-width: 639px) {
     .faq-card {
@@ -395,7 +451,7 @@
     border-radius: 999px;
     background: var(--cobalt);
     opacity: 0.35;
-    animation: orb-ring 2.4s var(--ease-out) infinite;
+    animation: orb-ring var(--loop-orb) var(--ease-out) infinite;
   }
   .orb-live::after {
     animation-delay: 1.2s;
@@ -412,7 +468,7 @@
   }
   .wave-live {
     transform-origin: center;
-    animation: wave 1.1s ease-in-out infinite alternate;
+    animation: wave var(--loop-wave) ease-in-out infinite alternate;
   }
   @keyframes wave {
     from {
@@ -438,13 +494,16 @@
   .tip-pop {
     transform-origin: var(--transform-origin);
     transition:
-      transform 140ms var(--ease-out),
-      opacity 140ms var(--ease-out);
+      transform var(--duration-quick) ease-out,
+      opacity var(--duration-quick) ease-out;
   }
   .tip-pop[data-starting-style],
   .tip-pop[data-ending-style] {
     opacity: 0;
-    transform: scale(0.97);
+    transform: scale(var(--scale-small));
+  }
+  .tip-pop[data-ending-style] {
+    transition-duration: var(--duration-micro);
   }
   .tip-pop[data-instant] {
     transition-duration: 0ms;
@@ -452,8 +511,8 @@
 
   /* A content block arriving: a short rise, staggered by --i */
   .block-in {
-    animation: block-in 460ms var(--ease-out) both;
-    animation-delay: calc(var(--i, 0) * 70ms);
+    animation: block-in var(--duration-slow) var(--ease-smooth-out) both;
+    animation-delay: calc(var(--i, 0) * var(--duration-micro));
   }
   @keyframes block-in {
     from {
@@ -463,19 +522,25 @@
   }
 
   .fade-in {
-    animation: fade-in 260ms var(--ease-out) both;
+    animation: fade-in var(--duration-fast) var(--ease-smooth-out) both;
+  }
+
+  /* A logged entry rises into the list; a whole example log arrives row by row */
+  .log-entry {
+    animation: block-in var(--duration-slow) var(--ease-smooth-out) both;
+    animation-delay: calc(min(var(--i, 0), 6) * var(--duration-stagger));
   }
 
   /* Text swap: the new value rises 4px out of a 2px blur */
   .swap-in {
     display: inline-block;
-    animation: swap-in 180ms var(--ease-out) both;
+    animation: swap-in var(--duration-quick) ease-in-out both;
   }
   @keyframes swap-in {
     from {
       opacity: 0;
-      transform: translateY(4px);
-      filter: blur(2px);
+      transform: translateY(var(--distance-micro));
+      filter: blur(var(--blur-small));
     }
   }
   @keyframes fade-in {
@@ -486,7 +551,7 @@
 
   /* A message bubble lands from where it was sent */
   .msg-in {
-    animation: msg-in 320ms var(--ease-out) both;
+    animation: msg-in var(--duration-fast) var(--ease-smooth-out) both;
     transform-origin: bottom right;
   }
   @keyframes msg-in {
@@ -498,12 +563,12 @@
 
   /* Streaming text: each word settles out of a soft blur */
   .stream-word {
-    animation: stream-in 380ms var(--ease-out) both;
+    animation: stream-in var(--duration-slow) var(--ease-smooth-out) both;
   }
   @keyframes stream-in {
     from {
       opacity: 0;
-      filter: blur(2px);
+      filter: blur(var(--blur-small));
     }
   }
 
@@ -517,7 +582,7 @@
     }
   }
   .think-text {
-    animation: think-pulse 1.4s ease-in-out infinite;
+    animation: think-pulse var(--loop-breath) ease-in-out infinite;
   }
   @keyframes think-pulse {
     50% {
@@ -529,7 +594,7 @@
   .check-draw path {
     stroke-dasharray: 1;
     stroke-dashoffset: 1;
-    animation: check-draw 340ms var(--ease-out) 40ms forwards;
+    animation: check-draw var(--duration-medium) var(--ease-out) 40ms forwards;
   }
   @keyframes check-draw {
     to {
@@ -541,7 +606,7 @@
   .reveal-rows {
     display: grid;
     grid-template-rows: 0fr;
-    transition: grid-template-rows 320ms var(--ease-out);
+    transition: grid-template-rows var(--duration-fast) var(--ease-smooth-out);
   }
   .reveal-rows[data-open] {
     grid-template-rows: 1fr;
@@ -647,7 +712,7 @@
     border-radius: 999px;
     background: currentColor;
     vertical-align: -0.1em;
-    animation: caret-blink 1s steps(1, end) infinite;
+    animation: caret-blink var(--loop-caret) steps(1, end) infinite;
   }
   @keyframes caret-blink {
     50% {
@@ -657,7 +722,7 @@
 
   /* Recording: the dot breathes */
   .live-dot {
-    animation: live-dot 1.6s ease-in-out infinite;
+    animation: live-dot var(--loop-live) ease-in-out infinite;
   }
   @keyframes live-dot {
     50% {
@@ -692,7 +757,7 @@
     }
   }
   .field-error {
-    animation: t-error-in var(--revert-dur) ease-out both;
+    animation: t-error-in var(--revert-dur) var(--ease-out) both;
   }
   @keyframes t-error-in {
     from {
@@ -774,7 +839,7 @@
   }
   .result-reveal,
   .reveal-item {
-    animation: fade-in 200ms ease both;
+    animation: fade-in var(--duration-quick) ease both;
   }
   .is-shaking {
     animation: none !important;
@@ -805,7 +870,7 @@
   .hero-actions,
   .hero-reassure,
   .hero-live > :first-child {
-    animation: load-rise 520ms var(--ease-out) both;
+    animation: load-rise var(--duration-very-slow) var(--ease-out) both;
   }
   .hero-support {
     animation-delay: 420ms;
@@ -820,7 +885,7 @@
     animation-delay: 300ms;
   }
   .hero-card {
-    animation: load-rise 620ms var(--ease-out) 360ms both;
+    animation: load-rise var(--duration-very-slow) var(--ease-out) 360ms both;
   }
   /* The honest range resolves last: the band opens from its middle and the marker slides to it */
   .hero-card [data-range-band] {
@@ -883,7 +948,7 @@
   .chat-delete {
     opacity: 0;
     transition:
-      opacity 160ms ease,
+      opacity var(--duration-quick) ease,
       transform var(--dur-press) var(--ease-out),
       background-color var(--dur-ui) ease;
   }
@@ -920,7 +985,7 @@
   /* Side drawers follow the finger (Base UI Drawer) and leave the way they came */
   .drawer-backdrop {
     opacity: calc(0.4 * (1 - var(--drawer-swipe-progress, 0)));
-    transition: opacity 420ms var(--ease-drawer);
+    transition: opacity var(--duration-slow) var(--ease-smooth-out);
   }
   .drawer-backdrop[data-starting-style],
   .drawer-backdrop[data-ending-style] {
@@ -930,11 +995,11 @@
     transition-duration: 0ms;
   }
   .drawer-backdrop[data-ending-style] {
-    transition-duration: calc(var(--drawer-swipe-strength, 1) * 300ms);
+    transition-duration: calc(var(--drawer-swipe-strength, 1) * var(--duration-medium));
   }
   .side-drawer {
     transform: translateX(var(--drawer-swipe-movement-x, 0px));
-    transition: transform 420ms var(--ease-drawer);
+    transition: transform var(--duration-slow) var(--ease-smooth-out);
   }
   .side-drawer[data-swiping] {
     transition-duration: 0ms;
@@ -949,22 +1014,22 @@
     transform: translateX(calc(-100% - 1rem));
   }
   .side-drawer[data-ending-style] {
-    transition-duration: calc(var(--drawer-swipe-strength, 1) * 300ms);
+    transition-duration: calc(var(--drawer-swipe-strength, 1) * var(--duration-medium));
   }
 
   /* The send marker swaps to stop with a blurred cross-scale (transitions-dev icon swap) */
   .send-marker .swap-a,
   .send-marker .swap-b {
     transition:
-      opacity 200ms var(--ease-out),
-      transform 200ms var(--ease-out),
-      filter 200ms var(--ease-out);
+      opacity var(--duration-fast) ease-in-out,
+      transform var(--duration-fast) ease-in-out,
+      filter var(--duration-fast) ease-in-out;
   }
   .send-marker .swap-b,
   .send-marker[data-busy] .swap-a {
     opacity: 0;
     transform: scale(0.5);
-    filter: blur(3px);
+    filter: blur(var(--blur-small));
   }
   .send-marker[data-busy] .swap-b {
     opacity: 1;
@@ -981,11 +1046,11 @@
   /* Hold to forget: the fill sweeps while held and snaps back on release */
   .hold-fill {
     clip-path: inset(0 100% 0 0 round 999px);
-    transition: clip-path 220ms var(--ease-out);
+    transition: clip-path var(--duration-quick) var(--ease-smooth-out);
   }
   .hold[data-holding] .hold-fill {
     clip-path: inset(0 0 0 0 round 999px);
-    transition: clip-path 1600ms linear;
+    transition: clip-path var(--hold-confirm) linear;
   }
 
   .upchance-toast [data-button] {
@@ -1004,8 +1069,9 @@
   .msg-in,
   .stream-word,
   .swap-in,
+  .log-entry,
   .blur-word {
-    animation: fade-in 200ms ease both;
+    animation: fade-in var(--duration-quick) ease both;
     animation-delay: 0ms;
   }
   .think-dot,
@@ -1014,7 +1080,7 @@
   }
   .reveal-rows,
   .side-drawer {
-    transition: opacity 200ms ease;
+    transition: opacity var(--duration-quick) ease;
   }
   .side-drawer[data-swipe-direction][data-starting-style],
   .side-drawer[data-swipe-direction][data-ending-style] {

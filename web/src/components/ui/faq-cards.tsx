@@ -43,13 +43,13 @@ export function FaqCards({
                   <span className="text-[clamp(1.125rem,1rem+0.5vw,1.375rem)] font-medium leading-snug">{it.q}</span>
                   <span
                     aria-hidden
-                    className="relative h-5 w-9 shrink-0 rounded-full bg-mid transition-colors duration-300 group-data-[panel-open]/faq:bg-cobalt"
+                    className="relative h-5 w-9 shrink-0 rounded-full bg-mid transition-colors duration-200 group-data-[panel-open]/faq:bg-cobalt"
                   >
-                    <span className="absolute left-[3px] top-1/2 size-[14px] -translate-y-1/2 rounded-full bg-paper transition-transform duration-300 ease-[var(--ease-out)] group-data-[panel-open]/faq:translate-x-4" />
+                    <span className="absolute left-[3px] top-1/2 size-[14px] -translate-y-1/2 rounded-full bg-paper transition-transform duration-200 ease-[var(--ease-out)] group-data-[panel-open]/faq:translate-x-4" />
                   </span>
                 </Accordion.Trigger>
               </Accordion.Header>
-              <Accordion.Panel className="faq-panel h-[var(--accordion-panel-height)] overflow-hidden transition-[height] duration-300 ease-[var(--ease-out)] data-ending-style:h-0 data-starting-style:h-0">
+              <Accordion.Panel className="faq-panel h-[var(--accordion-panel-height)] overflow-hidden transition-[height] duration-250 ease-[var(--ease-out)] data-ending-style:h-0 data-starting-style:h-0">
                 <p className="max-w-[60ch] px-6 pb-8 text-body sm:px-8">{it.a}</p>
               </Accordion.Panel>
             </Accordion.Item>

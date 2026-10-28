@@ -3,14 +3,15 @@
 import { useMemo, useState, useSyncExternalStore } from "react";
 
 const noop = () => () => {};
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+const EASE_OUT: [number, number, number, number] = [0.23, 1, 0.32, 1];
+import { AnimatePresence, motion, useReducedMotion, type Variants } from "motion/react";
 import clsx from "clsx";
 import { toast } from "sonner";
 import { Button, LinkButton } from "@/components/ui/button";
 import { Chip } from "@/components/ui/chip";
 import { MotifSlider } from "@/components/ui/motif-slider";
 import { Select, TextInput } from "@/components/ui/fields";
-import { RangeBar, VerdictChip } from "@/components/ui/range-bar";
+import { RangeBar, Swap, VerdictChip } from "@/components/ui/range-bar";
 import { activityKinds, applyingFrom, courses, gradeScales, systemOptions, type System } from "@/content/assessment";
 import { dreamUniversities, moreUniversities, verdictFor, type ExampleChance } from "@/content/universities";
 import { Generated } from "@/components/motion/generated";
@@ -102,10 +103,14 @@ export function Assessment() {
       return { ...s, [key]: has ? s[key].filter((x) => x !== v) : [...s[key], v] };
     });
 
-  const slide = {
+  // The old question gets out of the way fast; the next one carries the motion
+  const slide: Variants = {
     initial: (d: number) => (reduce ? { opacity: 0 } : { opacity: 0, transform: `translateX(${d * 48}px)` }),
-    animate: { opacity: 1, transform: "translateX(0px)" },
-    exit: (d: number) => (reduce ? { opacity: 0 } : { opacity: 0, transform: `translateX(${d * -32}px)` }),
+    animate: { opacity: 1, transform: "translateX(0px)", transition: { duration: 0.25, ease: EASE_OUT } },
+    exit: (d: number) =>
+      reduce
+        ? { opacity: 0, transition: { duration: 0.12 } }
+        : { opacity: 0, transform: `translateX(${d * -24}px)`, transition: { duration: 0.15, ease: EASE_OUT } },
   };
 
   if (phase !== "questions") {
@@ -133,7 +138,7 @@ export function Assessment() {
           aria-valuenow={step + 1}
         >
           <div
-            className="absolute inset-0 rounded-full bg-cobalt transition-[clip-path] duration-500 ease-[var(--ease-in-out)]"
+            className="absolute inset-0 rounded-full bg-cobalt transition-[clip-path] duration-400 ease-[var(--ease-in-out)]"
             style={{ clipPath: `inset(0 ${100 - ((step + 1) / TOTAL) * 100}% 0 0 round 999px)` }}
           />
         </div>
@@ -148,7 +153,6 @@ export function Assessment() {
             initial="initial"
             animate="animate"
             exit="exit"
-            transition={{ duration: 0.32, ease: [0.23, 1, 0.32, 1] }}
           >
             <h1 className="text-[clamp(2rem,1.2rem+2.8vw,3.5rem)] font-medium leading-[1.05] tracking-[-0.03em]" tabIndex={-1}>
               {title}
@@ -294,7 +298,7 @@ export function Assessment() {
                   >
                     <span
                       className={clsx(
-                        "absolute top-1 size-5 rounded-full bg-paper transition-transform duration-300 ease-[var(--ease-out)]",
+                        "absolute top-1 size-5 rounded-full bg-paper transition-transform duration-200 ease-[var(--ease-out)]",
                         a.age13 ? "translate-x-6" : "translate-x-1",
                       )}
                     />
@@ -336,6 +340,7 @@ function Results({ phase, answers, onRestart }: { phase: "building" | "results";
       },
   );
   const building = phase === "building";
+  const [saved, setSaved] = useState(false);
   return (
     <div className="frame pb-[var(--section)] pt-10 lg:pt-14" aria-live="polite" aria-busy={building}>
       <div className="mx-auto max-w-4xl">
@@ -411,8 +416,30 @@ function Results({ phase, answers, onRestart }: { phase: "building" | "results";
 
         {!building ? (
           <div className="mt-12 flex flex-wrap items-center gap-3">
-            <Button size="lg" onClick={() => toast("Saved to your Log. Your chances will follow it.")}>
-              Save my results
+            <Button
+              size="lg"
+              dot={!saved}
+              aria-disabled={saved}
+              onClick={() => {
+                if (saved) return;
+                setSaved(true);
+                toast("Saved to your Log. Your chances will follow it.");
+              }}
+              className={saved ? "pointer-events-none" : undefined}
+            >
+              {saved ? (
+                <span className="flex items-center gap-2.5">
+                  {/* transitions.dev success check: it turns, settles and draws itself once */}
+                  <span className="t-success-check" data-state="in" aria-hidden>
+                    <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth={2.6} strokeLinecap="round" strokeLinejoin="round">
+                      <path d="m5 12.5 4.5 4.5L19 7.5" />
+                    </svg>
+                  </span>
+                  <Swap value="Saved to your Log" />
+                </span>
+              ) : (
+                "Save my results"
+              )}
             </Button>
             <LinkButton href="/ask" size="lg" tone="quiet" dot={false}>
               Ask about my results

@@ -2,8 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
-import { motion } from "motion/react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Dialog } from "@base-ui/react/dialog";
 import { Menu } from "@base-ui/react/menu";
 import clsx from "clsx";
@@ -81,7 +80,7 @@ function MobileMenu({ pathname }: { pathname: string }) {
   }
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
-      <Dialog.Trigger className="press flex h-11 items-center gap-2 rounded-full bg-surface px-4 text-body font-medium text-ink hover:bg-mid lg:hidden">
+      <Dialog.Trigger className="press flex h-11 items-center gap-2 rounded-full bg-surface px-4 text-body font-medium text-ink hover:bg-mid xl:hidden">
         <span aria-hidden className="relative h-2.5 w-5 rounded-full bg-ink">
           <span className="absolute right-0.5 top-1/2 size-1.5 -translate-y-1/2 rounded-full bg-paper" />
         </span>
@@ -131,6 +130,72 @@ function MobileMenu({ pathname }: { pathname: string }) {
   );
 }
 
+/**
+ * The main links share one band that slides to the current page. It is the range band again: a capsule
+ * clipped to the active link with clip-path, so it moves on the compositor while the next page loads.
+ */
+function NavBand({ pathname }: { pathname: string }) {
+  const list = useRef<HTMLUListElement>(null);
+  const band = useRef<HTMLSpanElement>(null);
+  const placed = useRef(false);
+
+  useLayoutEffect(() => {
+    const ul = list.current;
+    const el = band.current;
+    if (!ul || !el) return;
+    const place = () => {
+      const active = ul.querySelector<HTMLElement>("[aria-current='page']")?.parentElement;
+      if (!active) {
+        el.style.opacity = "0";
+        return;
+      }
+      const right = ul.clientWidth - active.offsetLeft - active.offsetWidth;
+      // The first placement lands without a slide; later ones glide
+      if (!placed.current) el.style.transition = "none";
+      el.style.clipPath = `inset(0 ${right}px 0 ${active.offsetLeft}px round 999px)`;
+      el.style.opacity = "1";
+      if (!placed.current) {
+        void el.offsetWidth;
+        el.style.transition = "";
+        placed.current = true;
+      }
+    };
+    place();
+    const ro = new ResizeObserver(place);
+    ro.observe(ul);
+    return () => ro.disconnect();
+  }, [pathname]);
+
+  return (
+    <nav aria-label="Main" className="hidden xl:block">
+      <ul ref={list} className="relative flex items-center gap-1">
+        <span
+          ref={band}
+          aria-hidden
+          className="absolute inset-0 rounded-full bg-surface opacity-0 transition-[clip-path] duration-300 ease-[var(--ease-in-out)] motion-reduce:transition-none"
+        />
+        {mainNav.map((item) => {
+          const active = isActive(pathname, item.href);
+          return (
+            <li key={item.href} className="relative">
+              <Link
+                href={item.href}
+                aria-current={active ? "page" : undefined}
+                className={clsx(
+                  "press relative flex h-11 items-center rounded-full px-4 text-body font-medium transition-colors",
+                  active ? "text-ink" : "text-soft hover:text-ink",
+                )}
+              >
+                {item.label}
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
+  );
+}
+
 export function SiteHeader({ app = false }: { app?: boolean }) {
   const pathname = usePathname() ?? "/";
   const hidden = useHideOnScroll();
@@ -145,37 +210,9 @@ export function SiteHeader({ app = false }: { app?: boolean }) {
     >
       <div className="frame flex h-[4.5rem] items-center justify-between gap-6">
         <Logo />
-        <nav aria-label="Main" className="hidden lg:block">
-          <ul className="flex items-center gap-1">
-            {mainNav.map((item) => {
-              const active = isActive(pathname, item.href);
-              return (
-                <li key={item.href} className="relative">
-                  {active ? (
-                    <motion.span
-                      layoutId="nav-band"
-                      aria-hidden
-                      className="absolute inset-0 rounded-full bg-surface"
-                      transition={{ type: "spring", bounce: 0, duration: 0.45 }}
-                    />
-                  ) : null}
-                  <Link
-                    href={item.href}
-                    aria-current={active ? "page" : undefined}
-                    className={clsx(
-                      "press relative flex h-11 items-center rounded-full px-4 text-body font-medium transition-colors",
-                      active ? "text-ink" : "text-soft hover:text-ink",
-                    )}
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
+        <NavBand pathname={pathname} />
         <div className="flex items-center gap-2">
-          <div className="hidden lg:block">
+          <div className="hidden xl:block">
             <AccountMenu />
           </div>
           <LinkButton href="/assessment" size="md" className="max-sm:hidden">

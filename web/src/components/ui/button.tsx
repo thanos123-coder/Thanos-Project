@@ -48,7 +48,7 @@ function Dot() {
   return (
     <span
       aria-hidden
-      className="relative block size-[0.55em] rounded-full bg-[var(--dot)] transition-transform duration-300 ease-[var(--ease-out)] group-hover/btn:translate-x-1 group-hover/btn:scale-110"
+      className="relative block size-[0.55em] rounded-full bg-[var(--dot)] transition-transform duration-200 ease-[var(--ease-out)] group-hover/btn:translate-x-1 group-hover/btn:scale-110"
     />
   );
 }
@@ -98,7 +98,7 @@ export function TextLink({
         {children}
         <span
           aria-hidden
-          className="absolute -bottom-1 left-0 h-[3px] w-full origin-left scale-x-[0.25] rounded-full bg-current transition-transform duration-300 ease-[var(--ease-out)] group-hover/tl:scale-x-100 group-focus-visible/tl:scale-x-100"
+          className="absolute -bottom-1 left-0 h-[3px] w-full origin-left scale-x-[0.25] rounded-full bg-current transition-transform duration-200 ease-[var(--ease-out)] group-hover/tl:scale-x-100 group-focus-visible/tl:scale-x-100"
         />
       </span>
     </Link>

@@ -35,7 +35,7 @@ export function Tabs<T extends string>({
             {t.label}
           </BaseTabs.Tab>
         ))}
-        <BaseTabs.Indicator className="tab-indicator absolute left-0 top-1 -z-0 h-11 w-(--active-tab-width) translate-x-(--active-tab-left) rounded-full bg-paper transition-[translate,width] duration-300 ease-[var(--ease-out)]" />
+        <BaseTabs.Indicator className="tab-indicator absolute inset-x-0 top-1 -z-0 h-11 rounded-full bg-paper [clip-path:inset(0_var(--active-tab-right)_0_var(--active-tab-left)_round_999px)] transition-[clip-path] duration-250 ease-[var(--ease-out)] motion-reduce:transition-none" />
       </BaseTabs.List>
       {children}
     </BaseTabs.Root>

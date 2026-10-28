@@ -22,8 +22,8 @@ export function HowItWorks() {
           <div key={i} className={`flex flex-col gap-5 lg:row-start-1 lg:self-end ${t.span}`}>
             <div className={`grow-tile relative overflow-hidden rounded-[var(--radius)] ${t.bg} ${t.h}`}>
               <div
-                className="absolute left-1/2 top-[12%] w-[min(86%,26rem)]"
-                style={{ transform: `translateX(-50%) scale(${0.86 + i * 0.07})`, transformOrigin: "top center" }}
+                className="absolute left-1/2 top-1/2 w-[min(86%,26rem)]"
+                style={{ transform: `translate(-50%, -50%) scale(${0.86 + i * 0.07})`, transformOrigin: "center" }}
               >
                 {t.frag}
               </div>

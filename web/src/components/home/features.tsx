@@ -59,7 +59,7 @@ export function Features() {
               data-on={isOn ? "" : undefined}
               data-field={isOn ? f.field : undefined}
               className={clsx(
-                "feature-band transition-colors duration-500 ease-[var(--ease-out)]",
+                "feature-band transition-colors duration-300 ease-[ease]",
                 isOn ? fieldOn[f.field] : "bg-ground text-soft hover:bg-surface",
               )}
             >
@@ -69,7 +69,7 @@ export function Features() {
                   className="col-span-10 flex cursor-pointer items-center text-[clamp(1.625rem,0.9rem+3vw,4rem)] leading-[1.08] tracking-[-0.03em] lg:col-span-11"
                   onClick={() => setOn((s) => ({ ...s, [f.id]: !s[f.id] }))}
                 >
-                  <span className={clsx("transition-colors duration-500", isOn ? "" : "text-soft")}>{f.sentence}</span>
+                  <span className={clsx("transition-colors duration-300", isOn ? "" : "text-soft")}>{f.sentence}</span>
                 </h3>
                 <div className="col-span-2 flex items-center justify-end text-[clamp(1.625rem,0.9rem+3vw,4rem)] lg:col-span-1">
                   <Switch
@@ -82,7 +82,7 @@ export function Features() {
                 </div>
 
                 <div
-                  className="feature-reveal col-span-12 grid transition-[grid-template-rows] duration-500 ease-[var(--ease-in-out)]"
+                  className="feature-reveal col-span-12 grid transition-[grid-template-rows] duration-400 ease-[var(--ease-in-out)]"
                   style={{ gridTemplateRows: isOn ? "1fr" : "0fr" }}
                   aria-hidden={!isOn}
                   inert={!isOn}
