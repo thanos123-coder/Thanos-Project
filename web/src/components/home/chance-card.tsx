@@ -34,14 +34,15 @@ export function ChanceCard({
     >
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 items-center gap-3">
-          <span className="grid size-12 shrink-0 place-items-center rounded-full bg-surface text-small font-bold tracking-tight">
+          {/* A capsule, not a circle, so six-letter codes (MBZUAI) still fit */}
+          <span className="grid h-12 min-w-12 shrink-0 place-items-center rounded-full bg-surface px-2 text-small font-bold tracking-tight">
             <Swap value={uni.short} />
           </span>
           <div className="min-w-0">
-            <p className="truncate text-lead font-medium leading-tight">
-              <Swap value={uni.name} />
+            <p className="text-lead font-medium leading-tight" title={uni.name}>
+              <Swap value={uni.name} className="line-clamp-2" />
             </p>
-            <p className="truncate text-small text-soft">
+            <p className="truncate text-small text-soft" title={`Engineering, ${uni.country}`}>
               <Swap value={`Engineering, ${uni.country}`} />
             </p>
           </div>
@@ -88,7 +89,7 @@ export function ChanceCard({
 
       {hasRange && uni.mover ? (
         moverToggle ? (
-          <div className="mt-5 flex items-center justify-between gap-4 rounded-full bg-ground py-2 pl-5 pr-2">
+          <div className="mt-5 flex items-center justify-between gap-4 rounded-3xl bg-ground py-2 pl-5 pr-2">
             <p className={clsx("text-body transition-opacity duration-200", showMover ? "opacity-100" : "opacity-60")}>
               <Swap value={showMover ? uni.mover : "Show what would move it"} />
             </p>

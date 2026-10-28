@@ -111,6 +111,8 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     -webkit-tap-highlight-color: transparent;
+    /* A pasted link or a long compound word breaks only when it can't fit the line */
+    overflow-wrap: break-word;
     font-feature-settings: "palt" 0;
   }
 

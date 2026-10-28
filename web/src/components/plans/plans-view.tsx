@@ -91,12 +91,14 @@ function PlanCard({ plan, billing, region }: { plan: Plan; billing: BillingId; r
       </h3>
       <p className={clsx("mt-1 text-body md:min-h-0", featured ? "text-white/75" : "text-soft")}>{plan.for}</p>
 
-      <div className="mt-6 min-h-[5.5rem]">
+      {/* The price block is the size container (not the card: containment would cut the card off its subgrid) */}
+      <div className="mt-6 min-h-[5.5rem] [container-type:inline-size]">
         {price ? (
           <>
             <p className={clsx("text-small", featured ? "text-white/70" : "text-soft", billing === "monthly" && "invisible")}>Works out to</p>
-            <p className="flex items-end gap-2">
-              <span className="text-[clamp(2.5rem,2rem+1.4vw,3.25rem)] font-medium leading-none tracking-[-0.04em] tabular">
+            {/* Sized to the card too, so a long local price (₹5,039.16) still fits; "/ month" wraps under it if it must */}
+            <p className="flex flex-wrap items-end gap-x-2 gap-y-1">
+              <span className="whitespace-nowrap text-[min(clamp(2.5rem,2rem+1.4vw,3.25rem),18cqi)] font-medium leading-none tracking-[-0.04em] tabular">
                 <NumberFlow value={price.perMonth * rate} format={fmtFlow} locales={localeFor(region.currency)} />
               </span>
               <span className={clsx("pb-1 text-body", featured ? "text-white/75" : "text-soft")}>/ month</span>
@@ -106,7 +108,7 @@ function PlanCard({ plan, billing, region }: { plan: Plan; billing: BillingId; r
           <>
             <p className="text-small invisible">Works out to</p>
             {/* NumberFlow pads its digits by a quarter em; match it so "Free" sits on the same line as the prices */}
-            <p className="pt-[0.25em] text-[clamp(2.5rem,2rem+1.4vw,3.25rem)] font-medium leading-none tracking-[-0.04em]">Free</p>
+            <p className="pt-[0.25em] text-[min(clamp(2.5rem,2rem+1.4vw,3.25rem),18cqi)] font-medium leading-none tracking-[-0.04em]">Free</p>
             <p className="mt-2 text-body text-soft">No card needed, ever</p>
           </>
         )}
@@ -114,9 +116,9 @@ function PlanCard({ plan, billing, region }: { plan: Plan; billing: BillingId; r
 
       {price ? (
         <div className={clsx("mt-5 rounded-[1.25rem] p-4", featured ? "bg-white/8" : "bg-ground")}>
-          <p className="flex items-baseline justify-between gap-3">
+          <p className="flex flex-wrap items-baseline justify-between gap-x-3">
             <span className="text-small font-medium">Billed today</span>
-            <span className="text-body font-medium tabular">
+            <span className="whitespace-nowrap text-body font-medium tabular">
               <NumberFlow value={price.billed * rate} format={fmtFlow} locales={localeFor(region.currency)} /> plus tax
             </span>
           </p>
@@ -338,6 +340,7 @@ function SchoolsForm() {
                     name="school"
                     required
                     autoComplete="organization"
+                    maxLength={120}
                     aria-invalid={invalid}
                     aria-describedby={hintId}
                     onChange={() => fix("school")}
@@ -351,6 +354,7 @@ function SchoolsForm() {
                     name="name"
                     required
                     autoComplete="name"
+                    maxLength={80}
                     aria-invalid={invalid}
                     aria-describedby={hintId}
                     onChange={() => fix("name")}
@@ -381,6 +385,7 @@ function SchoolsForm() {
                     type="email"
                     required
                     autoComplete="email"
+                    maxLength={254}
                     inputMode="email"
                     aria-invalid={invalid}
                     aria-describedby={hintId}
@@ -404,7 +409,7 @@ function SchoolsForm() {
                 )}
               </Field>
               <Field label="Anything we should know? (optional)" className="sm:col-span-2">
-                {({ id }) => <TextArea id={id} />}
+                {({ id }) => <TextArea id={id} maxLength={2000} />}
               </Field>
               <div className="flex justify-end sm:col-span-2">
                 <Button type="submit" size="lg">

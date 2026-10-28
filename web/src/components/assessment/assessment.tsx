@@ -14,10 +14,26 @@ import { Select, TextInput } from "@/components/ui/fields";
 import { RangeBar, Swap, VerdictChip } from "@/components/ui/range-bar";
 import { activityKinds, applyingFrom, courses, gradeScales, systemOptions, type System } from "@/content/assessment";
 import { dreamUniversities, moreUniversities, verdictFor, type ExampleChance } from "@/content/universities";
+import { worstDreamUniversities, worstMoreUniversities } from "@/content/worst-case";
+import { useFixture } from "@/lib/data-mode";
 import { Generated } from "@/components/motion/generated";
 
-const allUnis = [...dreamUniversities, ...moreUniversities];
+const demoUnis = [...dreamUniversities, ...moreUniversities];
+const worstUnis = [...worstDreamUniversities, ...worstMoreUniversities];
 const TOTAL = 6;
+
+const minorWords = new Set(["the", "of", "at", "and", "in", "for", "de", "la", "le", "du", "des", "di", "del", "y", "der", "die", "das", "für", "à"]);
+
+/** Initials for a university typed in by hand: the first letters of up to three significant words (UTA, MIT). */
+function initialsOf(name: string) {
+  const words = name.split(/[\s,()-]+/).filter((w) => w && !minorWords.has(w.toLowerCase()));
+  const first = (w: string) => {
+    const seg = typeof Intl.Segmenter === "function" ? new Intl.Segmenter(undefined, { granularity: "grapheme" }) : null;
+    return seg ? (seg.segment(w)[Symbol.iterator]().next().value?.segment ?? "") : Array.from(w)[0] ?? "";
+  };
+  const letters = words.length > 1 ? words.slice(0, 3).map(first).join("") : Array.from(words[0] ?? "?").slice(0, 2).join("");
+  return letters.toLocaleUpperCase();
+}
 
 type Answers = {
   system?: System;
@@ -41,6 +57,7 @@ const titles = [
 
 export function Assessment() {
   const reduce = useReducedMotion();
+  const allUnis = useFixture(demoUnis, worstUnis);
   const [step, setStep] = useState(0);
   const [dir, setDir] = useState(1);
   const [phase, setPhase] = useState<"questions" | "building" | "results">("questions");
@@ -49,7 +66,7 @@ export function Assessment() {
   // A university chosen on the home page arrives in the link (?uni=Edinburgh) and is added once.
   const fromLink = useSyncExternalStore(
     noop,
-    () => new URLSearchParams(window.location.search).get("uni")?.trim() || null,
+    () => new URLSearchParams(window.location.search).get("uni")?.trim().slice(0, 120) || null,
     () => null,
   );
   const [seeded, setSeeded] = useState<string | null>(null);
@@ -223,6 +240,7 @@ export function Assessment() {
                   <TextInput
                     className="mt-2"
                     placeholder="For example, Biomedical engineering"
+                    maxLength={120}
                     value={courses.includes(a.course ?? "") ? "" : (a.course ?? "")}
                     onChange={(e) => setA((x) => ({ ...x, course: e.target.value }))}
                   />
@@ -245,6 +263,7 @@ export function Assessment() {
                   <TextInput
                     className="mt-2"
                     placeholder="For example, Captain, robotics team"
+                    maxLength={100}
                     value={a.lead}
                     onChange={(e) => setA((x) => ({ ...x, lead: e.target.value }))}
                   />
@@ -257,14 +276,14 @@ export function Assessment() {
                 <p className="text-body text-soft">Choose up to 8. You’ll see a range for each one.</p>
                 <div className="mt-5 flex flex-wrap gap-2">
                   {allUnis.map((u) => (
-                    <Chip key={u.id} pressed={a.unis.includes(u.id)} onClick={() => toggle("unis", u.id)}>
+                    <Chip key={u.id} pressed={a.unis.includes(u.id)} onClick={() => toggle("unis", u.id)} title={u.name}>
                       {u.name}
                     </Chip>
                   ))}
                   {a.unis
                     .filter((id) => id.startsWith("custom:"))
                     .map((id) => (
-                      <Chip key={id} pressed onClick={() => toggle("unis", id)}>
+                      <Chip key={id} pressed onClick={() => toggle("unis", id)} title={id.slice(7)}>
                         {id.slice(7)}
                       </Chip>
                     ))}
@@ -329,11 +348,12 @@ export function Assessment() {
 }
 
 function Results({ phase, answers, onRestart }: { phase: "building" | "results"; answers: Answers; onRestart: () => void }) {
+  const allUnis = useFixture(demoUnis, worstUnis);
   const chosen: ExampleChance[] = answers.unis.map(
     (id) =>
       allUnis.find((u) => u.id === id) ?? {
         id,
-        short: id.slice(7, 9).toUpperCase(),
+        short: initialsOf(id.slice(7)),
         name: id.slice(7),
         country: "",
         note: "More details needed",
@@ -358,10 +378,12 @@ function Results({ phase, answers, onRestart }: { phase: "building" | "results";
             const has = u.low !== undefined && u.high !== undefined;
             const content = (
               <>
-                <div className="flex flex-wrap items-center justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    <span className="grid size-11 place-items-center rounded-full bg-surface text-small font-bold">{u.short}</span>
-                    <div>
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <span className="grid h-11 min-w-11 shrink-0 place-items-center rounded-full bg-surface px-2 text-small font-bold">
+                      {u.short}
+                    </span>
+                    <div className="min-w-0">
                       <p className="text-lead font-medium leading-tight">{u.name}</p>
                       {u.country ? <p className="text-small text-soft">{u.country}</p> : null}
                     </div>
@@ -369,9 +391,9 @@ function Results({ phase, answers, onRestart }: { phase: "building" | "results";
                   {building ? (
                     <span className="h-7 w-28 rounded-full bg-surface gen-shimmer" aria-hidden />
                   ) : (
-                    <div className="flex items-center gap-3">
+                    <div className="flex shrink-0 items-center gap-3">
                       {has ? (
-                        <span className="tabular text-[1.75rem] font-medium leading-none tracking-[-0.03em]">
+                        <span className="tabular whitespace-nowrap text-[1.75rem] font-medium leading-none tracking-[-0.03em]">
                           {u.low}–{u.high}%
                         </span>
                       ) : null}
@@ -384,8 +406,11 @@ function Results({ phase, answers, onRestart }: { phase: "building" | "results";
                     <div className="h-4 rounded-full bg-surface gen-shimmer" aria-hidden />
                   ) : has ? (
                     <RangeBar low={u.low!} high={u.high!} reach={u.could} label={`${u.name}: ${u.low} to ${u.high} percent`} />
+                  ) : u.note && u.note !== "More details needed" ? (
+                    <p className="text-body text-soft">{u.note}</p>
                   ) : (
-                    <p className="text-body text-soft">{u.note ?? "More details needed"}</p>
+                    // The chip already says "More details needed"; an empty track says there's no range yet
+                    <div className="h-4 rounded-full bg-surface" aria-hidden />
                   )}
                 </div>
                 {!building && has && u.mover ? (

@@ -23,6 +23,14 @@
  * No dependencies, any framework. Respects prefers-reduced-motion (a plain fade instead).
  */
 
+// Panel text is built as DOM nodes with textContent, never as HTML strings (Upchance security hardening)
+function domNode(tag, cls, text) {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text != null) n.textContent = text;
+  return n;
+}
+
 const NS = "http://www.w3.org/2000/svg";
 
 const DEFAULTS = {
@@ -527,8 +535,7 @@ function buildTexts(G, el, opts) {
   G.stepEl = mk("t-tig-steps");
   if (!isFree(el, r.left, r.bottom + 16, r.right, r.bottom + 50)) G.stepEl.style.display = "none";
   G.steps = [...opts.steps, opts.done].filter(Boolean);
-  G.stepEl.innerHTML = G.steps.map(() => `<div class="t-tig-step"><i></i><span></span></div>`).join("");
-  [...G.stepEl.children].forEach((d, i) => (d.lastChild.textContent = G.steps[i]));
+  G.stepEl.replaceChildren(...G.steps.map((s) => { const d = domNode("div", "t-tig-step"); d.append(domNode("i"), domNode("span", "", s)); return d; }));
   const hex = (k) => "0x" + Math.floor(hashN(k * 5.3 + 17.1) * 65535).toString(16).padStart(4, "0");
   const sz = (b) => `${String(Math.round(b.w)).padStart(3, "0")}×${String(Math.round(b.h)).padStart(3, "0")}`;
   G.log = [
@@ -678,9 +685,9 @@ function texts(G, p, t) {
       const k = clamp((p - l.t0) / 0.03), prog = clamp((p - l.t0) / (l.t1 - l.t0)), full = l.head + (prog >= 1 ? "[  ok  ]" : `[${"#".repeat(Math.round(prog * 6)).padEnd(6, ".")}]`);
       return full.slice(0, Math.ceil(full.length * k));
     });
-    const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
-    const html = `<div class="t-tig-panel-head">AGENT.LOG // ${String(done).padStart(2, "0")}/${String(G.log.length).padStart(2, "0")}</div>` + rows.map((r) => `<div>${esc(r)}</div>`).join("");
-    if (G.logSig !== html) { G.logSig = html; G.logEl.innerHTML = html; }
+    const head = `AGENT.LOG // ${String(done).padStart(2, "0")}/${String(G.log.length).padStart(2, "0")}`;
+    const sig = head + "|" + rows.join("|");
+    if (G.logSig !== sig) { G.logSig = sig; G.logEl.replaceChildren(domNode("div", "t-tig-panel-head", head), ...rows.map((r) => domNode("div", "", r))); }
   }
   const n = G.steps.length, gone = smooth(0.98, 1.05, p);
   [...G.stepEl.children].forEach((s, i) => {

@@ -148,7 +148,7 @@ export function MemoryDrawer({
                       transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
                       className="flex min-h-14 items-center justify-between gap-3 rounded-[1.25rem] bg-surface py-2 pl-4 pr-2"
                     >
-                      <span className="text-body">{item}</span>
+                      <span className="min-w-0 text-body">{item}</span>
                       <button
                         type="button"
                         aria-label={`Forget “${item}”`}

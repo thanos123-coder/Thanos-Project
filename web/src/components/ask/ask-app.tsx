@@ -27,6 +27,8 @@ import { BlurText } from "@/components/vendor/blur-text";
 import { AnswerView, plainText, totalUnits, type AssistantMessage } from "@/components/ask/answer-view";
 import { MemoryDrawer } from "@/components/ask/memory-drawer";
 import { answers, memoryItems, pastChats, specialistSteps, suggestions, type Answer } from "@/content/ask";
+import { worstMemoryItems, worstPastChats } from "@/content/worst-case";
+import { useFixture } from "@/lib/data-mode";
 
 type UserMessage = { id: string; role: "user"; text: string; file?: string };
 type Message = UserMessage | AssistantMessage;
@@ -52,7 +54,7 @@ function titleFrom(text: string) {
 }
 
 /** Old chats arrive finished, so they open instantly and whole. */
-const initialChats: Chat[] = pastChats.map((title, i) => {
+const chatsFrom = (titles: string[]): Chat[] => titles.map((title, i) => {
   const answer = answerFor(title);
   return {
     id: `past-${i}`,
@@ -397,9 +399,11 @@ function SearchChats({
 export function AskApp() {
   const reduce = useReducedMotion();
   const wide = useWide();
-  const [chats, setChats] = useState<Chat[]>(initialChats);
+  const pastTitles = useFixture(pastChats, worstPastChats, []);
+  const seedMemory = useFixture(memoryItems, worstMemoryItems, []);
+  const [chats, setChats] = useState<Chat[]>(() => chatsFrom(pastTitles));
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [memory, setMemory] = useState<string[]>(memoryItems);
+  const [memory, setMemory] = useState<string[]>(seedMemory);
   const [paused, setPaused] = useState(false);
   // The account menu deep-links here with ?panel=memory; after that, the panel is the visitor's to open and close
   const deepMemory = useSyncExternalStore(

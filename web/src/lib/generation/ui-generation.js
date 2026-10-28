@@ -29,6 +29,14 @@
  * Respects prefers-reduced-motion (a plain fade instead).
  */
 
+// Panel text is built as DOM nodes with textContent, never as HTML strings (Upchance security hardening)
+function domNode(tag, cls, text) {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text != null) n.textContent = text;
+  return n;
+}
+
 import * as TIG from "./text-image-generation.js";
 
 const NS = "http://www.w3.org/2000/svg";
@@ -302,8 +310,7 @@ function buildTexts(G, el, M, opts) {
   G.stepEl = mk("t-gen-steps");
   if (!side && !below && !isFree(el, r.left, r.bottom + 20, r.right, r.bottom + 50)) G.stepEl.style.display = "none"; // no room at all: the drawing speaks for itself
   G.steps = [...opts.steps, opts.done].filter(Boolean);
-  G.stepEl.innerHTML = G.steps.map((s) => `<div class="t-gen-step"><i></i><span></span></div>`).join("");
-  [...G.stepEl.children].forEach((d, i) => (d.lastChild.textContent = G.steps[i]));
+  G.stepEl.replaceChildren(...G.steps.map((s) => { const d = domNode("div", "t-gen-step"); d.append(domNode("i"), domNode("span", "", s)); return d; }));
 }
 
 // ─── 4. one frame of the build: p = progress (0 → END), t = ms since start ───
@@ -410,19 +417,19 @@ function texts(G, p, t, D) {
   const sk = clamp((p - 0.12) / 0.72), typed = Math.floor(G.codeChars * sk); let left = typed; const lines = [];
   for (const ln of G.code) { if (left <= 0) break; lines.push(ln.slice(0, left)); left -= ln.length + 1; }
   const tok = Math.round(typed / 3.4), secs = Math.max(0.1, (Math.min(p, 1) - 0.12) * D / 1000), caret = sk > 0 && sk < 1 && blink ? "_" : "";
-  const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
-  const codeHtml = lines.slice(-(G.textMode === "side" ? Math.max(8, Math.floor(G.h / 11)) : 4)).map((ln, i, a) => {
+  const codeRows = () => lines.slice(-(G.textMode === "side" ? Math.max(8, Math.floor(G.h / 11)) : 4)).map((ln, i, a) => {
     const m = ln.match(/^(\s*)([\w-]+)(:)(.*)$/), c = i === a.length - 1 ? caret : "";
-    return m ? `<div>${esc(m[1])}<b>${esc(m[2])}</b>:<em>${esc(m[4])}</em>${c}</div>` : `<div class="${/^\/\*/.test(ln) ? "is-comment" : /^[.:]/.test(ln) ? "is-selector" : ""}">${esc(ln)}${c}</div>`;
-  }).join("");
+    if (!m) return domNode("div", /^\/\*/.test(ln) ? "is-comment" : /^[.:]/.test(ln) ? "is-selector" : "", ln + c);
+    const d = domNode("div"); d.append(m[1], domNode("b", "", m[2]), ":", domNode("em", "", m[4]), c); return d;
+  });
   const foot = sk > 0 ? `${Math.round(tok / secs)} TOK/S · ${lines.length} LN · ${sk < 1 ? "WRITING" : "READY"}` : "";
-  const logHtml = `<div class="t-gen-panel-head">${head}</div>` + logRows.map((r) => `<div>${esc(r)}</div>`).join("");
+  const logNodes = () => [domNode("div", "t-gen-panel-head", head), ...logRows.map((r) => domNode("div", "", r))];
   if (G.codeEl) {
     G.codeEl.style.opacity = f2(vis);
-    const sig = typed + "|" + caret; if (G.codeSig !== sig) { G.codeSig = sig; G.codeEl.innerHTML = `<div class="t-gen-panel-head">MOTION.CSS // ${String(tok).padStart(4, "0")} TOKENS</div>${codeHtml}<div class="t-gen-panel-foot">${foot}</div>`; }
-    if (G.logSig !== logRows.join("|")) { G.logSig = logRows.join("|"); G.logEl.innerHTML = logHtml; }
+    const sig = typed + "|" + caret; if (G.codeSig !== sig) { G.codeSig = sig; G.codeEl.replaceChildren(domNode("div", "t-gen-panel-head", `MOTION.CSS // ${String(tok).padStart(4, "0")} TOKENS`), ...codeRows(), domNode("div", "t-gen-panel-foot", foot)); }
+    if (G.logSig !== logRows.join("|")) { G.logSig = logRows.join("|"); G.logEl.replaceChildren(...logNodes()); }
   } else if (G.logEl) {
-    const sig = logRows.join("|") + typed; if (G.logSig !== sig) { G.logSig = sig; G.logEl.innerHTML = logHtml + `<div class="t-gen-panel-foot">${foot}</div>`; }
+    const sig = logRows.join("|") + typed; if (G.logSig !== sig) { G.logSig = sig; G.logEl.replaceChildren(...logNodes(), domNode("div", "t-gen-panel-foot", foot)); }
   }
   // step line: each step for its share of the drawing, the last once the UI is in
   const n = G.steps.length, gone = smooth(0.98, 1.06, p);

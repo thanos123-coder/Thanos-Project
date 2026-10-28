@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { M_PLUS_Rounded_1c } from "next/font/google";
 import { Toaster } from "sonner";
+import { DataSwitch } from "@/components/dev/data-switch";
 import { SmoothScroll } from "@/components/motion/smooth-scroll";
 import "@/lib/generation/ui-generation.css";
 import "@/lib/generation/text-image-generation.css";
@@ -36,7 +37,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="en" data-theme="light" className={rounded.variable}>
       <body className="min-h-dvh">
         <SmoothScroll />
-        {children}
+        {process.env.NODE_ENV === "development" ? <DataSwitch>{children}</DataSwitch> : children}
         <Toaster
           position="bottom-center"
           toastOptions={{

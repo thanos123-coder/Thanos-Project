@@ -6,10 +6,13 @@ import { RangeBar, VerdictChip } from "@/components/ui/range-bar";
 import { Switch } from "@/components/ui/switch";
 import { TextLink } from "@/components/ui/button";
 import { eleniResults, exampleStudent, verdictFor } from "@/content/universities";
+import { worstResults } from "@/content/worst-case";
+import { useFixture } from "@/lib/data-mode";
 
 /** "What your results look like": Eleni's five results, with one switch for what would move each range. */
 export function ExampleResults() {
   const [moves, setMoves] = useState(false);
+  const results = useFixture(eleniResults, worstResults);
   return (
     <section className="frame section" aria-labelledby="results-title">
       <div className="grid-12 gap-y-6">
@@ -30,7 +33,7 @@ export function ExampleResults() {
       </div>
 
       <ul className="mt-12 grid gap-2 md:grid-cols-2">
-        {eleniResults.map((u, i) => {
+        {results.map((u, i) => {
           const verdict = verdictFor(u);
           const has = u.low !== undefined && u.high !== undefined;
           return (
@@ -45,17 +48,19 @@ export function ExampleResults() {
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex min-w-0 items-center gap-3">
-                  <span className="grid size-12 shrink-0 place-items-center rounded-full bg-surface text-small font-bold">
+                  <span className="grid h-12 min-w-12 shrink-0 place-items-center rounded-full bg-surface px-2 text-small font-bold">
                     {u.short}
                   </span>
                   <div className="min-w-0">
-                    <h3 className="truncate text-lead font-medium leading-tight">{u.name}</h3>
+                    <h3 className="line-clamp-2 text-lead font-medium leading-tight" title={u.name}>
+                      {u.name}
+                    </h3>
                     <p className="text-small text-soft">{u.country}</p>
                   </div>
                 </div>
-                <div className="flex flex-col items-end gap-2">
+                <div className="flex shrink-0 flex-col items-end gap-2">
                   {has ? (
-                    <p className="tabular text-[clamp(1.75rem,1.3rem+1.4vw,2.5rem)] font-medium leading-none tracking-[-0.03em]">
+                    <p className="tabular whitespace-nowrap text-[clamp(1.75rem,1.3rem+1.4vw,2.5rem)] font-medium leading-none tracking-[-0.03em]">
                       {u.low}–{u.high}%
                     </p>
                   ) : null}

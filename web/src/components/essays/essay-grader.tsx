@@ -7,7 +7,9 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Field, Select, TextArea, TextInput } from "@/components/ui/fields";
 import { Tabs } from "@/components/ui/tabs";
-import { draftStages, feedback, promptTypes, sampleEssay, scanLevels, type ScanVerdict } from "@/content/essays";
+import { draftStages, feedback as demoFeedback, promptTypes, sampleEssay as demoEssay, scanLevels, type ScanVerdict } from "@/content/essays";
+import { worstEssay, worstFeedback } from "@/content/worst-case";
+import { useFixture } from "@/lib/data-mode";
 import { Generated } from "@/components/motion/generated";
 
 type Mode = "feedback" | "scan";
@@ -57,6 +59,7 @@ const ScanIcon = () => (
 );
 
 export function EssayGrader() {
+  const sampleEssay = useFixture(demoEssay, worstEssay);
   const [mode, setMode] = useState<Mode>("feedback");
   const [essay, setEssay] = useState("");
   const [prompt, setPrompt] = useState("");
@@ -129,22 +132,22 @@ export function EssayGrader() {
               </Field>
               <Field label="The exact prompt" hint="Paste the prompt, or the platform and prompt number. Without it the evaluation is provisional." className="sm:col-span-2">
                 {({ id, hintId }) => (
-                  <TextArea id={id} aria-describedby={hintId} rows={2} value={prompt} onChange={(e) => setPrompt(e.target.value)} className="min-h-20" />
+                  <TextArea id={id} aria-describedby={hintId} rows={2} maxLength={1000} value={prompt} onChange={(e) => setPrompt(e.target.value)} className="min-h-20" />
                 )}
               </Field>
               <Field label="Limit">
                 {({ id }) => (
                   <div className="flex gap-2">
-                    <TextInput id={id} inputMode="numeric" placeholder="e.g. 650" value={limit} onChange={(e) => setLimit(e.target.value.replace(/\D/g, ""))} className="w-28! shrink-0" />
+                    <TextInput id={id} inputMode="numeric" maxLength={5} placeholder="e.g. 650" value={limit} onChange={(e) => setLimit(e.target.value.replace(/\D/g, ""))} className="w-28! shrink-0" />
                     <Select label="Limit unit" value={unit} onChange={setUnit} items={[{ value: "words", label: "words" }, { value: "characters", label: "characters" }]} />
                   </div>
                 )}
               </Field>
               <Field label="Target college (optional)">
-                {({ id }) => <TextInput id={id} placeholder="e.g. Yale" value={college} onChange={(e) => setCollege(e.target.value)} />}
+                {({ id }) => <TextInput id={id} maxLength={120} placeholder="e.g. Yale" value={college} onChange={(e) => setCollege(e.target.value)} />}
               </Field>
               <Field label="Intended major (optional)">
-                {({ id }) => <TextInput id={id} placeholder="e.g. Biology" value={major} onChange={(e) => setMajor(e.target.value)} />}
+                {({ id }) => <TextInput id={id} maxLength={120} placeholder="e.g. Biology" value={major} onChange={(e) => setMajor(e.target.value)} />}
               </Field>
               <Field label="Draft stage">
                 {({ id }) => <Select id={id} label="Draft stage" value={stage} onChange={setStage} items={draftStages} />}
@@ -161,6 +164,7 @@ export function EssayGrader() {
             <textarea
               value={essay}
               onChange={(e) => setEssay(e.target.value)}
+              maxLength={20000}
               placeholder="Paste your essay here…"
               className="essay-input min-h-[22rem] w-full resize-y rounded-[1.25rem] bg-ground p-5 text-[1.125rem] leading-[1.75] text-ink outline-none transition-shadow placeholder:text-soft focus-visible:shadow-[0_0_0_3px_var(--cobalt)] sm:p-6"
             />
@@ -215,6 +219,7 @@ export function EssayGrader() {
 }
 
 function Results({ mode, phase, essay }: { mode: Mode; phase: Phase; essay: string }) {
+  const feedback = useFixture(demoFeedback, worstFeedback);
   if (phase === "empty") {
     return (
       <div className="flex min-h-[28rem] flex-col items-center justify-center rounded-[var(--radius)] bg-surface p-8 text-center">
@@ -319,7 +324,7 @@ function Results({ mode, phase, essay }: { mode: Mode; phase: Phase; essay: stri
           {feedback.lines.map((l, i) => (
             <li key={l.text} className="flex items-start gap-3 rounded-[1rem] bg-ground p-3">
               <span className="shrink-0 rounded-full bg-cobalt-tint px-2.5 py-0.5 text-small font-medium">{l.tag}</span>
-              <span className="text-body">
+              <span className="min-w-0 text-body">
                 <Quoted text={l.text} tag={l.tag} delay={0.35 + i * 0.25} />
               </span>
             </li>

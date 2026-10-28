@@ -17,7 +17,7 @@ export function Chip({
       type="button"
       aria-pressed={pressed}
       className={clsx(
-        "press group/chip inline-flex items-center gap-2 rounded-full font-medium",
+        "press group/chip inline-flex max-w-full items-center gap-2 rounded-full font-medium",
         size === "md" ? "h-11 px-4 text-body" : "h-9 px-3.5 text-small",
         pressed
           ? "bg-cobalt text-on-cobalt"
@@ -35,7 +35,7 @@ export function Chip({
           pressed ? "scale-125 bg-paper" : onField ? "bg-white/60" : "bg-soft/50",
         )}
       />
-      {children}
+      <span className="truncate">{children}</span>
     </button>
   );
 }

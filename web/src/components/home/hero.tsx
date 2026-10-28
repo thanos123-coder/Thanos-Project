@@ -5,16 +5,17 @@ import { ChanceCard } from "@/components/home/chance-card";
 import { DreamPicker } from "@/components/home/dream-picker";
 import { HeroActions, Reassurance, heroHeadline, heroSupport } from "@/components/home/hero-copy";
 import { dreamUniversities, type ExampleChance } from "@/content/universities";
+import { worstDreamUniversities } from "@/content/worst-case";
+import { useFixture } from "@/lib/data-mode";
 import { BlurText, wordCount } from "@/components/vendor/blur-text";
-
-const start = dreamUniversities.find((u) => u.id === "imperial")!;
 
 /**
  * Home hero (prototype "Field", promoted): the headline sits on the cobalt field, whose right edge is the
  * range band's giant rounded end; the live range for your dream university sits beside it.
  */
 export function HomeHero() {
-  const [uni, setUni] = useState<ExampleChance>(start);
+  const unis = useFixture(dreamUniversities, worstDreamUniversities);
+  const [uni, setUni] = useState<ExampleChance>(() => unis.find((u) => u.id === "imperial")!);
   return (
     <section className="relative isolate" aria-labelledby="hero-title">
       <div className="grid grid-cols-[minmax(0,1fr)] lg:min-h-[calc(100svh-4.5rem)] lg:grid-cols-[minmax(0,1.18fr)_minmax(0,1fr)]">

@@ -11,6 +11,8 @@ import { MotifSlider } from "@/components/ui/motif-slider";
 import { Swap } from "@/components/ui/range-bar";
 import { ChancesFragment } from "@/components/fragments/fragments";
 import { gradeScales, systemOptions, type System } from "@/content/assessment";
+import { worstGrades, worstLog, worstScores } from "@/content/worst-case";
+import { useFixture } from "@/lib/data-mode";
 
 type Kind = "Activity" | "Award" | "Experience";
 type Entry = { id: number; kind: Kind; title: string; role: string; when: string; hours?: string; text: string };
@@ -42,7 +44,13 @@ const EditButton = (props: React.ComponentProps<"button">) => (
   </button>
 );
 
+const exampleGrades = { system: "IB Diploma" as System, value: 40 };
+const exampleScores = { IELTS: "8.0" };
+
 export function LogBoard() {
+  const exampleLog = useFixture<Entry[]>(example, worstLog);
+  const exampleGrade = useFixture<{ system: System; value: number }>(exampleGrades, worstGrades);
+  const exampleScore = useFixture<Partial<Record<(typeof tests)[number], string>>>(exampleScores, worstScores);
   const [entries, setEntries] = useState<Entry[]>([]);
   const [filter, setFilter] = useState<"All" | Kind>("All");
   const [addOpen, setAddOpen] = useState(false);
@@ -103,9 +111,9 @@ export function LogBoard() {
   };
 
   const loadExample = () => {
-    setEntries(example);
-    setGrades({ system: "IB Diploma", value: 40 });
-    setScores({ IELTS: "8.0" });
+    setEntries(exampleLog);
+    setGrades(exampleGrade);
+    setScores(exampleScore);
     toast("Showing Eleni’s example log.");
   };
 
@@ -244,17 +252,22 @@ export function LogBoard() {
           ) : (
             <ul className="mt-6 flex flex-col gap-2">
               {shown.map((e, i) => (
-                <li key={e.id} className="log-entry flex flex-col gap-2 rounded-[1.25rem] bg-ground p-5 sm:flex-row sm:items-start sm:justify-between" style={{ "--i": i } as React.CSSProperties}>
+                <li key={e.id} className="log-entry grid gap-2 rounded-[1.25rem] bg-ground p-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-x-8" style={{ "--i": i } as React.CSSProperties}>
                   <div className="min-w-0">
-                    <p className="flex flex-wrap items-center gap-2">
-                      <span className="rounded-full bg-cobalt-tint px-2.5 py-0.5 text-small font-medium">{e.kind}</span>
-                      <span className="text-lead font-medium">{e.title}</span>
+                    {/* The kind sits inline, so a long title wraps under it instead of pushing it onto its own line */}
+                    <p className="text-lead font-medium">
+                      <span className="mr-2 inline-block rounded-full bg-cobalt-tint px-2.5 py-0.5 align-[0.15em] text-small font-medium leading-normal">
+                        {e.kind}
+                      </span>
+                      {e.title}
                     </p>
                     {e.text ? <p className="mt-2 max-w-[60ch] text-body text-soft">{e.text}</p> : null}
                   </div>
-                  <p className="shrink-0 text-body text-soft">
-                    {[e.role, e.when, e.hours ? `${e.hours} h a week` : ""].filter(Boolean).join(", ")}
-                  </p>
+                  {e.role || e.when || e.hours ? (
+                    <p className="text-body text-soft sm:max-w-[15rem] sm:text-right">
+                      {[e.role, e.when, e.hours ? `${e.hours} h a week` : ""].filter(Boolean).join(", ")}
+                    </p>
+                  ) : null}
                 </li>
               ))}
             </ul>
@@ -294,23 +307,24 @@ export function LogBoard() {
                 placeholder="For example, Captain, robotics team"
                 aria-invalid={invalid}
                 aria-describedby={hintId}
+                maxLength={100}
                 autoFocus
               />
             )}
           </Field>
           <Field label={kind === "Award" ? "Level" : "Your role"}>
-            {({ id }) => <TextInput id={id} value={role} onChange={(e) => setRole(e.target.value)} placeholder={kind === "Award" ? "For example, National round" : "For example, Leader"} />}
+            {({ id }) => <TextInput id={id} maxLength={60} value={role} onChange={(e) => setRole(e.target.value)} placeholder={kind === "Award" ? "For example, National round" : "For example, Leader"} />}
           </Field>
           <Field label="When">
-            {({ id }) => <TextInput id={id} value={when} onChange={(e) => setWhen(e.target.value)} placeholder="For example, 2024 to now" />}
+            {({ id }) => <TextInput id={id} maxLength={40} value={when} onChange={(e) => setWhen(e.target.value)} placeholder="For example, 2024 to now" />}
           </Field>
           {kind !== "Award" ? (
             <Field label="Hours a week">
-              {({ id }) => <TextInput id={id} inputMode="numeric" value={hours} onChange={(e) => setHours(e.target.value.replace(/[^\d.]/g, ""))} placeholder="For example, 6" />}
+              {({ id }) => <TextInput id={id} inputMode="numeric" maxLength={4} value={hours} onChange={(e) => setHours(e.target.value.replace(/[^\d.]/g, ""))} placeholder="For example, 6" />}
             </Field>
           ) : null}
           <Field label="What you did" hint="One or two sentences. Numbers help: people, results, hours." className="sm:col-span-2">
-            {({ id, hintId }) => <TextArea id={id} aria-describedby={hintId} value={text} onChange={(e) => setText(e.target.value)} />}
+            {({ id, hintId }) => <TextArea id={id} aria-describedby={hintId} maxLength={500} value={text} onChange={(e) => setText(e.target.value)} />}
           </Field>
           <div className="flex justify-end gap-2 sm:col-span-2">
             <Button tone="quiet" dot={false} onClick={() => setAddOpen(false)}>
@@ -377,6 +391,7 @@ export function LogBoard() {
                 <TextInput
                   id={id}
                   inputMode="decimal"
+                  maxLength={12}
                   value={draftScores[t] ?? ""}
                   onChange={(e) => setDraftScores((s) => ({ ...s, [t]: e.target.value }))}
                   placeholder={t === "SAT" ? "e.g. 1480" : t === "ACT" ? "e.g. 33" : t === "IELTS" ? "e.g. 7.5" : t === "TOEFL" ? "e.g. 105" : "e.g. 2900"}

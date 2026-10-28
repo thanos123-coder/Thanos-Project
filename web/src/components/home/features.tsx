@@ -66,12 +66,12 @@ export function Features() {
               <div className="frame grid-12 py-7 lg:py-9">
                 <h3
                   id={sentenceId}
-                  className="col-span-10 flex cursor-pointer items-center text-[clamp(1.625rem,0.9rem+3vw,4rem)] leading-[1.08] tracking-[-0.03em] lg:col-span-11"
+                  className="col-span-10 flex cursor-pointer items-center text-[clamp(1.625rem,0.9rem+3vw,4rem)] leading-[1.08] tracking-[-0.03em]"
                   onClick={() => setOn((s) => ({ ...s, [f.id]: !s[f.id] }))}
                 >
                   <span className={clsx("transition-colors duration-300", isOn ? "" : "text-soft")}>{f.sentence}</span>
                 </h3>
-                <div className="col-span-2 flex items-center justify-end text-[clamp(1.625rem,0.9rem+3vw,4rem)] lg:col-span-1">
+                <div className="col-span-2 flex items-center justify-end text-[clamp(1.625rem,0.9rem+3vw,4rem)]">
                   <Switch
                     checked={isOn}
                     onCheckedChange={(v) => setOn((s) => ({ ...s, [f.id]: v }))}

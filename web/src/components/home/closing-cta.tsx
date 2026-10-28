@@ -41,6 +41,7 @@ export function ClosingCta() {
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
             placeholder={typing ? "" : "Edinburgh"}
+            maxLength={120}
             autoComplete="off"
             className="cta-blank block h-[1.12em] w-full rounded-full bg-surface px-[0.4em] font-medium tracking-[-0.03em] text-ink outline-none placeholder:text-soft focus-visible:bg-cobalt-tint"
           />

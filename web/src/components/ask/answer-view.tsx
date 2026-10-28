@@ -8,7 +8,9 @@ import { Icon } from "@/components/ui/icons";
 import { RangeBar } from "@/components/ui/range-bar";
 import { Tip } from "@/components/ui/tip";
 import { specialistSteps, type Answer, type AnswerBlock } from "@/content/ask";
-import { dreamUniversities } from "@/content/universities";
+import { dreamUniversities, type ExampleChance } from "@/content/universities";
+import { worstDreamUniversities } from "@/content/worst-case";
+import { useFixture } from "@/lib/data-mode";
 
 export type Phase = "thinking" | "streaming" | "done" | "stopped";
 
@@ -43,14 +45,14 @@ function unitsOf(block: AnswerBlock) {
 
 export const totalUnits = (a: Answer) => a.blocks.reduce((n, b) => n + unitsOf(b), 0);
 
-export function plainText(a: Answer) {
+export function plainText(a: Answer, unis: ExampleChance[] = dreamUniversities) {
   return a.blocks
     .map((b) => {
       if (b.kind === "p") return b.text;
       if (b.kind === "list") return b.items.map((i) => `- ${i}`).join("\n");
       if (b.kind === "sources") return `Checked against: ${b.items.join(", ")}`;
       return b.tiers
-        .map((t) => `${t.name}: ${t.unis.map((id) => dreamUniversities.find((u) => u.id === id)?.name ?? id).join(", ")}`)
+        .map((t) => `${t.name}: ${t.unis.map((id) => unis.find((u) => u.id === id)?.name ?? id).join(", ")}`)
         .join("\n");
     })
     .join("\n\n");
@@ -80,6 +82,7 @@ const tierTone = {
 };
 
 function Tiers({ tiers }: { tiers: Extract<AnswerBlock, { kind: "tiers" }>["tiers"] }) {
+  const unis = useFixture(dreamUniversities, worstDreamUniversities);
   return (
     <div className="my-5 grid gap-2 sm:grid-cols-3" data-ui>
       {tiers.map((t, i) => (
@@ -93,13 +96,13 @@ function Tiers({ tiers }: { tiers: Extract<AnswerBlock, { kind: "tiers" }>["tier
           </span>
           <ul className="mt-4 flex flex-col gap-4">
             {t.unis.map((id) => {
-              const u = dreamUniversities.find((d) => d.id === id);
+              const u = unis.find((d) => d.id === id);
               if (!u || u.low === undefined || u.high === undefined) return null;
               return (
                 <li key={id}>
                   <div className="flex items-baseline justify-between gap-3">
-                    <span className="font-medium">{u.name}</span>
-                    <span className="tabular text-small text-soft">
+                    <span className="min-w-0 font-medium">{u.name}</span>
+                    <span className="tabular shrink-0 whitespace-nowrap text-small text-soft">
                       {u.low}–{u.high}%
                     </span>
                   </div>
@@ -252,6 +255,7 @@ export const AnswerView = memo(function AnswerView({
   onFollowUp: (text: string) => void;
   last: boolean;
 }) {
+  const unis = useFixture(dreamUniversities, worstDreamUniversities);
   const thinking = msg.phase === "thinking";
   const settled = msg.phase === "done" || msg.phase === "stopped";
   const [copied, setCopied] = useState(false);
@@ -283,7 +287,7 @@ export const AnswerView = memo(function AnswerView({
                 aria-label={copied ? "Answer copied" : "Copy answer"}
                 data-busy={copied ? "" : undefined}
                 onClick={() => {
-                  navigator.clipboard?.writeText(plainText(msg.answer)).then(
+                  navigator.clipboard?.writeText(plainText(msg.answer, unis)).then(
                     () => {
                       toast("Answer copied");
                       setCopied(true);

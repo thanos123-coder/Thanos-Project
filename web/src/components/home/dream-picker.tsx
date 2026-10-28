@@ -5,6 +5,8 @@ import { useMemo, useState } from "react";
 import clsx from "clsx";
 import { Chip } from "@/components/ui/chip";
 import { dreamUniversities, moreUniversities, type ExampleChance } from "@/content/universities";
+import { worstDreamUniversities, worstMoreUniversities } from "@/content/worst-case";
+import { useFixture } from "@/lib/data-mode";
 
 /** "Where do you dream of studying?" — the chips that drive the live range. */
 export function DreamPicker({
@@ -20,12 +22,13 @@ export function DreamPicker({
   className?: string;
   labelClassName?: string;
 }) {
+  const dream = useFixture(dreamUniversities, worstDreamUniversities);
   return (
     <fieldset className={clsx("min-w-0", className)}>
       <legend className={clsx("mb-3 text-body font-medium", labelClassName)}>Where do you dream of studying?</legend>
       <div className="flex flex-wrap gap-2">
-        {dreamUniversities.map((u) => (
-          <Chip key={u.id} size="sm" pressed={value === u.id} onField={onField} onClick={() => onChange(u)}>
+        {dream.map((u) => (
+          <Chip key={u.id} size="sm" pressed={value === u.id} onField={onField} onClick={() => onChange(u)} title={u.name}>
             {u.name}
           </Chip>
         ))}
@@ -46,15 +49,17 @@ function MoreUniversities({
 }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const all = useMemo(() => [...dreamUniversities, ...moreUniversities], []);
+  const dream = useFixture(dreamUniversities, worstDreamUniversities);
+  const more = useFixture(moreUniversities, worstMoreUniversities);
+  const all = useMemo(() => [...dream, ...more], [dream, more]);
   const results = all.filter((u) => u.name.toLowerCase().includes(query.trim().toLowerCase()));
-  const picked = moreUniversities.find((u) => u.id === value);
+  const picked = more.find((u) => u.id === value);
 
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Trigger
         className={clsx(
-          "press inline-flex h-9 items-center gap-2 rounded-full px-3.5 text-small font-medium",
+          "press inline-flex h-9 max-w-full items-center gap-2 rounded-full px-3.5 text-small font-medium",
           picked
             ? "bg-cobalt text-on-cobalt"
             : onField
@@ -62,7 +67,9 @@ function MoreUniversities({
               : "text-ink shadow-[inset_0_0_0_2px_var(--mid)] hover:bg-surface",
         )}
       >
-        {picked ? picked.name : "More universities"}
+        <span className="truncate" title={picked?.name}>
+          {picked ? picked.name : "More universities"}
+        </span>
       </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Backdrop className="dialog-backdrop fixed inset-0 z-50 bg-ink/40" />
@@ -101,15 +108,15 @@ function MoreUniversities({
                       onPick(u);
                       setOpen(false);
                     }}
-                    className="press flex w-full items-center justify-between gap-3 rounded-full px-4 py-3 text-left hover:bg-surface"
+                    className="press flex w-full items-center justify-between gap-4 rounded-[1.75rem] px-4 py-3 text-left hover:bg-surface"
                   >
-                    <span className="flex items-center gap-3">
-                      <span className="grid size-9 place-items-center rounded-full bg-surface text-[0.75rem] font-bold">
+                    <span className="flex min-w-0 items-center gap-3">
+                      <span className="grid h-9 min-w-9 shrink-0 place-items-center rounded-full bg-surface px-1.5 text-[0.75rem] font-bold">
                         {u.short}
                       </span>
                       <span className="font-medium">{u.name}</span>
                     </span>
-                    <span className="text-small text-soft">{u.country}</span>
+                    <span className="max-w-[9rem] shrink-0 text-right text-small text-soft">{u.country}</span>
                   </button>
                 </li>
               ))}
