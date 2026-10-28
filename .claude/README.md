@@ -24,18 +24,18 @@ To update a pack, copy its folder again from the source path above and reapply t
 
 Transitions.dev and React Bits forbid redistributing their libraries, so keep this repository private while those folders are in it.
 
-With this many skills, the skill listing can exceed its budget. Claude Code then drops the descriptions of the least-used skills first. If a skill stops triggering on its own, raise `skillListingBudgetFraction` in `settings.json` or invoke the skill by name.
+`settings.json` sets `skillListingBudgetFraction` to 0.02, reserving 2% of the context window for the skill listing. At the default 1%, the listing dropped the descriptions of 26 skills, so Claude stopped picking them on its own. If a skill stops triggering again, raise it further or invoke the skill by name.
 
 ## MCP servers (`.mcp.json`)
 
 - `playwright`: Microsoft's Playwright MCP (`npx @playwright/mcp@latest`). Where `/opt/pw-browsers/chromium` exists (the cloud container), it runs headless against that browser with the Chromium sandbox off, which the container needs. Anywhere else it runs the plain command. Snapshots go to `.playwright-mcp/`, which is ignored by git.
 - `21st`: the 21st.dev component generator. In cloud sessions, store the key as a network secret for `21st.dev` (the default Authorization header with the Bearer prefix). The agent proxy then attaches the key and serves the connection with a certificate Claude Code trusts; without the secret, cloud sessions reject 21st.dev's certificate. Elsewhere, set `API_KEY_21ST`. The `x-api-key` header is sent empty when the variable isn't set, since a wrong value there overrides the key the proxy attaches.
-- `getlayers`: GetLayers, which needs a paid plan and a sign-in on the first tool call. Needs `mcp.getlayers.ai` reachable.
+`settings.json` approves these two servers in folders Claude Code trusts.
 
-`settings.json` approves these three servers in folders Claude Code trusts.
+GetLayers isn't here. Its server needs an OAuth sign-in, which cloud sessions can't run for a server in `.mcp.json`, so add it as a claude.ai custom connector instead (`https://mcp.getlayers.ai/mcp`). The `getlayers` skill drives the connector's tools.
 
 ## Kept outside this repository
 
 - Security Guidance, claude-code-setup and Figma are plugins on the claude.ai account, because cloud sessions don't install plugins that a repository's settings declare.
-- Figma's MCP tools come from the claude.ai Figma connector.
+- Figma's MCP tools come from the claude.ai Figma connector, and GetLayers' from a claude.ai custom connector.
 - frontend-design is already on the account.

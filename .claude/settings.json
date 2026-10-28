@@ -1,3 +1,4 @@
 {
-  "enabledMcpjsonServers": ["playwright", "21st", "getlayers"]
+  "enabledMcpjsonServers": ["playwright", "21st"],
+  "skillListingBudgetFraction": 0.02
 }
