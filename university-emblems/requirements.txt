@@ -1,0 +1,5 @@
+requests>=2.28
+Pillow>=10.0
+reportlab>=4.0
+# Optional: renders SVGs locally when Wikimedia has no PNG rendering (needs the cairo library).
+cairosvg>=2.7
