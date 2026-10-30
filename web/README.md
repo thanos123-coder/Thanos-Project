@@ -1,36 +1,48 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Upchance website (redesign)
 
-## Getting Started
+The Upchance site as a front end only: every page, state and flow is designed and clickable, but nothing is wired
+to the agents backend in the repository root. Built for desktop.
 
-First, run the development server:
+## Run it
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000. For a production build: `npm run build && npm start`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Checks: `npx tsc --noEmit` and `npm run lint`.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Pages
 
-## Learn More
+| Route | What it shows |
+| --- | --- |
+| `/` | Home: hero with a live chance card, features, how it works, coverage, trust, pricing, FAQ |
+| `/ask` | Ask Upchance: chats, streamed answers, search (Ctrl K), memory drawer (`?panel=memory`) |
+| `/chances` | Example results and how the estimates work |
+| `/assessment` | The free assessment, six questions to results (`?uni=Edinburgh` pre-fills a university) |
+| `/essays` | Essay grader: writing feedback and the AI scan |
+| `/interviews` | Live mock interview with the voice orb |
+| `/log` | Grades, tests, activities, with add and edit dialogs |
+| `/plans` | Plans, billing periods, local prices, comparison, schools form |
 
-To learn more about Next.js, take a look at the following resources:
+## Where things live
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `src/app/globals.css`: design tokens (colours, type, radius) and the motion-token scale.
+- `src/components/`: one folder per page, plus `ui/` (buttons, chips, range bar, fields) and `motion/` (Lenis,
+  GSAP ScrollTrigger scenes, generation reveals).
+- `src/content/`: all copy and sample data. Sample values (Eleni's example ranges, price conversion rates, the
+  company details in the footer) are marked there and need confirming before launch.
+- `src/components/vendor/` and `src/lib/generation/`: third-party code (React Bits, 21st.dev, transitions.dev).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Worst-case data (development only)
 
-## Deploy on Vercel
+Add `?data=worst` to any URL to swap the demo content for realistic extremes (the longest university names, pasted
+links, Greek text, long log entries), or `?data=empty` for empty lists. A small switch at the bottom of the page
+flips between them. It never ships in a production build.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Not part of this redesign
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The legal and help pages linked from the footer (Terms, Privacy, Contact and so on) aren't built here; those links
+land on the branded 404 page.
