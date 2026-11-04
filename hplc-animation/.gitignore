@@ -1,0 +1,4 @@
+build/*
+!build/timeline.json
+!build/anchors.json
+__pycache__/
