@@ -98,6 +98,8 @@ export class Film {
       w.update(t, s, lt);
       tickMaterials(w.scene, t);
       const p = w.post ? w.post(t, s, lt) : {};
+      if (this.debug?.nodof) p.aperture = 0;
+      if (this.debug?.nobloom) p.bloom = 0;
       texs.push(this.post.renderShot(i, w.scene, w.camera, p));
       s._grade = p;
     });

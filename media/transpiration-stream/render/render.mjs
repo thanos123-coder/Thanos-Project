@@ -48,7 +48,7 @@ const browser = await chromium.launch({ args: ['--use-angle=swiftshader', '--ena
 const page = await browser.newPage({ viewport: { width: 640, height: 360 } });
 page.on('console', m => { if (m.type() === 'error' || m.type() === 'warning' || args.verbose) console.log('[page]', m.type(), m.text()); });
 page.on('pageerror', e => console.log('[pageerror]', e.message));
-await page.goto(`http://127.0.0.1:${port}/film/index.html?w=${W}&h=${H}`);
+await page.goto(`http://127.0.0.1:${port}/film/index.html?w=${W}&h=${H}${args.flags ? '&' + args.flags : ''}`);
 await page.waitForFunction('window.ready === true || window.initError', null, { timeout: 300000 });
 const initErr = await page.evaluate(() => window.initError);
 if (initErr) { console.error(initErr); process.exit(1); }

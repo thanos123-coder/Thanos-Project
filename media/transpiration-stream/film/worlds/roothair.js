@@ -5,6 +5,7 @@
 // ways with a net inward flux down the water-potential gradient (osmosis);
 // solute molecules cannot cross the membrane. (s1c)
 import * as THREE from 'three';
+import { mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js';
 import { organicMaterial, waterMaterial, Sprites } from '../engine/materials.js';
 import { studioEnv } from '../engine/studio.js';
 import { CameraPath, rng, v3, clamp, smooth, noise3, remap } from '../engine/util.js';
@@ -63,12 +64,14 @@ export async function build(env) {
   const coreMat = organicMaterial({ color: 0xc9a65a, roughness: 0.6, sssColor: 0x5a4010, sssStrength: 0.5, rimColor: 0xffe6a0, rimStrength: 0.2 });
   scene.add(new THREE.Mesh(sector(L.mem0 + 0.035, L.wall0 - 0.035), coreMat));
   scene.add(new THREE.Mesh(sector(L.ton0 + 0.03, L.cyt0 - 0.03), coreMat));
-  const headGeo = new THREE.SphereGeometry(1, 10, 8);
+  let headGeo = new THREE.IcosahedronGeometry(1, 1); // ~40 px at 4K: 80 faces with smooth normals is plenty
+  headGeo.deleteAttribute('normal'); headGeo.deleteAttribute('uv'); headGeo = mergeVertices(headGeo); headGeo.computeVertexNormals();
   const headMat = organicMaterial({ color: 0xf3e3b5, roughness: 0.35, rimColor: 0xffffff, rimStrength: 0.3, sssColor: 0x504020, sssStrength: 0.2 });
   const heads = [];
   for (const [rr, tag] of [[L.wall0 - 0.02, 0], [L.mem0 + 0.02, 0], [L.cyt0 - 0.02, 1], [L.ton0 + 0.02, 1]]) {
     const dth = 0.075 / rr, dz = 0.075;
-    for (let z = Z0 + 0.05; z < Z1 - 0.03; z += dz) for (let th = TH0 + dth / 2; th < TH1; th += dth) heads.push(polar(rr, th + (Math.round(z / dz) % 2) * dth / 2, z));
+    // heads further back than ~7.5 units are lost in fog and depth of field: not built
+    for (let z = Math.max(Z0 + 0.05, Z1 - 7.5); z < Z1 - 0.03; z += dz) for (let th = TH0 + dth / 2; th < TH1; th += dth) heads.push(polar(rr, th + (Math.round(z / dz) % 2) * dth / 2, z));
   }
   const headMesh = new THREE.InstancedMesh(headGeo, headMat, heads.length);
   { const m = new THREE.Matrix4(); heads.forEach((p, i) => headMesh.setMatrixAt(i, m.makeScale(0.04, 0.04, 0.04).setPosition(p))); }

@@ -32,7 +32,7 @@ export async function build(env) {
     mols.push({ p0: v3(x + R.range(-0.38, 0.38), y + R.range(-0.38, 0.38), z + R.range(-0.38, 0.38)), ph: R() * 100, q: new THREE.Quaternion(), p: v3(), H: [v3(), v3()] });
   }
   const N = mols.length;
-  const sphere = new THREE.SphereGeometry(1, 24, 14);
+  const sphere = new THREE.SphereGeometry(1, 20, 12);
   const oMat = organicMaterial({ color: 0xe0322a, roughness: 0.32, rimColor: 0xffb0a0, rimStrength: 0.3, sssColor: 0x400806, sssStrength: 0.3, physical: true, clearcoat: 0.6 });
   const hMat = organicMaterial({ color: 0xf2f2f4, roughness: 0.3, rimColor: 0xffffff, rimStrength: 0.25, sssColor: 0x303038, sssStrength: 0.25, physical: true, clearcoat: 0.6 });
   const stickGeo = new THREE.CylinderGeometry(1, 1, 1, 12, 1, false); stickGeo.translate(0, 0.5, 0);

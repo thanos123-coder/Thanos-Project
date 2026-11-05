@@ -56,7 +56,10 @@ export async function build(env) {
   // --- chloroplast container (filled as cells are made) ------------------------------
   const chl = []; // matrices
   const addChloroplasts = (center, axis, radius, halfLen, n, rr) => {
+    // cells are opaque: chloroplasts can only be seen in cells opened by a cut plane
+    const cut = Math.abs(ZC - center.z) < radius + 0.5 || Math.abs(XC - center.x) < radius + 0.5;
     for (let i = 0; i < n; i++) {
+      if (!cut) { rr(); rr(); if (axis === 'blob') { rr(); rr(); } rr(); continue; } // same draws as a built chloroplast: layout unchanged
       const a = rr.range(0, Math.PI * 2), h = rr.range(-halfLen, halfLen);
       const nrm = v3(Math.cos(a), 0, Math.sin(a));
       const p = center.clone().add(v3(nrm.x * (radius - 0.33), h, nrm.z * (radius - 0.33)));
@@ -145,7 +148,7 @@ export async function build(env) {
   }
   // chloroplasts (instanced, after all cells)
   const chlMat = withClip(organicMaterial({ color: 0x3f9a2c, roughness: 0.35, rimColor: 0xb8ff90, rimStrength: 0.4, sssColor: 0x0c3006, sssStrength: 0.6, noiseAmp: 0.5, noiseScale: 6, noiseColor: 0x1d5a14 }));
-  const chlMesh = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 14, 10), chlMat, chl.length);
+  const chlMesh = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 12, 8), chlMat, chl.length);
   chl.forEach((m, i) => chlMesh.setMatrixAt(i, m)); chlMesh.renderOrder = 2; scene.add(chlMesh);
 
   // --- water: liquid paths (xylem → cell walls) and vapour (air spaces → stoma → out) -----------
