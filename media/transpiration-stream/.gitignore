@@ -1,0 +1,6 @@
+# third-party assets are downloaded by build/fetch_assets.sh (not redistributed here)
+assets/
+# intermediate renders
+output/frames/
+output/*.log
+output/x264pass*

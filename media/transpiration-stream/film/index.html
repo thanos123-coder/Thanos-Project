@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>The Transpiration Stream</title>
+<style>
+  @font-face { font-family: 'Inter'; src: url('../assets/fonts/Inter-Regular.ttf'); font-weight: 400; }
+  @font-face { font-family: 'Inter'; src: url('../assets/fonts/Inter-Medium.ttf'); font-weight: 500; }
+  @font-face { font-family: 'Inter'; src: url('../assets/fonts/Inter-SemiBold.ttf'); font-weight: 600; }
+  @font-face { font-family: 'Inter'; src: url('../assets/fonts/Inter-Bold.ttf'); font-weight: 700; }
+  html, body { margin: 0; background: #000; overflow: hidden; }
+  canvas { display: block; }
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "../node_modules/three/build/three.module.js",
+  "three/addons/": "../node_modules/three/examples/jsm/",
+  "d3-delaunay": "../node_modules/d3-delaunay/src/index.js",
+  "delaunator": "../node_modules/delaunator/index.js",
+  "robust-predicates": "../node_modules/robust-predicates/index.js"
+} }
+</script>
+</head>
+<body>
+<script type="module" src="./main.js"></script>
+</body>
+</html>

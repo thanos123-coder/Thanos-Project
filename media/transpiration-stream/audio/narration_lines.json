@@ -1,0 +1,11 @@
+[
+  {"id": "n1",  "scene": 1, "text": "Water enters a plant through its root hair cells by osmosis, moving across selectively permeable membranes from higher to lower water potential."},
+  {"id": "n2",  "scene": 2, "text": "It then travels through the root into the xylem, where a continuous column of liquid water extends upward toward the leaves."},
+  {"id": "n3a", "scene": 3, "text": "Inside the leaf, water evaporates from the moist walls of mesophyll cells into tiny air spaces."},
+  {"id": "n3b", "scene": 3, "text": "The resulting water vapour diffuses through open stomata into the atmosphere."},
+  {"id": "n4",  "scene": 4, "text": "Evaporation creates tension, or negative pressure, which pulls the remaining water upward through the xylem, against gravity."},
+  {"id": "n5a", "scene": 5, "text": "Cohesion, caused largely by hydrogen bonds between water molecules, helps maintain the continuous water column."},
+  {"id": "n5b", "scene": 5, "text": "Adhesion attracts water molecules to the xylem walls."},
+  {"id": "n6a", "scene": 6, "text": "Guard cells regulate the stomata, balancing carbon dioxide uptake for photosynthesis against water loss."},
+  {"id": "n6b", "scene": 6, "text": "Together, these processes produce the transpiration stream, carrying water from roots to leaves."}
+]

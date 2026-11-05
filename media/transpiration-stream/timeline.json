@@ -1,0 +1,36 @@
+{
+  "fps": 30,
+  "duration": 64.0,
+  "width": 3840,
+  "height": 2160,
+  "narration": {
+    "n1": 1.20,
+    "n2": 10.80,
+    "n3a": 18.20,
+    "n3b": 24.70,
+    "n4": 29.95,
+    "n5a": 38.25,
+    "n5b": 45.58,
+    "n6a": 49.40,
+    "n6b": 56.80
+  },
+  "subtitle_cues": [
+    {"line": "n1",  "words": [0, 10],  "text": "Water enters a plant through its root hair cells by osmosis,"},
+    {"line": "n1",  "words": [11, 15], "text": "moving across selectively permeable membranes"},
+    {"line": "n1",  "words": [16, 21], "text": "from higher to lower water potential."},
+    {"line": "n2",  "words": [0, 8],   "text": "It then travels through the root into the xylem,"},
+    {"line": "n2",  "words": [9, 20],  "text": "where a continuous column of liquid water extends upward toward the leaves."},
+    {"line": "n3a", "words": [0, 4],   "text": "Inside the leaf, water evaporates"},
+    {"line": "n3a", "words": [5, 15],  "text": "from the moist walls of mesophyll cells into tiny air spaces."},
+    {"line": "n3b", "words": [0, 10],  "text": "The resulting water vapour diffuses through open stomata into the atmosphere."},
+    {"line": "n4",  "words": [0, 5],   "text": "Evaporation creates tension, or negative pressure,"},
+    {"line": "n4",  "words": [6, 16],  "text": "which pulls the remaining water upward through the xylem, against gravity."},
+    {"line": "n5a", "words": [0, 8],   "text": "Cohesion, caused largely by hydrogen bonds between water molecules,"},
+    {"line": "n5a", "words": [9, 14],  "text": "helps maintain the continuous water column."},
+    {"line": "n5b", "words": [0, 7],   "text": "Adhesion attracts water molecules to the xylem walls."},
+    {"line": "n6a", "words": [0, 4],   "text": "Guard cells regulate the stomata,"},
+    {"line": "n6a", "words": [5, 13],  "text": "balancing carbon dioxide uptake for photosynthesis against water loss."},
+    {"line": "n6b", "words": [0, 6],   "text": "Together, these processes produce the transpiration stream,"},
+    {"line": "n6b", "words": [7, 12],  "text": "carrying water from roots to leaves."}
+  ]
+}

@@ -1,0 +1,76 @@
+1
+00:00:01,120 --> 00:00:05,100
+Water enters a plant through
+its root hair cells by osmosis,
+
+2
+00:00:05,140 --> 00:00:07,640
+moving across selectively permeable membranes
+
+3
+00:00:07,680 --> 00:00:10,280
+from higher to lower water potential.
+
+4
+00:00:10,720 --> 00:00:13,340
+It then travels through the root into the xylem,
+
+5
+00:00:13,380 --> 00:00:17,740
+where a continuous column of liquid water
+extends upward toward the leaves.
+
+6
+00:00:18,120 --> 00:00:20,320
+Inside the leaf, water evaporates
+
+7
+00:00:20,360 --> 00:00:24,420
+from the moist walls of
+mesophyll cells into tiny air spaces.
+
+8
+00:00:24,620 --> 00:00:29,420
+The resulting water vapour diffuses
+through open stomata into the atmosphere.
+
+9
+00:00:29,870 --> 00:00:33,390
+Evaporation creates tension, or negative pressure,
+
+10
+00:00:33,430 --> 00:00:37,790
+which pulls the remaining water upward
+through the xylem, against gravity.
+
+11
+00:00:38,170 --> 00:00:42,830
+Cohesion, caused largely by
+hydrogen bonds between water molecules,
+
+12
+00:00:42,950 --> 00:00:45,410
+helps maintain the continuous water column.
+
+13
+00:00:45,500 --> 00:00:48,860
+Adhesion attracts water molecules
+to the xylem walls.
+
+14
+00:00:49,320 --> 00:00:51,360
+Guard cells regulate the stomata,
+
+15
+00:00:51,400 --> 00:00:56,320
+balancing carbon dioxide uptake for
+photosynthesis against water loss.
+
+16
+00:00:56,720 --> 00:01:00,160
+Together, these processes
+produce the transpiration stream,
+
+17
+00:01:00,200 --> 00:01:02,380
+carrying water from roots to leaves.

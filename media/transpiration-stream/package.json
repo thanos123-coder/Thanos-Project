@@ -1,0 +1,15 @@
+{
+  "name": "transpiration-stream-film",
+  "private": true,
+  "type": "module",
+  "description": "Procedural 3D educational film: the transpiration stream, from soil to atmosphere.",
+  "scripts": {
+    "assets": "bash build/fetch_assets.sh",
+    "render": "node render/render.mjs",
+    "preview": "node render/render.mjs --preview"
+  },
+  "dependencies": {
+    "d3-delaunay": "6.0.4",
+    "three": "0.170.0"
+  }
+}
