@@ -114,7 +114,7 @@ def build_music():
         chord *= env_adsr(n, 2.2, 2.0)
         place(mus, chord, a, 0.05, pan=0.15 * np.sin(i))
     # sub drone on D
-    drone = (np.sin(2 * np.pi * hz("D2") * t) + 0.5 * np.sin(2 * np.pi * hz("A1") * t)) * 0.03
+    drone = (np.sin(2 * np.pi * hz("D2") * t) + 0.5 * np.sin(2 * np.pi * hz("A1") * t)) * 0.018
     drone *= np.clip(np.minimum(t / 4, (DUR - t) / 3), 0, 1)
     mus += drone[:, None]
     # plucks: a sparse pentatonic motif, soft (piano/celesta-like additive tones)
@@ -142,14 +142,16 @@ def build_music():
         place(mus, sh, a, 0.005)
     wet = np.stack([fftconvolve(mus[:, c], IR[:, c])[:N] for c in range(2)], axis=1)
     mus = 0.72 * mus + 0.55 * wet
+    mus = np.stack([hp(mus[:, c], 40, order=2) for c in range(2)], axis=1)  # keep the low end clear of the voice
     return np.tanh(mus * 1.4) / 1.4
 
 
 # --- sound design -------------------------------------------------------------------
 def noise(n, color="pink"):
     w = rng.standard_normal(n)
-    if color == "brown":
-        return lp(np.cumsum(w) / 50, 1200)
+    if color == "brown":  # integrated noise, band-limited (no DC drift or sub-sonic energy), unit RMS
+        x = hp(lp(np.cumsum(w), 1200), 30, order=4)
+        return x / (np.sqrt(np.mean(x ** 2)) + 1e-12)
     if color == "pink":
         f = np.fft.rfft(w)
         f /= np.maximum(1, np.sqrt(np.arange(len(f))))
@@ -179,42 +181,42 @@ def whoosh(dur=1.1, up=True):
 def build_sfx():
     fx = np.zeros((N, 2))
     # outdoors: wind + leaf rustle (opening, X-ray tree, recap)
-    for (a, b, g) in [(0.0, 3.9, 1.0), (15.9, 18.6, 0.6), (56.4, DUR, 0.9)]:
+    for (a, b, g) in [(0.0, 3.9, 1.0), (15.9, 18.6, 0.7), (56.4, DUR, 1.1)]:
         n = int((b - a) * SR)
         e = env_adsr(n, 1.0, 1.4)
         for c in range(2):
             w = bp(noise(n, "pink"), 160, 900) * (0.5 + 0.8 * slow(n, 0.6, seed=c + int(a)))
             r = hp(noise(n, "white"), 3500) * slow(n, 1.2, seed=7 + c + int(a)) ** 3 * 0.35
-            fx[int(a * SR):int(a * SR) + n, c] += (w * 0.022 + r * 0.012) * e * g
+            fx[int(a * SR):int(a * SR) + n, c] += (w * 0.055 + r * 0.03) * e * g
     # soil: low rumble and sparse drips
     n = int(3.2 * SR)
-    rum = lp(noise(n, "brown"), 180) * env_adsr(n, 0.8, 1.2) * 0.05
+    rum = bp(noise(n, "brown"), 40, 170) * env_adsr(n, 0.8, 1.2) * 0.006  # felt more than heard
     place(fx, rum, 2.6, 1.0)
     for st in [3.3, 3.95, 4.6, 5.05, 5.7, 6.4]:
         nn = int(0.25 * SR)
         tt = np.arange(nn) / SR
         f0 = rng.uniform(1300, 2000)
         drip = np.sin(2 * np.pi * (f0 * tt - 0.5 * f0 * 9 * tt ** 2)) * np.exp(-tt * 38)
-        place(fx, drip, st, 0.02, pan=rng.uniform(-0.6, 0.6))
+        place(fx, drip, st, 0.03, pan=rng.uniform(-0.6, 0.6))
     # molecular ticks during osmosis and the molecular scenes
     for (a, b, dens) in [(5.6, 11.0, 7), (38.4, 49.6, 9)]:
         for st in np.sort(rng.uniform(a, b, int((b - a) * dens))):
             nn = int(0.03 * SR)
             tt = np.arange(nn) / SR
             tick = np.sin(2 * np.pi * rng.uniform(2500, 6000) * tt) * np.exp(-tt * 260)
-            place(fx, tick, st, 0.006, pan=rng.uniform(-0.8, 0.8))
+            place(fx, tick, st, 0.016, pan=rng.uniform(-0.8, 0.8))
     # xylem flow (and the transpiration pull)
     for (a, b, g) in [(13.6, 16.5, 1.0), (35.8, 38.8, 1.2)]:
         n = int((b - a) * SR)
         for c in range(2):
             fl = bp(noise(n, "pink"), 250, 1400) * (0.6 + 0.6 * slow(n, 3.0, seed=11 + c))
-            fx[int(a * SR):int(a * SR) + n, c] += fl * 0.016 * env_adsr(n, 0.6, 0.8) * g
+            fx[int(a * SR):int(a * SR) + n, c] += fl * 0.045 * env_adsr(n, 0.6, 0.8) * g
     # evaporation sparkle
     for st in np.sort(rng.uniform(22.0, 25.0, 26)):
         nn = int(0.12 * SR)
         tt = np.arange(nn) / SR
         sp = np.sin(2 * np.pi * rng.uniform(5000, 9000) * tt) * np.exp(-tt * 45)
-        place(fx, sp, st, 0.006, pan=rng.uniform(-0.7, 0.7))
+        place(fx, sp, st, 0.014, pan=rng.uniform(-0.7, 0.7))
     # stoma: airflow following the opening state
     a, b = 49.6, 56.8
     n = int((b - a) * SR)
@@ -223,12 +225,12 @@ def build_sfx():
     c1 = np.clip((tt - 54.0) / 1.6, 0, 1)
     openness = 0.12 + 0.88 * (o1 * o1 * (3 - 2 * o1)) - 0.78 * (c1 * c1 * (3 - 2 * c1))
     for c in range(2):
-        br = bp(noise(n, "pink"), 400, 2600) * openness * 0.02
+        br = bp(noise(n, "pink"), 400, 2600) * openness * 0.06
         fx[int(a * SR):int(a * SR) + n, c] += br * env_adsr(n, 0.4, 0.6)
     # transitions between scales/worlds
     for s0, up in [(3.7, False), (5.4, False), (10.7, True), (13.6, True), (15.9, True), (18.2, False), (21.7, False),
                    (24.7, True), (29.9, False), (33.9, True), (35.8, True), (38.2, False), (45.4, True), (49.3, True), (56.4, True)]:
-        place(fx, whoosh(1.1, up), s0 - 0.25, 0.018, pan=rng.uniform(-0.3, 0.3))
+        place(fx, whoosh(1.1, up), s0 - 0.25, 0.04, pan=rng.uniform(-0.3, 0.3))
     wet = np.stack([fftconvolve(fx[:, c], IR[:, c] * 0.6)[:N] for c in range(2)], axis=1)
     return fx * 0.85 + wet * 0.35
 

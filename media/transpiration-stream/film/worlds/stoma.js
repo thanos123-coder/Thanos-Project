@@ -169,7 +169,7 @@ export async function build(env) {
     const gp = curves[1] ? curves[1].getPointAt(0.5) : v3(6, 0, 3);
     ov.label({ text: 'Guard cells', sub: 'contain chloroplasts', at: gp.clone().add(v3(1.5, 0, 2)), dx: 190, dy: -120, t0: 49.9, t1: 56.6 }, camera, t);
     ov.label({ text: 'Stoma', sub: 'the pore', at: v3(0, -4, 0), dx: -170, dy: -110, t0: 50.3, t1: 53.7 }, camera, t);
-    ov.label({ text: 'Epidermal cell', sub: 'no chloroplasts', at: v3(26, -15, 1.6), dx: 120, dy: 80, t0: 50.6, t1: 53.4 }, camera, t);
+    ov.label({ text: 'Epidermal cell', sub: 'no chloroplasts', at: v3(23, 13, 1.6), dx: 70, dy: -70, t0: 50.6, t1: 53.4 }, camera, t);
     ov.caption({ text: 'Turgid guard cells → stoma opens', sub: 'K⁺ ions enter; water follows by osmosis', x: 0.075, y: 0.66, size: 34, weight: 700, t0: 50.0, t1: 53.5 }, t);
     ov.caption({ text: 'Flaccid guard cells → stoma narrows', sub: 'e.g. water stress (hormone ABA): K⁺ ions leave; water follows', x: 0.075, y: 0.66, size: 34, weight: 700, t0: 53.9, t1: 56.65 }, t);
     ov.label({ text: 'CO₂ in', sub: 'for photosynthesis', at: v3(-6, 6, 14), dx: -190, dy: -40, t0: 51.6, t1: 54.4, color: '#c8c8c8' }, camera, t);

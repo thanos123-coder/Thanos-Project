@@ -151,7 +151,36 @@ export async function build(env) {
   // --- water: liquid paths (xylem → cell walls) and vapour (air spaces → stoma → out) -----------
   const liquid = [], vapourPaths = [];
   const nearSpon = (p) => spon.reduce((b, s) => (s.p.distanceTo(p) < b.p.distanceTo(p) ? s : b), spon[0]);
-  for (let k = 0; k < 26; k++) {
+  // paths drawn on the section (cut face): xylem → bundle sheath → around cut spongy cells (in their
+  // walls) → walls bordering the air spaces above the stoma. These stay visible in the cutaway.
+  const ZF = ZC + 0.25;
+  const faceCells = spon.map(c => { const dz = ZC - c.p.z; if (Math.abs(dz) >= c.r * 0.95) return null; return { c: v3(c.p.x, c.p.y, ZF), r: Math.sqrt(c.r * c.r - dz * dz) * 1.08 }; }).filter(Boolean);
+  for (let k = 0; k < 14; k++) {
+    const x0 = xylem[k % xylem.length];
+    let cur = v3(x0.p.x, x0.p.y, ZF);
+    const pts = [cur.clone(), v3(VEIN.x + 3.4, VEIN.y + R.range(-2.5, 2.5), ZF), v3(VEIN.x + 6.0, VEIN.y + R.range(-3.6, 1.6), ZF)];
+    cur = pts[2].clone();
+    const goal = v3(STOMA.x + R.range(-3.5, 1.0), -4.6 + R.range(-0.8, 0.8), ZF);
+    const used = new Set();
+    for (let hop = 0; hop < 9 && cur.x < goal.x - 1.5; hop++) {
+      let best = null, bd = 1e9;
+      for (const fc of faceCells) {
+        if (used.has(fc) || fc.c.x < cur.x + 0.6 || Math.abs(fc.c.y - THREE.MathUtils.lerp(cur.y, goal.y, 0.35)) > 3.2) continue;
+        const d = fc.c.distanceTo(cur) + 0.6 * Math.abs(fc.c.y - goal.y);
+        if (d < bd) { bd = d; best = fc; }
+      }
+      if (!best) break;
+      used.add(best);
+      const ein = cur.clone().sub(best.c).normalize(), eout = goal.clone().sub(best.c).normalize();
+      const a0 = Math.atan2(ein.y, ein.x); let a1 = Math.atan2(eout.y, eout.x);
+      if (a1 - a0 > Math.PI) a1 -= 2 * Math.PI; if (a0 - a1 > Math.PI) a1 += 2 * Math.PI;
+      for (const f of [0, 0.5, 1]) { const a = a0 + (a1 - a0) * f; pts.push(v3(best.c.x + best.r * Math.cos(a), best.c.y + best.r * Math.sin(a), ZF)); }
+      cur = pts[pts.length - 1].clone();
+    }
+    pts.push(goal);
+    liquid.push(new THREE.CatmullRomCurve3(pts, false, 'catmullrom', 0.3));
+  }
+  for (let k = 0; k < 10; k++) {
     const x = xylem[k % 3]; const z = R.range(-6, ZC - 0.6);
     const pts = [v3(x.p.x + R.range(-0.3, 0.3), x.p.y + 0.4, z)];
     let cur = v3(VEIN.x + 6.2, VEIN.y + R.range(-3.5, 1.5), z);
@@ -176,7 +205,8 @@ export async function build(env) {
   const LQ = 8, VP = 3;
   const liqS = new Sprites(liquid.length * LQ, { shape: 'sphere', renderOrder: 14 });
   const vapS = new Sprites(vapourPaths.length * VP, { shape: 'sphere', renderOrder: 15 });
-  const tenS = new Sprites(liquid.length * 4, { shape: 'soft', additive: true, renderOrder: 16 });
+  const TN = 26;
+  const tenS = new Sprites(liquid.length * TN, { shape: 'soft', additive: true, renderOrder: 16 });
   scene.add(liqS.mesh, vapS.mesh, tenS.mesh);
   const cBlue = new THREE.Color(0.32, 0.7, 1.0), cVap = new THREE.Color(0.85, 0.94, 1.0), cTen = new THREE.Color(1.0, 0.55, 0.25), P = new THREE.Vector3();
 
@@ -222,10 +252,13 @@ export async function build(env) {
     }
     vapS.commit();
     n = 0;
-    const showTen = shot.id === 's4b' ? smooth((lt - 0.2) / 0.5) : 0;
-    for (const c of liquid) for (let j = 0; j < 4; j++) {
-      const k = 1 - ((t * 0.55 + j / 4) % 1); c.getPointAt(k, P);
-      tenS.set(n++, P, 0.75, cTen, showTen * 0.8 * smooth(k / 0.1) * smooth((1 - k) / 0.1));
+    // tension: spreads back from the evaporating surfaces (path end) to the xylem (path start), then persists
+    const showTen = shot.id === 's4b' ? 1 : 0;
+    const front = 1 - smooth((lt - 0.35) / 1.0);
+    for (const c of liquid) for (let j = 0; j < TN; j++) {
+      const k = j / (TN - 1); c.getPointAt(k, P);
+      const lit = smooth((k - front) / 0.12) * (0.34 + 0.14 * Math.sin(t * 5 + j * 0.9));
+      tenS.set(n++, P, 0.42, cTen, showTen * lit);
     }
     tenS.commit();
   };
@@ -258,7 +291,9 @@ export async function build(env) {
     if (shot.id === 's4b') {
       ov.caption({ text: 'Tension is transmitted', sub: 'through the continuous water in cell walls and xylem', x: 0.075, y: 0.66, size: 38, weight: 700, color: '#ffffff', t0: 34.25, t1: 36.1 }, t);
       ov.label({ text: 'Xylem', at: xyl, dx: -150, dy: -80, t0: 34.6, t1: 36.1 }, camera, t);
-      ov.caption({ text: '●  tension (pull)', x: 0.075, y: 0.765, size: 22, weight: 600, color: TENSION, t0: 34.4, t1: 36.1 }, t);
+      ov.arrow({ from: v3(VEIN.x + 6.5, -1.2, ZF + 0.5), to: v3(STOMA.x - 1, -3.6, ZF + 0.5), text: 'pull on the water, toward the evaporating surfaces', tdx: 0, tdy: -34,
+        t0: 34.75, t1: 36.1, c0: '#ffd2b0', c1: TENSION, width: 9 }, camera, t);
+      ov.caption({ text: '●  tension in the water (spreads back to the xylem)', x: 0.075, y: 0.765, size: 22, weight: 600, color: TENSION, t0: 34.4, t1: 36.1 }, t);
       ov.caption({ text: '●  water moving toward evaporating surfaces', x: 0.075, y: 0.80, size: 22, weight: 600, color: '#59adff', t0: 34.4, t1: 36.1 }, t);
     }
   };

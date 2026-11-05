@@ -140,8 +140,13 @@ export async function build(env) {
   tileUV(surf, 0.9); surf.computeVertexNormals();
   const surfMesh = new THREE.Mesh(surf, surfMat); surfMesh.rotation.x = -Math.PI / 2; surfMesh.receiveShadow = true;
   scene.add(surfMesh);
-  const farTex = grass.clone(); farTex.repeat.set(110, 80); farTex.needsUpdate = true;
-  const far = new THREE.Mesh(new THREE.PlaneGeometry(160, 120), new THREE.MeshStandardMaterial({ map: farTex, color: 0xb4c49a, roughness: 1, envMapIntensity: 0.3 }));
+  // far field: same grass texture, tile size, tint and soil-normal relief as the near patch's grass,
+  // so there is no tonal seam where the two meet
+  const farTex = grass.clone(); farTex.repeat.set(160 / 1.3, 120 / 1.3); farTex.needsUpdate = true;
+  const farN = soilN.clone(); farN.repeat.set(160 / 0.9, 120 / 0.9); farN.needsUpdate = true;
+  const farMat = new THREE.MeshStandardMaterial({ map: farTex, normalMap: farN, normalScale: new THREE.Vector2(1.3, 1.3), roughness: 0.97, envMapIntensity: 0.3 });
+  farMat.color.setRGB(0.78, 0.86, 0.62, THREE.LinearSRGBColorSpace);
+  const far = new THREE.Mesh(new THREE.PlaneGeometry(160, 120), farMat);
   far.rotation.x = -Math.PI / 2; far.position.set(0, -0.03, -60.25); scene.add(far);
   // grass rim far behind so the soil meets the meadow in the sky dome
   const faceMat = new THREE.MeshStandardMaterial({ map: soil, normalMap: soilN, roughnessMap: soilR, aoMap: soilAO,
@@ -166,7 +171,7 @@ export async function build(env) {
   let pebGeo = new THREE.IcosahedronGeometry(1, 3);
   pebGeo.deleteAttribute('normal'); pebGeo.deleteAttribute('uv'); pebGeo = mergeVertices(pebGeo);
   { const p = pebGeo.attributes.position; for (let i = 0; i < p.count; i++) { const x = p.getX(i), y = p.getY(i), z = p.getZ(i); const k = 1 + 0.25 * noise3(x * 1.7, y * 1.7, z * 1.7); p.setXYZ(i, x * k, y * k * 0.7, z * k); } pebGeo.computeVertexNormals(); }
-  const pebMat = organicMaterial({ color: 0x7c6f62, roughness: 0.8, noiseAmp: 0.6, noiseScale: 3, noiseColor: 0x3d342c });
+  const pebMat = organicMaterial({ color: 0x5e5044, roughness: 0.9, noiseAmp: 0.7, noiseScale: 3, noiseColor: 0x2e251e, envMapIntensity: 0.5 });
   const peb = new THREE.InstancedMesh(pebGeo, pebMat, 260);
   { const m = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3();
     for (let i = 0; i < 260; i++) {
