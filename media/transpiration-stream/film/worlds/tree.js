@@ -464,7 +464,7 @@ export async function build(env) {
   const P = (x, y, z) => v3(x, y, z);
   const overlay = (ov, t, shot, lt) => {
     if (shot.id === 's1a') {
-      ov.label({ text: 'Root hairs', sub: 'on young roots, just behind the tip', at: P(0.112, -0.331, 0.002), dx: -150, dy: -95, t0: 3.05, t1: 4.0 }, camera, t);
+      ov.label({ text: 'Root hairs', sub: 'on young roots, just behind the tip', at: P(0.112, -0.331, 0.002), dx: -150, dy: -95, t0: 2.7, t1: 4.05 }, camera, t);
     }
     if (shot.id === 's2c') {
       ov.label({ text: 'Xylem', sub: 'water-conducting tissue', at: trunkCurve.getPointAt(0.42), dx: -170, dy: -40, t0: 16.45, t1: 18.0 }, camera, t);
