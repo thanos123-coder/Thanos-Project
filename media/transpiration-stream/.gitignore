@@ -4,3 +4,4 @@ assets/
 output/frames/
 output/*.log
 output/x264pass*
+output/segments/
