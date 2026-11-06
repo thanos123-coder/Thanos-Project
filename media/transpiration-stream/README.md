@@ -1,8 +1,8 @@
 # The Transpiration Stream — From Soil to Atmosphere
 
 A 64-second, 4K (3840 × 2160, 30 fps) scientific 3D educational film for Grade 10
-biology, with English narration, burned-in English subtitles (plus a selectable
-subtitle track and an `.srt` sidecar), on-screen labels, music and sound design.
+biology, with English narration, burned-in English subtitles (plus an `.srt`
+sidecar), on-screen labels, music and sound design.
 It follows the reference slide *“Transpiration: Plant Water Transport Stream”*:
 **absorption by osmosis → transpiration pull (tension) → cohesion & adhesion.**
 
